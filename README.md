@@ -60,16 +60,27 @@ dentro de um container o endereço é `host.docker.internal:54321` (o compose j�
 `SUPABASE_URL` assim no ai-service). Pelo mesmo motivo, o Database Webhook do Supabase deve
 chamar o serviço de IA em `http://host.docker.internal:8000`.
 
-### Imagens de produção
+## Deploy
+
+**Front → Vercel.** O front é estático (o build gera HTML, JS e CSS), então não precisa de
+container em produção. Na Vercel:
+
+1. *Add New → Project* e importe este repositório.
+2. Em *Root Directory*, escolha `web` (a Vercel detecta o Vite sozinha).
+3. Em *Environment Variables*, cadastre `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY` do
+   projeto do Supabase na nuvem.
+
+O `web/vercel.json` faz rotas como `/quadro` funcionarem ao abrir direto no navegador.
+Cada PR ganha um link de preview automático.
+
+**Serviço de IA → container.** Ele é um servidor de verdade, então usa a imagem de produção:
 
 ```bash
-docker build --target prod -t fila-web \
-  --build-arg VITE_SUPABASE_URL=<url> --build-arg VITE_SUPABASE_ANON_KEY=<anon-key> web
 docker build --target prod -t fila-ai-service ai-service
 ```
 
-O front vira arquivos estáticos servidos por nginx; o serviço de IA roda sem reload e sem
-dependências de desenvolvimento. O CI constrói as duas imagens a cada PR.
+Ela roda sem reload, sem dependências de desenvolvimento e com usuário sem privilégios.
+O CI constrói a imagem a cada PR.
 
 ## Rodar sem Docker
 

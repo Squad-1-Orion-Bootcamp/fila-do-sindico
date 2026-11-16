@@ -16,4 +16,5 @@ Registro curto das decisões técnicas, com data e motivo. Decisão nova entra n
 | Front do zero (Vite + React + TS); o protótipo do Lovable serve de referência visual | Base limpa e conhecida pelo time |
 | Serviço de IA em Python + FastAPI | É onde está a experiência de IA do time |
 | Desenvolvimento com `docker compose` (front e IA com hot reload); Supabase pelo próprio CLI | Ambiente igual para todos; o CLI já roda o Supabase em Docker e cuida das migrações |
-| Imagens de produção: front em nginx, IA sem reload e com usuário sem privilégios | Prontas para o deploy, construídas pelo CI a cada PR |
+| Front em produção na Vercel, sem container; Docker do front só para desenvolvimento | O front é estático; a Vercel faz build, HTTPS, CDN e preview por PR sem custo |
+| Serviço de IA em produção como container (sem reload, sem root) | É um servidor de verdade; a imagem é construída pelo CI a cada PR |
