@@ -6,6 +6,7 @@ Registro curto das decisões técnicas, com data e motivo. Decisão nova entra n
 
 | Decisão | Motivo |
 | --- | --- |
+| Gitflow com `develop` como branch base; `main` só recebe releases (uma por sprint) e hotfixes | Decisão do time |
 | Não há formulário público: toda ocorrência é registrada por usuário logado | Decisão da planning |
 | Login por e-mail e senha na Sprint 1; Google pode entrar depois | Já vem pronto no Supabase, sem configurar o Google Cloud |
 | Confirmação de e-mail desligada no ambiente local | O servidor de e-mail padrão do Supabase envia poucos e-mails por hora |

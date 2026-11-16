@@ -125,11 +125,35 @@ Nunca altere o banco da nuvem direto pelo painel sem criar a migração correspo
 ## Como trabalhamos
 
 - Cada tarefa sai de uma issue do Linear (time Squad1, projeto "Projeto Fila do Síndico").
-- Branch a partir da `main`: `tipo/LUCAS-123-descricao-curta` (ex.: `feat/LUCAS-12-tela-login`).
 - Commits no padrão [Conventional Commits](https://www.conventionalcommits.org/pt-br/):
   `feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`.
 - Toda mudança entra por Pull Request com pelo menos uma revisão. O CI precisa passar.
 - Chaves e senhas ficam em `.env` / `.env.local`, nunca no repositório.
+
+### Branches (Gitflow)
+
+| Branch | Para quê | Sai de | Volta para |
+| --- | --- | --- | --- |
+| `main` | Versão entregue (demo para a banca) | — | — |
+| `develop` | Integração do dia a dia; **branch base** | `main` | — |
+| `feature/LUCAS-123-descricao` | Uma issue do Linear | `develop` | `develop` (PR) |
+| `release/vX.Y.Z` | Preparar uma entrega (fim de sprint) | `develop` | `main` e `develop` |
+| `hotfix/LUCAS-123-descricao` | Correção urgente no que já foi entregue | `main` | `main` e `develop` |
+
+Dia a dia:
+
+```bash
+git switch develop && git pull
+git switch -c feature/LUCAS-12-tela-login
+# ...commits...
+git push -u origin feature/LUCAS-12-tela-login   # abra a PR para develop
+```
+
+Fim de sprint: uma `release/` sai da `develop`, recebe só ajustes finais, entra na `main` com
+uma tag (`v0.1.0` na Sprint 1, `v0.2.0` na Sprint 2...) e volta para a `develop`.
+
+O identificador da issue (`LUCAS-12`) no nome da branch faz o Linear ligar a PR à issue
+automaticamente.
 
 ## Definição de pronto
 
