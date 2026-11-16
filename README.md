@@ -17,13 +17,64 @@ morador registra ocorrência (web) → Supabase grava → Database Webhook → a
 → grava urgência, categoria e justificativa → quadro do síndico atualiza (Realtime)
 ```
 
-## Pré-requisitos
+## Rodar com Docker (recomendado)
 
-- Node.js 22+
-- Python 3.12+ e [uv](https://docs.astral.sh/uv/)
-- Docker (para o Supabase local)
+Só precisa de **Docker** (com Docker Compose) e **Node.js 22+** (para o CLI do Supabase).
 
-## Primeira vez
+```bash
+# 1. Supabase local (o CLI sobe os containers dele)
+npx supabase start          # imprime a API URL e a anon key
+npx supabase db reset       # aplica as migrações e o seed
+
+# 2. Variáveis do front
+cp web/.env.example web/.env.local   # cole a API URL e a anon key do passo 1
+
+# 3. Front + serviço de IA, com hot reload
+docker compose up --build
+```
+
+- Front: http://localhost:5173
+- Serviço de IA: http://localhost:8000/docs
+- Studio do Supabase: http://127.0.0.1:54323
+
+Editar arquivos na sua máquina recarrega os containers automaticamente.
+Mudou `package.json` ou `pyproject.toml`? Rode `docker compose up --build` de novo.
+
+Comandos úteis:
+
+```bash
+docker compose exec ai-service pytest          # testes do serviço de IA
+docker compose exec ai-service ruff check .    # lint do serviço de IA
+docker compose exec web npm run lint           # lint do front
+docker compose logs -f ai-service              # logs
+docker compose down                            # derruba front e IA
+npx supabase stop                              # derruba o Supabase
+```
+
+**Por que o Supabase fica fora do compose?** O CLI já roda o Supabase em Docker (banco, Auth,
+Storage, Studio e outros serviços) e cuida das migrações. Replicar isso no nosso compose
+duplicaria a configuração sem ganho.
+
+**Endereços entre containers:** o navegador acessa o Supabase por `127.0.0.1:54321`, mas de
+dentro de um container o endereço é `host.docker.internal:54321` (o compose já define
+`SUPABASE_URL` assim no ai-service). Pelo mesmo motivo, o Database Webhook do Supabase deve
+chamar o serviço de IA em `http://host.docker.internal:8000`.
+
+### Imagens de produção
+
+```bash
+docker build --target prod -t fila-web \
+  --build-arg VITE_SUPABASE_URL=<url> --build-arg VITE_SUPABASE_ANON_KEY=<anon-key> web
+docker build --target prod -t fila-ai-service ai-service
+```
+
+O front vira arquivos estáticos servidos por nginx; o serviço de IA roda sem reload e sem
+dependências de desenvolvimento. O CI constrói as duas imagens a cada PR.
+
+## Rodar sem Docker
+
+Pré-requisitos: Node.js 22+, Python 3.12+ e [uv](https://docs.astral.sh/uv/). O Supabase local
+continua precisando de Docker.
 
 ```bash
 # 1. Supabase local (sobe Postgres, Auth, Storage e o Studio)

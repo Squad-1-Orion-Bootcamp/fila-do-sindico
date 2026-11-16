@@ -1,0 +1,43 @@
+# Ambiente de desenvolvimento: front e serviço de IA com hot reload.
+#
+# O Supabase NÃO sobe por aqui: ele roda pelo próprio CLI (`npx supabase start`),
+# que já cria e gerencia os containers dele. Suba o Supabase antes deste compose.
+#
+#   docker compose up --build     → sobe tudo
+#   docker compose down           → derruba
+
+services:
+  web:
+    build:
+      context: ./web
+      target: dev
+    ports:
+      - "5173:5173"
+    env_file:
+      - path: ./web/.env.local
+        required: false
+    environment:
+      VITE_USE_POLLING: "true"
+    volumes:
+      - ./web:/app
+      # Mantém o node_modules da imagem (Linux) em vez do da sua máquina.
+      - /app/node_modules
+
+  ai-service:
+    build:
+      context: ./ai-service
+      target: dev
+    ports:
+      - "8000:8000"
+    env_file:
+      - path: ./ai-service/.env
+        required: false
+    environment:
+      WATCHFILES_FORCE_POLLING: "true"
+      # De dentro do container, o Supabase local fica no host:
+      SUPABASE_URL: http://host.docker.internal:54321
+    extra_hosts:
+      # Faz host.docker.internal funcionar também no Linux.
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./ai-service:/app

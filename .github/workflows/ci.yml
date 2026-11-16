@@ -37,3 +37,27 @@ jobs:
       - run: uv run ruff check .
       - run: uv run ruff format --check .
       - run: uv run pytest
+
+  docker:
+    # Garante que as imagens de produção continuam construindo.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Imagem de produção do web
+        uses: docker/build-push-action@v6
+        with:
+          context: web
+          target: prod
+          push: false
+          build-args: |
+            VITE_SUPABASE_URL=http://localhost:54321
+            VITE_SUPABASE_ANON_KEY=ci-placeholder
+      - name: Imagem de produção do ai-service
+        uses: docker/build-push-action@v6
+        with:
+          context: ai-service
+          target: prod
+          push: false
+      - name: Imagens de desenvolvimento (docker compose)
+        run: docker compose build
