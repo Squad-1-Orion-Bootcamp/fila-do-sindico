@@ -1,0 +1,6 @@
+-- Dados de desenvolvimento, carregados por `npx supabase db reset`.
+--
+-- Síndicos são criados pelo time, não por tela de cadastro (decisão da Sprint 1):
+--   1. Crie o usuário no Studio local (http://127.0.0.1:54323 → Authentication → Add user).
+--   2. Copie o UUID dele e rode:
+--        insert into public.profiles (id, role, nome) values ('<uuid>', 'sindico', 'Nome do Síndico');
