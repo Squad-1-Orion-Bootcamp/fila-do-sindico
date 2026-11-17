@@ -1,0 +1,35 @@
+name: Título da PR
+
+# O título da PR vira o commit na develop (squash merge), então precisa seguir o padrão:
+#   feat: cadastro do gestor (SQUAD1-12)
+# Branches release/ não precisam do código da issue.
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+permissions:
+  contents: read
+
+jobs:
+  titulo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Conferir o título
+        env:
+          TITULO: ${{ github.event.pull_request.title }}
+          BRANCH: ${{ github.event.pull_request.head.ref }}
+        run: |
+          tipos='feat|fix|docs|refactor|test|chore|style|perf|ci|build'
+          if ! printf '%s' "$TITULO" | grep -Eq "^($tipos)(\([a-z0-9-]+\))?!?: .+"; then
+            echo "::error::O título deve começar com um tipo do Conventional Commits, ex.: 'feat: cadastro do gestor (SQUAD1-12)'. Tipos: ${tipos//|/, }."
+            exit 1
+          fi
+          case "$BRANCH" in
+            release/*) exit 0 ;;
+          esac
+          if ! printf '%s' "$TITULO" | grep -Eq '\(SQUAD1-[0-9]+\)$'; then
+            echo "::error::O título deve terminar com o código da issue do Linear entre parênteses, ex.: '(SQUAD1-12)'."
+            exit 1
+          fi
+          echo "Título ok: $TITULO"

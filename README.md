@@ -155,6 +155,19 @@ uma tag (`v0.1.0` na Sprint 1, `v0.2.0` na Sprint 2...) e volta para a `develop`
 O identificador da issue (`SQUAD1-12`) no nome da branch faz o Linear ligar a PR à issue
 automaticamente.
 
+### Pull Requests
+
+- **Título** no padrão Conventional Commits, terminando com a issue:
+  `feat: cadastro do gestor (SQUAD1-12)`. O CI confere. PRs de `release/` dispensam a issue.
+- **Uma issue por PR**, de preferência com menos de 400 linhas alteradas.
+- Ainda não está pronta? Abra como **rascunho (draft)**.
+- Preencha o template; em mudança de tela, inclua **prints**.
+- Rode o **`revisor-pr`** antes de pedir revisão (e o **`revisor-rls`** se mexeu no banco).
+- **Revisão no mesmo dia** ou até a manhã seguinte.
+- **Merge:** feature → `develop` por **squash** (o título da PR vira o commit);
+  `release/` e `hotfix/` → `main` por **merge commit**. Quem abriu a PR faz o merge, depois da
+  aprovação e do CI verde. A branch é apagada depois do merge.
+
 ## Definição de pronto
 
 - PR revisada por pelo menos uma pessoa e CI verde

@@ -67,6 +67,8 @@ condomínio é opcional, nunca a visão padrão.
 - **Gitflow**: branch base `develop`; trabalho em `feature/SQUAD1-123-descricao` (o código vem da
   issue do Linear); PR para `develop`. `main` só recebe `release/` e `hotfix/`.
 - **Conventional Commits** em português: `feat: tela de cadastro do gestor`.
+- **Título de PR**: `tipo: descrição (SQUAD1-123)`, ex.: `feat: cadastro do gestor (SQUAD1-12)`.
+  Vira o commit na `develop` (squash merge). Preencha o template de PR, com prints se mudou tela.
 - Mudanças pequenas e focadas na issue. Não refatore o que não foi pedido.
 - Mudou tabela, rota ou variável de ambiente? Atualize o README da pasta.
 

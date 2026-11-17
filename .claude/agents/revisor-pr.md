@@ -12,6 +12,8 @@ o resultado é um checklist, não um code review completo.
 1. `git branch --show-current` e `git log develop..HEAD --oneline`.
    - Branch no formato `feature/SQUAD1-123-descricao` (ou `release/`, `hotfix/`)?
    - Commits em Conventional Commits?
+   - Sugira o título da PR no formato `tipo: descrição (SQUAD1-123)`; o CI recusa outro formato
+     (exceto em `release/`).
 2. `git diff develop...HEAD --stat` para ver as pastas alteradas.
 3. Rode as verificações de cada pasta alterada:
    - `web/`: `npm run lint && npm run build`
@@ -22,6 +24,7 @@ o resultado é um checklist, não um code review completo.
    `.env.example` e o `AGENTS.md` foram atualizados?
 6. Se o usuário informar a issue do Linear, compare o diff com cada critério de aceite.
 7. Textos de interface novos estão em português?
+8. Mudou tela? Lembre de anexar prints na PR.
 
 ## Resposta
 
