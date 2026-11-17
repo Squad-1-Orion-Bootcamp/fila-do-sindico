@@ -1,5 +1,5 @@
 import type { Session } from '@supabase/supabase-js'
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { supabase } from '../lib/supabase'
 
 export type Role = 'sindico' | 'morador'
@@ -33,7 +33,21 @@ async function fetchProfile(userId: string): Promise<Profile | null> {
   return data
 }
 
-export function AuthProvider({ children }: { children: ReactNode }) {
+// Fora do componente: não dependem do estado, então têm sempre a mesma identidade.
+async function signIn(email: string, password: string) {
+  const { error } = await supabase.auth.signInWithPassword({ email, password })
+  if (error) {
+    console.error('Erro ao entrar', error)
+    return 'E-mail ou senha inválidos'
+  }
+  return null
+}
+
+async function signOut() {
+  await supabase.auth.signOut()
+}
+
+export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
   const [session, setSession] = useState<Session | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
@@ -55,20 +69,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => data.subscription.unsubscribe()
   }, [])
 
-  async function signIn(email: string, password: string) {
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
-    return error ? 'E-mail ou senha inválidos' : null
-  }
-
-  async function signOut() {
-    await supabase.auth.signOut()
-  }
-
-  return (
-    <AuthContext.Provider value={{ session, profile, loading, signIn, signOut }}>
-      {children}
-    </AuthContext.Provider>
+  // Mesmo objeto entre renderizações, para não re-renderizar quem usa useAuth() à toa.
+  const value = useMemo(
+    () => ({ session, profile, loading, signIn, signOut }),
+    [session, profile, loading],
   )
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 
 // eslint-disable-next-line react/only-export-components
