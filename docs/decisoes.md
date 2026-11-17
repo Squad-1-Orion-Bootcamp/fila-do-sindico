@@ -3,6 +3,14 @@
 Registro curto das decisões, com o motivo. Decisão nova entra no topo da sua seção. Quando uma
 decisão for trocada, mova a antiga para "Substituídas", dizendo o que a substituiu.
 
+## 17/11/2026
+
+### Técnica
+
+| Decisão | Motivo |
+| --- | --- |
+| PRs entram por merge commit (merge comum), nunca squash, também na `develop`; cada commit da branch segue Conventional Commits e o título da PR vira a mensagem do merge commit | Mantém o histórico de commits e alterações; quando mais de uma pessoa colabora na mesma branch, nada do que cada uma fez é apagado |
+
 ## 16/11/2026 — Planning da Sprint 1
 
 ### Produto e acesso
@@ -55,3 +63,4 @@ decisão for trocada, mova a antiga para "Substituídas", dizendo o que a substi
 | Síndico cadastra o morador e o morador cria a conta com esse e-mail | Pré-cadastro do morador com aprovação do gestor |
 | Link de convite por condomínio | Lista pública de condomínios |
 | Papéis `sindico` e `morador` | `admin`, `gestor` e `morador` |
+| PRs de feature para a `develop` por squash merge | Merge commit em todas as PRs (17/11) |

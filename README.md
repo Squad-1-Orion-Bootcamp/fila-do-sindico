@@ -166,9 +166,10 @@ o começo à mão; `release/` é sempre digitada (`release/v0.1.0`).
 - Preencha o template; em mudança de tela, inclua **prints**.
 - Rode o **`revisor-pr`** antes de pedir revisão (e o **`revisor-rls`** se mexeu no banco).
 - **Revisão no mesmo dia** ou até a manhã seguinte.
-- **Merge:** feature → `develop` por **squash** (o título da PR vira o commit);
-  `release/` e `hotfix/` → `main` por **merge commit**. Quem abriu a PR faz o merge, depois da
-  aprovação e do CI verde. A branch é apagada depois do merge.
+- **Merge:** sempre por **merge commit** (merge comum), nunca squash: feature → `develop`,
+  `release/` e `hotfix/` → `main`. Os commits da branch entram na `develop` como estão, então
+  cada um segue Conventional Commits; o título da PR vira a mensagem do merge commit. Quem abriu
+  a PR faz o merge, depois da aprovação e do CI verde. A branch é apagada depois do merge.
 
 ## Definição de pronto
 

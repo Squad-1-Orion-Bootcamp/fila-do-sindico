@@ -1,6 +1,7 @@
 name: Título da PR
 
-# O título da PR vira o commit na develop (squash merge), então precisa seguir o padrão:
+# O título da PR vira a mensagem do merge commit na develop (merge comum, sem squash), então
+# precisa seguir o padrão:
 #   feat: cadastro do gestor (SQUAD1-12)
 # Branches release/ não precisam do código da issue.
 
