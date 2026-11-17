@@ -24,40 +24,51 @@ export function Login() {
   }
 
   return (
-    <main className="caixa">
-      <div className="topo-marca login-marca">
-        <span className="topo-marca-icone">
-          <Building2 size={20} aria-hidden />
-        </span>
-        Fila do Síndico
+    <main className="tela-centralizada">
+      <div className="caixa">
+        <div className="topo-marca login-marca">
+          <span className="topo-marca-icone">
+            <Building2 size={20} aria-hidden />
+          </span>
+          Fila do Síndico
+        </div>
+        <form className="formulario" onSubmit={handleSubmit}>
+          <label className="campo">
+            <span className="campo-rotulo">E-mail</span>
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </label>
+          <label className="campo">
+            <span className="campo-rotulo">Senha</span>
+            <input
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </label>
+          {error && (
+            <p role="alert" className="aviso aviso-erro">
+              {error}
+            </p>
+          )}
+          <button
+            type="submit"
+            className="botao botao-principal botao-largo"
+            disabled={submitting}
+          >
+            {submitting ? 'Entrando…' : 'Entrar'}
+          </button>
+        </form>
+        <nav className="login-cadastro" aria-label="Criar conta">
+          <Link to="/cadastro-gestor">Criar conta de gestor</Link>
+          <Link to="/cadastro">Criar conta de morador</Link>
+        </nav>
       </div>
-      <form className="formulario" onSubmit={handleSubmit}>
-        <label className="campo">
-          <span className="campo-rotulo">E-mail</span>
-          <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
-        </label>
-        <label className="campo">
-          <span className="campo-rotulo">Senha</span>
-          <input
-            type="password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </label>
-        {error && (
-          <p role="alert" className="aviso aviso-erro">
-            {error}
-          </p>
-        )}
-        <button type="submit" className="botao botao-principal botao-largo" disabled={submitting}>
-          {submitting ? 'Entrando…' : 'Entrar'}
-        </button>
-      </form>
-      <nav className="login-cadastro" aria-label="Criar conta">
-        <Link to="/cadastro-gestor">Criar conta de gestor</Link>
-        <Link to="/cadastro">Criar conta de morador</Link>
-      </nav>
     </main>
   )
 }

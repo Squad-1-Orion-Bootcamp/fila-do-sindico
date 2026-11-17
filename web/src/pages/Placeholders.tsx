@@ -58,15 +58,17 @@ export function SemAcesso() {
   if (!loading && !session) return <Navigate to="/login" replace />
 
   return (
-    <main className="caixa">
-      <h1>Acesso ainda não liberado</h1>
-      <p className="subtitulo" style={{ margin: 'var(--espaco-3) 0 var(--espaco-6)' }}>
-        Você entrou com {session?.user.email}. Peça ao gestor do seu condomínio para liberar seu
-        acesso.
-      </p>
-      <button className="botao botao-largo" onClick={signOut}>
-        Sair
-      </button>
+    <main className="tela-centralizada">
+      <div className="caixa">
+        <h1>Acesso ainda não liberado</h1>
+        <p className="subtitulo" style={{ margin: 'var(--espaco-3) 0 var(--espaco-6)' }}>
+          Você entrou com {session?.user.email}. Peça ao gestor do seu condomínio para liberar
+          seu acesso.
+        </p>
+        <button className="botao botao-largo" onClick={signOut}>
+          Sair
+        </button>
+      </div>
     </main>
   )
 }

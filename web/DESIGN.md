@@ -92,7 +92,7 @@ fundo do cartão inteiro.
 | Contagem | `.contador` | Ao lado do nome da coluna |
 | Avisos | `.aviso .aviso-erro` / `.aviso-sucesso` | Mensagens de formulário |
 | Lista vazia | `.estado-vazio` | Sempre uma frase, nunca espaço em branco |
-| Login e cadastro | `.caixa` | Caixa branca centralizada |
+| Login e cadastro | `.tela-centralizada` > `.caixa` | Caixa branca centralizada na vertical e na horizontal |
 
 ### Exemplo de formulário
 

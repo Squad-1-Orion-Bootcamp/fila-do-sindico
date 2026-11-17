@@ -298,10 +298,21 @@ p {
   font-weight: var(--peso-forte);
 }
 
-/* Caixa centralizada (login, cadastro) */
+/* Tela que centraliza a .caixa na vertical e na horizontal (login, cadastro).
+   Se o conteúdo for maior que a tela, a página rola normalmente. */
+.tela-centralizada {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: var(--espaco-8) var(--espaco-4);
+}
+
+/* Caixa branca (login, cadastro); vai dentro de .tela-centralizada */
 .caixa {
+  width: 100%;
   max-width: 400px;
-  margin: 10vh auto 0;
   padding: var(--espaco-8);
   border: var(--borda);
   border-radius: var(--raio);
@@ -376,8 +387,11 @@ p {
     flex-direction: column;
   }
 
+  .tela-centralizada {
+    padding: var(--espaco-4);
+  }
+
   .caixa {
-    margin: var(--espaco-8) var(--espaco-4) 0;
     padding: var(--espaco-6);
   }
 }
