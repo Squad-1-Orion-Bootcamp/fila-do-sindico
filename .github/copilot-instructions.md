@@ -17,7 +17,7 @@ código feitas pelo Copilot.
 
 ## Em revisões de PR, verifique
 
-- A PR aponta para `develop` e o nome da branch segue `feature/LUCAS-123-descricao`.
+- A PR aponta para `develop` e o nome da branch segue `feature/SQUAD1-123-descricao`.
 - Textos de interface em português.
 - Lint e testes da pasta alterada passando.
 - README atualizado quando muda tabela, rota ou variável de ambiente.

@@ -4,7 +4,7 @@
 
 ## Issue
 
-<!-- Ex.: LUCAS-12 -->
+<!-- Ex.: SQUAD1-12 -->
 
 ## Como testar
 

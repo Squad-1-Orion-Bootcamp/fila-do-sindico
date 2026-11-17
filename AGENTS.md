@@ -64,7 +64,7 @@ condomínio é opcional, nunca a visão padrão.
 
 - Textos da interface, mensagens de erro e comentários em **português**. Nomes de tabelas e
   colunas em português, sem acento (`ocorrencias`, `condominio_id`).
-- **Gitflow**: branch base `develop`; trabalho em `feature/LUCAS-123-descricao` (o código vem da
+- **Gitflow**: branch base `develop`; trabalho em `feature/SQUAD1-123-descricao` (o código vem da
   issue do Linear); PR para `develop`. `main` só recebe `release/` e `hotfix/`.
 - **Conventional Commits** em português: `feat: tela de cadastro do gestor`.
 - Mudanças pequenas e focadas na issue. Não refatore o que não foi pedido.

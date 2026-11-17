@@ -10,7 +10,7 @@ o resultado é um checklist, não um code review completo.
 ## Procedimento
 
 1. `git branch --show-current` e `git log develop..HEAD --oneline`.
-   - Branch no formato `feature/LUCAS-123-descricao` (ou `release/`, `hotfix/`)?
+   - Branch no formato `feature/SQUAD1-123-descricao` (ou `release/`, `hotfix/`)?
    - Commits em Conventional Commits?
 2. `git diff develop...HEAD --stat` para ver as pastas alteradas.
 3. Rode as verificações de cada pasta alterada:
