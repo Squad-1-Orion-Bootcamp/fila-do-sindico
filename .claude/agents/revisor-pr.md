@@ -10,7 +10,7 @@ o resultado é um checklist, não um code review completo.
 ## Procedimento
 
 1. `git branch --show-current` e `git log develop..HEAD --oneline`.
-   - Branch no formato `feature/SQUAD1-123-descricao` (ou `release/`, `hotfix/`)?
+   - Branch no formato `feature/squad1-123-descricao` (ou `release/`, `hotfix/`)?
    - Commits em Conventional Commits?
    - Sugira o título da PR no formato `tipo: descrição (SQUAD1-123)`; o CI recusa outro formato
      (exceto em `release/`).

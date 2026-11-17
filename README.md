@@ -136,24 +136,26 @@ Nunca altere o banco da nuvem direto pelo painel sem criar a migração correspo
 | --- | --- | --- | --- |
 | `main` | Versão entregue (demo para a banca) | — | — |
 | `develop` | Integração do dia a dia; **branch base** | `main` | — |
-| `feature/SQUAD1-123-descricao` | Uma issue do Linear | `develop` | `develop` (PR) |
+| `feature/squad1-123-descricao` | Uma issue do Linear | `develop` | `develop` (PR) |
 | `release/vX.Y.Z` | Preparar uma entrega (fim de sprint) | `develop` | `main` e `develop` |
-| `hotfix/SQUAD1-123-descricao` | Correção urgente no que já foi entregue | `main` | `main` e `develop` |
+| `hotfix/squad1-123-descricao` | Correção urgente no que já foi entregue | `main` | `main` e `develop` |
 
 Dia a dia:
 
 ```bash
 git switch develop && git pull
-git switch -c feature/SQUAD1-12-tela-login
+git switch -c feature/squad1-12-tela-login
 # ...commits...
-git push -u origin feature/SQUAD1-12-tela-login   # abra a PR para develop
+git push -u origin feature/squad1-12-tela-login   # abra a PR para develop
 ```
 
 Fim de sprint: uma `release/` sai da `develop`, recebe só ajustes finais, entra na `main` com
 uma tag (`v0.1.0` na Sprint 1, `v0.2.0` na Sprint 2...) e volta para a `develop`.
 
-O identificador da issue (`SQUAD1-12`) no nome da branch faz o Linear ligar a PR à issue
-automaticamente.
+O código da issue (`squad1-12`) no nome da branch faz o Linear ligar a PR à issue
+automaticamente. Use o atalho **"Copy git branch name"** da issue no Linear
+(`Ctrl/Cmd + Shift + .`): ele já gera `feature/squad1-12-titulo-da-issue`. Para `hotfix/`, troque
+o começo à mão; `release/` é sempre digitada (`release/v0.1.0`).
 
 ### Pull Requests
 
