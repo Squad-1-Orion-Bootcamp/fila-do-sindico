@@ -4,7 +4,7 @@ import { useAuth, type Role } from './AuthProvider'
 import { homeFor } from './homeFor'
 
 // Proteção só de navegação. Quem impede o acesso aos dados de verdade é o RLS no banco.
-export function RequireRole({ role, children }: { role: Role; children: ReactNode }) {
+export function RequireRole({ role, children }: Readonly<{ role: Role; children: ReactNode }>) {
   const { session, profile, loading } = useAuth()
 
   if (loading) return <p className="estado-vazio">Carregando…</p>
