@@ -7,7 +7,7 @@ import { homeFor } from './homeFor'
 export function RequireRole({ role, children }: { role: Role; children: ReactNode }) {
   const { session, profile, loading } = useAuth()
 
-  if (loading) return <p className="center">Carregando…</p>
+  if (loading) return <p className="estado-vazio">Carregando…</p>
   if (!session) return <Navigate to="/login" replace />
   if (!profile) return <Navigate to="/sem-acesso" replace />
   if (profile.role !== role) return <Navigate to={homeFor(profile.role)} replace />

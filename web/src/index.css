@@ -1,77 +1,383 @@
-:root {
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  color: #1f2328;
-  background: #f6f8fa;
+/*
+ * Estilos base e componentes compartilhados.
+ * Valores sempre via tokens (src/styles/tokens.css). Guia completo: web/DESIGN.md.
+ */
+@import '@fontsource/inter/400.css';
+@import '@fontsource/inter/600.css';
+@import './styles/tokens.css';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
 body {
   margin: 0;
+  font-family: var(--fonte);
+  font-size: var(--texto-md);
+  line-height: 1.5;
+  color: var(--cor-texto);
+  background: var(--cor-fundo);
+  font-variant-numeric: tabular-nums;
 }
 
-main {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 24px;
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-weight: var(--peso-forte);
+  line-height: 1.25;
 }
 
-.card {
-  max-width: 360px;
-  margin-top: 10vh;
-  background: #fff;
-  border: 1px solid #d0d7de;
-  border-radius: 8px;
+h1 {
+  font-size: var(--texto-xl);
 }
 
-form {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+h2 {
+  font-size: var(--texto-lg);
 }
 
-label {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-size: 14px;
-}
-
-input {
-  padding: 8px;
-  border: 1px solid #d0d7de;
-  border-radius: 6px;
-  font-size: 16px;
-}
-
-button {
-  padding: 8px 12px;
-  border: 0;
-  border-radius: 6px;
-  background: #1f6feb;
-  color: #fff;
-  font-size: 15px;
-  cursor: pointer;
-}
-
-button:disabled {
-  opacity: 0.6;
-}
-
-.error {
-  color: #cf222e;
+p {
   margin: 0;
 }
 
-.header {
+:focus-visible {
+  outline: none;
+  box-shadow: var(--foco);
+}
+
+/* ---------- Layout ---------- */
+
+.topo {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: var(--espaco-3);
+  padding: var(--espaco-4) var(--espaco-8);
+  background: var(--cor-superficie);
+  border-bottom: var(--borda);
 }
 
-.header h1 {
+.topo-marca {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-3);
   flex: 1;
+  font-size: var(--texto-md);
+  font-weight: var(--peso-forte);
 }
 
-.center {
+.topo-marca-icone {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--raio);
+  background: var(--cor-acao-suave);
+  color: var(--cor-acao);
+}
+
+.pagina {
+  max-width: var(--largura-pagina);
+  margin: 0 auto;
+  padding: var(--espaco-8);
+}
+
+.pagina-estreita {
+  max-width: var(--largura-formulario);
+  margin: 0 auto;
+  padding: var(--espaco-8) var(--espaco-4) 120px;
+}
+
+.cabecalho-pagina {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--espaco-4);
+  margin-bottom: var(--espaco-6);
+}
+
+.subtitulo {
+  margin-top: var(--espaco-1);
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-secundario);
+}
+
+.link-voltar {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaco-2);
+  margin-bottom: var(--espaco-6);
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-secundario);
+  text-decoration: none;
+}
+
+/* ---------- Botões ---------- */
+
+.botao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--espaco-2);
+  min-height: var(--altura-controle);
+  padding: 0 var(--espaco-4);
+  border: var(--borda);
+  border-radius: var(--raio);
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+  font: inherit;
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-forte);
+  cursor: pointer;
+}
+
+.botao:hover {
+  border-color: var(--cor-borda-forte);
+}
+
+.botao:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.botao-principal {
+  border-color: var(--cor-acao);
+  background: var(--cor-acao);
+  color: var(--cor-acao-texto);
+}
+
+.botao-principal:hover {
+  border-color: var(--cor-acao-hover);
+  background: var(--cor-acao-hover);
+}
+
+.botao-largo {
+  width: 100%;
+}
+
+/* Grupo de opções (ex.: Proprietário / Morador / Funcionário) */
+.opcoes {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: var(--espaco-2);
+}
+
+.opcoes .botao[aria-pressed='true'] {
+  border: 2px solid var(--cor-acao);
+  background: var(--cor-acao-suave);
+  color: var(--cor-acao);
+}
+
+/* Barra fixa no rodapé dos formulários longos */
+.rodape-acao {
+  position: fixed;
+  inset: auto 0 0;
+  padding: var(--espaco-4);
+  background: var(--cor-superficie);
+  border-top: var(--borda);
+}
+
+.rodape-acao .botao {
+  display: flex;
+  width: 100%;
+  max-width: var(--largura-formulario);
+  margin: 0 auto;
+}
+
+/* ---------- Formulários ---------- */
+
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-6);
+}
+
+.linha-campos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--espaco-4);
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+}
+
+.campo-rotulo {
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-forte);
+}
+
+.campo-rotulo .obrigatorio {
+  margin-left: var(--espaco-1);
+  color: var(--cor-texto-sutil);
+}
+
+.campo-rotulo .opcional {
+  font-weight: var(--peso-normal);
+  color: var(--cor-texto-sutil);
+}
+
+.campo input,
+.campo select,
+.campo textarea {
+  min-height: var(--altura-controle);
+  padding: 0 var(--espaco-3);
+  border: var(--borda);
+  border-radius: var(--raio);
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+  font: inherit;
+  font-size: var(--texto-sm);
+}
+
+.campo textarea {
+  min-height: 128px;
+  padding: var(--espaco-3);
+  resize: vertical;
+}
+
+.campo ::placeholder {
+  color: var(--cor-texto-sutil);
+}
+
+.campo-erro {
+  font-size: var(--texto-xs);
+  color: var(--cor-erro);
+}
+
+/* ---------- Mensagens e estados ---------- */
+
+.aviso {
+  padding: var(--espaco-3) var(--espaco-4);
+  border-radius: var(--raio);
+  font-size: var(--texto-sm);
+}
+
+.aviso-erro {
+  background: var(--cor-erro-fundo);
+  color: var(--cor-erro);
+}
+
+.aviso-sucesso {
+  background: var(--cor-sucesso-fundo);
+  color: var(--cor-sucesso);
+}
+
+.estado-vazio {
+  padding: var(--espaco-8) var(--espaco-4);
   text-align: center;
-  margin-top: 20vh;
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-secundario);
+}
+
+/* ---------- Cartão ---------- */
+
+.cartao {
+  padding: var(--espaco-4);
+  border: var(--borda);
+  border-radius: var(--raio);
+  background: var(--cor-superficie);
+}
+
+.cartao-apagado {
+  background: var(--cor-superficie-apagada);
+}
+
+.cartao-meta {
+  font-size: var(--texto-xs);
+  color: var(--cor-texto-secundario);
+}
+
+.cartao-titulo {
+  margin-top: var(--espaco-1);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-forte);
+}
+
+/* Caixa centralizada (login, cadastro) */
+.caixa {
+  max-width: 400px;
+  margin: 10vh auto 0;
+  padding: var(--espaco-8);
+  border: var(--borda);
+  border-radius: var(--raio);
+  background: var(--cor-superficie);
+}
+
+/* ---------- Etiquetas ---------- */
+
+.etiqueta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaco-1);
+  padding: 2px var(--espaco-2);
+  border-radius: 4px;
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-forte);
+}
+
+.etiqueta::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: var(--raio-pilula);
+  background: currentColor;
+}
+
+.etiqueta-urgente {
+  background: var(--prioridade-urgente-fundo);
+  color: var(--prioridade-urgente-texto);
+}
+
+.etiqueta-alta {
+  background: var(--prioridade-alta-fundo);
+  color: var(--prioridade-alta-texto);
+}
+
+.etiqueta-normal {
+  background: var(--prioridade-normal-fundo);
+  color: var(--prioridade-normal-texto);
+}
+
+.etiqueta-baixa {
+  background: var(--prioridade-baixa-fundo);
+  color: var(--prioridade-baixa-texto);
+}
+
+.contador {
+  padding: 0 var(--espaco-2);
+  border-radius: 4px;
+  background: var(--prioridade-baixa-fundo);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-forte);
+  color: var(--cor-texto-secundario);
+}
+
+/* ---------- Celular ---------- */
+
+@media (max-width: 640px) {
+  .topo {
+    padding: var(--espaco-3) var(--espaco-4);
+  }
+
+  .pagina {
+    padding: var(--espaco-4);
+  }
+
+  .linha-campos {
+    grid-template-columns: 1fr;
+  }
+
+  .cabecalho-pagina {
+    flex-direction: column;
+  }
+
+  .caixa {
+    margin: var(--espaco-8) var(--espaco-4) 0;
+    padding: var(--espaco-6);
+  }
 }

@@ -1,6 +1,5 @@
 -- Dados de desenvolvimento, carregados por `npx supabase db reset`.
+-- Só dados de teste, nunca dados reais.
 --
--- Síndicos são criados pelo time, não por tela de cadastro (decisão da Sprint 1):
---   1. Crie o usuário no Studio local (http://127.0.0.1:54323 → Authentication → Add user).
---   2. Copie o UUID dele e rode:
---        insert into public.profiles (id, role, nome) values ('<uuid>', 'sindico', 'Nome do Síndico');
+-- A preencher na Sprint 1 (Riane): 2 gestores, 2 condomínios, 1 morador pendente,
+-- 1 morador aprovado e algumas ocorrências. Ver docs/decisoes.md e a skill nova-tabela.

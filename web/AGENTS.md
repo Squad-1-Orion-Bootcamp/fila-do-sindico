@@ -20,6 +20,17 @@ npm run build     # checagem de tipos + build
 - `src/pages/` — uma página por arquivo.
 - `src/App.tsx` — todas as rotas.
 
+## Design
+
+- **Leia o `web/DESIGN.md` antes de criar ou mudar qualquer tela.** Ele define cores,
+  tipografia, componentes e as classes CSS prontas.
+- CSS puro. Cores, tamanhos, espaços e raios só via variáveis de `src/styles/tokens.css`;
+  nunca um valor solto (`#0f766e`, `13px`) no código.
+- Reaproveite as classes de `src/index.css` (`.botao`, `.campo`, `.cartao`, `.etiqueta-*`...).
+  Estilo específico de uma tela vai num `.css` ao lado da página, ainda usando os tokens.
+- Ícones: `lucide-react`. Fonte: Inter (já carregada).
+- Referência visual: `docs/prototipo/`. Use para layout e visual; os campos seguem a história.
+
 ## Padrões
 
 - Nova página: siga a skill `.claude/skills/nova-tela/SKILL.md`.

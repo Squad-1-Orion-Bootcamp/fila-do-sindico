@@ -106,10 +106,10 @@ uv run uvicorn app.main:app --reload --port 8000   # http://localhost:8000/docs
 
 Studio local do Supabase: http://127.0.0.1:54323
 
-### Criar um síndico para testar
+### Usuários para testar
 
-Síndicos são criados pelo time, não por tela de cadastro. Veja as instruções em
-`supabase/seed.sql`.
+O `supabase/seed.sql` cria gestores, condomínios e moradores de teste (em construção na
+Sprint 1). Também dá para criar pelo próprio app: cadastro de gestor e pré-cadastro de morador.
 
 ## Banco de dados
 

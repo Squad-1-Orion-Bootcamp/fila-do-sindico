@@ -10,7 +10,12 @@ description: Criar uma página no front (web/) com rota, proteção por perfil, 
 Liste os critérios de aceite da issue do Linear. Cada um vira algo verificável na tela.
 Se faltar informação (campos, mensagens, quem acessa), pergunte antes de seguir.
 
-## 2. Crie a página
+## 2. Confira o visual
+
+Leia o `web/DESIGN.md` e veja se a tela tem referência em `docs/prototipo/`. Monte com as classes
+prontas de `src/index.css` e os tokens de `src/styles/tokens.css`. Um botão principal por tela.
+
+## 3. Crie a página
 
 Um arquivo por página em `web/src/pages/<NomeDaPagina>.tsx`.
 
@@ -41,14 +46,16 @@ export function Condominios() {
       })
   }, [])
 
-  if (loading) return <p>Carregando…</p>
-  if (erro) return <p role="alert" className="error">{erro}</p>
-  if (itens.length === 0) return <p>Nenhum condomínio cadastrado ainda.</p>
+  if (loading) return <p className="estado-vazio">Carregando…</p>
+  if (erro) return <p role="alert" className="aviso aviso-erro">{erro}</p>
+  if (itens.length === 0) return <p className="estado-vazio">Nenhum condomínio cadastrado ainda.</p>
 
   return (
     <ul>
       {itens.map((c) => (
-        <li key={c.id}>{c.nome}</li>
+        <li key={c.id} className="cartao">
+          <p className="cartao-titulo">{c.nome}</p>
+        </li>
       ))}
     </ul>
   )
@@ -61,7 +68,7 @@ export function Condominios() {
   permitido. Filtros no front são só de interface (ex.: "mostrar só o Condomínio Aurora").
 - Escritas sensíveis chamam funções do banco: `supabase.rpc('aprovar_vinculo', { ... })`.
 
-## 3. Registre a rota
+## 4. Registre a rota
 
 Em `web/src/App.tsx`, proteja pelo perfil:
 
@@ -78,18 +85,21 @@ Em `web/src/App.tsx`, proteja pelo perfil:
 
 Telas públicas (login, cadastro) ficam fora do `RequireRole`.
 
-## 4. Formulários
+## 5. Formulários
 
 - `required` e tipos de input corretos (`email`, `password`, `tel`).
 - Botão desabilitado enquanto envia, com texto de progresso ("Salvando…").
-- Mensagem de sucesso e de erro em português, sem detalhe técnico.
+- Mensagem de sucesso e de erro em português, sem detalhe técnico (`.aviso-sucesso`,
+  `.aviso-erro`).
+- Campos com `.campo` e `.campo-rotulo`; obrigatório e opcional marcados como no `DESIGN.md`.
 - Valide no front para ajudar o usuário, mas lembre que a regra de verdade está no banco.
 
-## 5. Verifique
+## 6. Verifique
 
 ```bash
 cd web && npm run lint && npm run build
 ```
 
-Teste no navegador com **dois usuários diferentes** (ex.: gestor A e gestor B do seed) e
+Confira a tela também com largura de celular (390 px). Teste no navegador com **dois usuários
+diferentes** (ex.: gestor A e gestor B do seed) e
 confira cada critério de aceite da história.

@@ -1,0 +1,74 @@
+/*
+ * Tokens de design da Fila do Síndico.
+ * Origem: direção visual do protótipo (documento da Júlia, seção "Direção visual").
+ * Regra: componentes usam só estas variáveis. Nenhuma cor, tamanho ou raio solto no código.
+ */
+
+:root {
+  /* Cor de ação (azul-petróleo). Cheia só no botão principal de cada tela. */
+  --cor-acao: #0f766e;
+  --cor-acao-hover: #115e59;
+  --cor-acao-suave: #f0fdfa;
+  --cor-acao-texto: #ffffff;
+
+  /* Superfícies */
+  --cor-fundo: #f6f7f9;
+  --cor-superficie: #ffffff;
+  --cor-superficie-apagada: #f9fafb;
+
+  /* Texto */
+  --cor-texto: #111827;
+  --cor-texto-secundario: #4b5563;
+  --cor-texto-sutil: #6b7280;
+
+  /* Bordas */
+  --cor-borda: #e5e7eb;
+  --cor-borda-forte: #d1d5db;
+
+  /* Feedback */
+  --cor-erro: #b42318;
+  --cor-erro-fundo: #fef3f2;
+  --cor-sucesso: #067647;
+  --cor-sucesso-fundo: #ecfdf3;
+
+  /* Prioridades: sempre com o nome escrito, nunca só a cor */
+  --prioridade-urgente-texto: #b42318;
+  --prioridade-urgente-fundo: #fef3f2;
+  --prioridade-alta-texto: #b54708;
+  --prioridade-alta-fundo: #fffaeb;
+  --prioridade-normal-texto: #175cd3;
+  --prioridade-normal-fundo: #eff8ff;
+  --prioridade-baixa-texto: #475467;
+  --prioridade-baixa-fundo: #f2f4f7;
+
+  /* Tipografia */
+  --fonte: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --peso-normal: 400;
+  --peso-forte: 600;
+  --texto-xs: 12px;
+  --texto-sm: 14px;
+  --texto-md: 16px;
+  --texto-lg: 20px;
+  --texto-xl: 24px;
+
+  /* Espaçamento (múltiplos de 4) */
+  --espaco-1: 4px;
+  --espaco-2: 8px;
+  --espaco-3: 12px;
+  --espaco-4: 16px;
+  --espaco-6: 24px;
+  --espaco-8: 32px;
+  --espaco-12: 48px;
+
+  /* Forma */
+  --raio: 8px;
+  --raio-pilula: 999px;
+  --borda: 1px solid var(--cor-borda);
+  --foco: 0 0 0 2px var(--cor-superficie), 0 0 0 4px var(--cor-acao);
+  --sombra-flutuante: 0 8px 24px rgb(17 24 39 / 0.12);
+
+  /* Medidas */
+  --altura-controle: 44px;
+  --largura-formulario: 576px;
+  --largura-pagina: 1520px;
+}

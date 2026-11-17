@@ -1,43 +1,67 @@
+import { Building2, LogOut } from 'lucide-react'
 import { useAuth } from '../auth/AuthProvider'
 
 // Telas provisórias. Cada uma vira uma história da sprint.
 
-function Header({ title }: { title: string }) {
+function Topo() {
   const { profile, signOut } = useAuth()
   return (
-    <header className="header">
-      <h1>{title}</h1>
-      <span>{profile?.nome}</span>
-      <button onClick={signOut}>Sair</button>
+    <header className="topo">
+      <div className="topo-marca">
+        <span className="topo-marca-icone">
+          <Building2 size={20} aria-hidden />
+        </span>
+        Fila do Síndico
+      </div>
+      <span className="subtitulo">{profile?.nome}</span>
+      <button className="botao" onClick={signOut}>
+        <LogOut size={16} aria-hidden /> Sair
+      </button>
     </header>
   )
 }
 
 export function QuadroOcorrencias() {
   return (
-    <main>
-      <Header title="Quadro de Ocorrências" />
-      <p>Em construção: fila priorizada de todos os condomínios do síndico.</p>
-    </main>
+    <>
+      <Topo />
+      <main className="pagina">
+        <div className="cabecalho-pagina">
+          <div>
+            <h1>Quadro de ocorrências</h1>
+            <p className="subtitulo">Ocorrências de todos os seus condomínios</p>
+          </div>
+        </div>
+        <p className="estado-vazio">Em construção.</p>
+      </main>
+    </>
   )
 }
 
 export function MinhasOcorrencias() {
   return (
-    <main>
-      <Header title="Minhas ocorrências" />
-      <p>Em construção: registro de ocorrência e acompanhamento do status.</p>
-    </main>
+    <>
+      <Topo />
+      <main className="pagina-estreita">
+        <h1>Minhas ocorrências</h1>
+        <p className="estado-vazio">Em construção.</p>
+      </main>
+    </>
   )
 }
 
 export function SemAcesso() {
-  const { signOut } = useAuth()
+  const { session, signOut } = useAuth()
   return (
-    <main className="card">
+    <main className="caixa">
       <h1>Acesso ainda não liberado</h1>
-      <p>Seu e-mail ainda não foi cadastrado por um síndico. Peça ao síndico do seu condomínio.</p>
-      <button onClick={signOut}>Sair</button>
+      <p className="subtitulo" style={{ margin: 'var(--espaco-3) 0 var(--espaco-6)' }}>
+        Você entrou com {session?.user.email}. Peça ao gestor do seu condomínio para liberar seu
+        acesso.
+      </p>
+      <button className="botao botao-largo" onClick={signOut}>
+        Sair
+      </button>
     </main>
   )
 }

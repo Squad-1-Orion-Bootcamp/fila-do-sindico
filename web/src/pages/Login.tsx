@@ -1,3 +1,4 @@
+import { Building2 } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthProvider'
@@ -22,15 +23,20 @@ export function Login() {
   }
 
   return (
-    <main className="card">
-      <h1>Fila do Síndico</h1>
-      <form onSubmit={handleSubmit}>
-        <label>
-          E-mail
+    <main className="caixa">
+      <div className="topo-marca" style={{ marginBottom: 'var(--espaco-6)' }}>
+        <span className="topo-marca-icone">
+          <Building2 size={20} aria-hidden />
+        </span>
+        Fila do Síndico
+      </div>
+      <form className="formulario" onSubmit={handleSubmit}>
+        <label className="campo">
+          <span className="campo-rotulo">E-mail</span>
           <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
         </label>
-        <label>
-          Senha
+        <label className="campo">
+          <span className="campo-rotulo">Senha</span>
           <input
             type="password"
             required
@@ -38,8 +44,12 @@ export function Login() {
             onChange={(e) => setPassword(e.target.value)}
           />
         </label>
-        {error && <p role="alert" className="error">{error}</p>}
-        <button type="submit" disabled={submitting}>
+        {error && (
+          <p role="alert" className="aviso aviso-erro">
+            {error}
+          </p>
+        )}
+        <button type="submit" className="botao botao-principal botao-largo" disabled={submitting}>
           {submitting ? 'Entrando…' : 'Entrar'}
         </button>
       </form>
