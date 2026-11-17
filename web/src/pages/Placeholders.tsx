@@ -1,4 +1,5 @@
 import { Building2, LogOut } from 'lucide-react'
+import { Navigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthProvider'
 
 // Telas provisórias. Cada uma vira uma história da sprint.
@@ -51,7 +52,11 @@ export function MinhasOcorrencias() {
 }
 
 export function SemAcesso() {
-  const { session, signOut } = useAuth()
+  const { session, loading, signOut } = useAuth()
+
+  // Esta rota não passa pelo RequireRole: sem sessão (ex.: depois de "Sair"), volta ao login.
+  if (!loading && !session) return <Navigate to="/login" replace />
+
   return (
     <main className="caixa">
       <h1>Acesso ainda não liberado</h1>
