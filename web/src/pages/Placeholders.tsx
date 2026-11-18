@@ -1,5 +1,5 @@
 import { Building2, LogOut } from 'lucide-react'
-import { Navigate } from 'react-router-dom'
+import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../auth/AuthProvider'
 
 // Telas provisórias. Cada uma vira uma história da sprint.
@@ -53,6 +53,10 @@ export function MinhasOcorrencias() {
 
 export function SemAcesso() {
   const { session, loading, signOut } = useAuth()
+  const location = useLocation()
+  // Vem do pré-cadastro do morador, quando o cadastro já devolve sessão.
+  const cadastroEnviado =
+    (location.state as { cadastroEnviado?: boolean } | null)?.cadastroEnviado === true
 
   // Esta rota não passa pelo RequireRole: sem sessão (ex.: depois de "Sair"), volta ao login.
   if (!loading && !session) return <Navigate to="/login" replace />
@@ -60,6 +64,15 @@ export function SemAcesso() {
   return (
     <main className="tela-centralizada">
       <div className="caixa">
+        {cadastroEnviado && (
+          <p
+            role="status"
+            className="aviso aviso-sucesso"
+            style={{ marginBottom: 'var(--espaco-6)' }}
+          >
+            Cadastro enviado! O gestor do condomínio vai analisar seu pedido.
+          </p>
+        )}
         <h1>Acesso ainda não liberado</h1>
         <p className="subtitulo" style={{ margin: 'var(--espaco-3) 0 var(--espaco-6)' }}>
           Você entrou com {session?.user.email}. Peça ao gestor do seu condomínio para liberar
