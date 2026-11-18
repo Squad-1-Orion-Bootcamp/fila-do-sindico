@@ -31,7 +31,8 @@ Studio local: http://127.0.0.1:54323
 
 ## Modelo de dados
 
-Migrações: `20261116000000_profiles.sql` (perfil) e `20261118033000_modelo_de_dados.sql` (resto).
+Migrações: `20261116000000_profiles.sql` (perfil), `20261118033000_modelo_de_dados.sql` (resto),
+`20261118050000_ajustes_revisao_rls.sql` e `20261118180436_registrar_ocorrencia.sql`.
 
 | Tabela | Para quê |
 | --- | --- |
@@ -45,8 +46,9 @@ Migrações: `20261116000000_profiles.sql` (perfil) e `20261118033000_modelo_de_
 | `documentos_comprobatorios` | Comprovantes no bucket privado `documentos`, caminho `<uid>/<arquivo>` |
 | `ocorrencias`, `anexos`, `classificacoes_ia`, `decisoes`, `historico_status` | Ocorrências, arquivos, sugestões da IA, decisões e mudanças de status |
 
-Ainda não existem: `conversas` e `mensagens` (chat), e as políticas de escrita de ocorrências e
-anexos (entram com as histórias que usam).
+Ainda não existem: `conversas` e `mensagens` (chat), a escrita de anexos e a mudança de status
+das ocorrências pelo gestor (entram com as histórias que usam). A ocorrência é criada só pela
+função `registrar_ocorrencia` (descrição de até 800 caracteres).
 
 ### Acesso
 
@@ -77,6 +79,7 @@ solicitação de vínculo pendente. Campo faltando = o cadastro falha com a mens
 | `recusar_solicitacao_condominio(p_solicitacao_id, p_motivo)` | admin. Para depois da Sprint 1 |
 | `aprovar_solicitacao_vinculo(p_solicitacao_id)` | gestor ativo do condomínio |
 | `recusar_solicitacao_vinculo(p_solicitacao_id, p_motivo)` | gestor ativo do condomínio |
+| `registrar_ocorrencia(p_descricao, p_local, p_condominio_id)` | morador (ou funcionário) com vínculo ativo. Grava em nome de quem chama, com status `novo`. `p_local` é opcional; `p_condominio_id` só é exigido de quem tem vínculo ativo em mais de um condomínio |
 | `encerrar_vinculo(p_vinculo_id, p_motivo)` | vínculo de gestor: admin; de morador ou funcionário: gestor do condomínio ou admin |
 
 Ninguém aprova, recusa ou encerra o próprio pedido ou vínculo. Motivo é obrigatório na recusa e

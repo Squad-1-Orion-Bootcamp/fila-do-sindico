@@ -1,0 +1,42 @@
+/* Página "Minhas ocorrências" do morador. Só tokens de src/styles/tokens.css. */
+
+.ocorrencias-formulario {
+  margin-top: var(--espaco-6);
+}
+
+.ocorrencias-contador {
+  align-self: flex-end;
+  font-size: var(--texto-xs);
+  color: var(--cor-texto-sutil);
+}
+
+.ocorrencias-lista {
+  margin-top: var(--espaco-12);
+}
+
+.ocorrencias-lista ul {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-3);
+  margin: var(--espaco-4) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ocorrencias-status {
+  font-weight: var(--peso-forte);
+  color: var(--cor-texto);
+}
+
+/* Cartão com no máximo quatro linhas de conteúdo (DESIGN.md): a descrição mostra até duas. */
+.ocorrencias-descricao {
+  display: -webkit-box;
+  margin-top: var(--espaco-1);
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-secundario);
+  overflow-wrap: anywhere;
+}
