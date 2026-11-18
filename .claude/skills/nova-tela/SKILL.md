@@ -66,7 +66,7 @@ export function Condominios() {
 - Selecione só as colunas que a tela usa.
 - **Não filtre por usuário no front** para esconder dados de outros: o RLS já devolve só o
   permitido. Filtros no front são só de interface (ex.: "mostrar só o Condomínio Aurora").
-- Escritas sensíveis chamam funções do banco: `supabase.rpc('aprovar_vinculo', { ... })`.
+- Escritas sensíveis chamam funções do banco: `supabase.rpc('aprovar_solicitacao_vinculo', { p_solicitacao_id })`.
 
 ## 4. Registre a rota
 

@@ -3,6 +3,25 @@
 Registro curto das decisões, com o motivo. Decisão nova entra no topo da sua seção. Quando uma
 decisão for trocada, mova a antiga para "Substituídas", dizendo o que a substituiu.
 
+## 18/11/2026 — Modelo de dados
+
+### Produto e acesso
+
+| Decisão | Motivo |
+| --- | --- |
+| Na Sprint 1, o gestor cadastra o condomínio (`cadastrar_condominio`) e já começa a usar; a análise do admin (`solicitacoes_condominio`) fica para depois | Mudança de última hora para a demo da Sprint 1 |
+| O pedido do morador fica em `solicitacoes_vinculo` (`pendente`, `aprovada`, `recusada`); aprovado, vira um vínculo `ativo` com vigência, e a unidade vai para `imoveis` | Segue o documento "Modelo de dados da Fila do Síndico": pedido e acesso são coisas diferentes, e o histórico fica guardado |
+| Vínculo de gestor só é encerrado pelo admin; de morador ou funcionário, pelo gestor do condomínio ou pelo admin. Ninguém encerra o próprio vínculo, e o motivo é obrigatório | Decisão do time |
+| Funcionário se cadastra como morador, por enquanto sem enviar documentação | O cadastro de funcionário ficou para depois |
+| Chat (`conversas` e `mensagens`) fica para o futuro | Fora do escopo das primeiras sprints |
+
+### Técnica
+
+| Decisão | Motivo |
+| --- | --- |
+| Tabelas, sequências e funções novas nascem sem acesso para `anon` e `authenticated`; cada migração dá os próprios `grant` | Nada fica exposto na API sem alguém liberar de propósito (apontado pelo `revisor-rls`) |
+| Visitante (`anon`) lê só `id` e `nome` dos condomínios com gestor ativo; logado, cada pessoa vê só os condomínios em que tem vínculo ativo | O CNPJ e os demais dados não ficam públicos |
+
 ## 17/11/2026
 
 ### Técnica
@@ -21,12 +40,12 @@ decisão for trocada, mova a antiga para "Substituídas", dizendo o que a substi
 | Perfis: `admin`, `gestor` (síndico ou administradora) e `morador`; o funcionário é um morador com vínculo do tipo `funcionario` | Funcionário com o mesmo acesso do morador evita trabalho extra agora |
 | Uma conta tem um tipo só; quem é gestor e morador usa dois e-mails | Simplifica as permissões nesta versão |
 | O papel fica em `profiles.role`, gravado pelo banco, nunca em `user_metadata` | O usuário consegue alterar `user_metadata` pelo navegador |
-| Acesso a condomínios pela tabela `vinculos` (usuário, condomínio, tipo, unidade, status) | Um gestor tem vários condomínios; uma pessoa pode ter vários imóveis |
+| Acesso a condomínios pela tabela `vinculos` (usuário, condomínio, tipo, status) | Um gestor tem vários condomínios; uma pessoa pode ter vários imóveis |
 | Condomínio identificado pelo CNPJ, único | O mesmo prédio não é cadastrado duas vezes |
 | Cadastro do gestor é público (nome, e-mail e senha); o vínculo com o condomínio que ele cadastra já nasce aprovado na Sprint 1 | Gestor novo começa com conta vazia e só vê o que cadastrar |
 | Morador faz o pré-cadastro escolhendo o condomínio numa lista e escolhe a própria senha; acessa depois da aprovação do gestor | Tira trabalho do gestor; nunca enviar senha por e-mail |
 | A lista pública de condomínios mostra só o nome, e só de condomínios com gestor aprovado | Nem todo morador está no grupo de WhatsApp; a aprovação barra pedidos indevidos |
-| O gestor aprova ou recusa o cadastro, com motivo, sem alterar os dados; isso passa pela função `aprovar_vinculo` | Quem preenche responde pelos dados; quem aprova responde pela aprovação |
+| O gestor aprova ou recusa o cadastro, com motivo, sem alterar os dados; isso passa pelas funções `aprovar_solicitacao_vinculo` e `recusar_solicitacao_vinculo` | Quem preenche responde pelos dados; quem aprova responde pela aprovação |
 | Toda ocorrência é registrada por usuário logado; não há formulário anônimo | Decisão da planning |
 | O painel do gestor mostra as ocorrências de todos os seus condomínios juntas; filtrar por condomínio é opcional | A fila única é o diferencial do produto |
 | Cada pessoa do time tem a própria conta de admin; na Sprint 1, aprovações de admin são feitas pelo Studio do Supabase | Saber quem fez cada ação; a tela de admin fica para depois |
@@ -65,3 +84,4 @@ decisão for trocada, mova a antiga para "Substituídas", dizendo o que a substi
 | Link de convite por condomínio | Lista pública de condomínios |
 | Papéis `sindico` e `morador` | `admin`, `gestor` e `morador` |
 | PRs de feature para a `develop` por squash merge | Merge commit em todas as PRs (17/11) |
+| `vinculos` com `unidade` e `status` `pendente`/`aprovado`/`recusado` | Pedido em `solicitacoes_vinculo`, vínculo `ativo`/`encerrado` com vigência e unidade em `imoveis` (18/11) |

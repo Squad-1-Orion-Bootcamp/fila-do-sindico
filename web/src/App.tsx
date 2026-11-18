@@ -2,7 +2,8 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import { RequireRole } from './auth/RequireRole'
 import { CadastroGestor } from './pages/CadastroGestor'
 import { Login } from './pages/Login'
-import { MinhasOcorrencias, QuadroOcorrencias, SemAcesso } from './pages/Placeholders'
+import { MinhasOcorrencias } from './pages/MinhasOcorrencias'
+import { QuadroOcorrencias, SemAcesso } from './pages/Placeholders'
 
 export default function App() {
   return (
