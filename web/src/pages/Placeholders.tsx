@@ -4,7 +4,7 @@ import { useAuth } from '../auth/AuthProvider'
 
 // Telas provisórias. Cada uma vira uma história da sprint.
 
-function Topo() {
+export function Topo() {
   const { profile, signOut } = useAuth()
   return (
     <header className="topo">
@@ -33,18 +33,6 @@ export function QuadroOcorrencias() {
             <p className="subtitulo">Ocorrências de todos os seus condomínios</p>
           </div>
         </div>
-        <p className="estado-vazio">Em construção.</p>
-      </main>
-    </>
-  )
-}
-
-export function MinhasOcorrencias() {
-  return (
-    <>
-      <Topo />
-      <main className="pagina-estreita">
-        <h1>Minhas ocorrências</h1>
         <p className="estado-vazio">Em construção.</p>
       </main>
     </>
