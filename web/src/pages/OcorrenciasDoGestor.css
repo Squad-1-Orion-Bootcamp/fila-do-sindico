@@ -1,0 +1,72 @@
+/* Bloco de ocorrências do painel do gestor. Só tokens de src/styles/tokens.css. */
+
+.ocorrencias-resumo {
+  margin-bottom: var(--espaco-4);
+}
+
+.ocorrencias-lista {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--largura-cartao)), 1fr));
+  gap: var(--espaco-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ocorrencias-onde {
+  margin-top: var(--espaco-2);
+}
+
+/* Descrição pode ter até 800 caracteres: o cartão mostra só o começo. */
+.ocorrencias-descricao {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+
+.ocorrencias-rodape {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espaco-1) var(--espaco-2);
+  margin-top: var(--espaco-2);
+}
+
+.ocorrencias-info {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaco-1);
+}
+
+.ocorrencias-status {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-2);
+  margin-top: var(--espaco-3);
+}
+
+.ocorrencias-status select {
+  min-height: var(--altura-controle);
+  padding: 0 var(--espaco-3);
+  border: var(--borda);
+  border-radius: var(--raio);
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+  font: inherit;
+  font-size: var(--texto-sm);
+}
+
+.ocorrencias-status select:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+/* Sem urgência da IA ainda: neutra, para não parecer uma prioridade. */
+.etiqueta-triagem {
+  background: var(--cor-superficie-apagada);
+  color: var(--cor-texto-sutil);
+  border: var(--borda);
+}
