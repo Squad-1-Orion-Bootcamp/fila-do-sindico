@@ -1,5 +1,5 @@
 import { Send } from 'lucide-react'
-import { useCallback, useEffect, useState, type FormEvent } from 'react'
+import { useCallback, useEffect, useState, type SubmitEvent } from 'react'
 import { supabase } from '../lib/supabase'
 import { Topo } from './Placeholders'
 import './MinhasOcorrencias.css'
@@ -64,6 +64,44 @@ function buscarOcorrencias() {
     .returns<Ocorrencia[]>()
 }
 
+type ListaProps = {
+  carregando: boolean
+  erro: string | null
+  itens: Ocorrencia[]
+}
+
+function ListaOcorrencias({ carregando, erro, itens }: ListaProps) {
+  if (carregando) return <p className="estado-vazio">Carregando…</p>
+  if (erro) {
+    return (
+      <p role="alert" className="aviso aviso-erro">
+        {erro}
+      </p>
+    )
+  }
+  if (itens.length === 0) {
+    return <p className="estado-vazio">Você ainda não registrou nenhuma ocorrência.</p>
+  }
+
+  return (
+    <ul>
+      {itens.map((o) => (
+        <li key={o.id} className={o.status === 'concluido' ? 'cartao cartao-apagado' : 'cartao'}>
+          <p className="cartao-meta">
+            <span className="ocorrencias-status">{ROTULO_STATUS[o.status]}</span>
+            {' · '}
+            <time dateTime={o.created_at} title={new Date(o.created_at).toLocaleString('pt-BR')}>
+              {quando(o.created_at)}
+            </time>
+          </p>
+          <p className="cartao-titulo">{o.local ?? 'Local não informado'}</p>
+          <p className="ocorrencias-descricao">{o.descricao}</p>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
 export function MinhasOcorrencias() {
   const [itens, setItens] = useState<Ocorrencia[]>([])
   const [carregando, setCarregando] = useState(true)
@@ -90,7 +128,7 @@ export function MinhasOcorrencias() {
 
   useEffect(carregar, [carregar])
 
-  async function enviar(evento: FormEvent<HTMLFormElement>) {
+  async function enviar(evento: SubmitEvent<HTMLFormElement>) {
     evento.preventDefault()
     setErroEnvio(null)
     setSucesso(false)
@@ -174,31 +212,7 @@ export function MinhasOcorrencias() {
         <section className="ocorrencias-lista" aria-labelledby="titulo-lista">
           <h2 id="titulo-lista">Minhas ocorrências</h2>
 
-          {carregando ? (
-            <p className="estado-vazio">Carregando…</p>
-          ) : erroLista ? (
-            <p role="alert" className="aviso aviso-erro">
-              {erroLista}
-            </p>
-          ) : itens.length === 0 ? (
-            <p className="estado-vazio">Você ainda não registrou nenhuma ocorrência.</p>
-          ) : (
-            <ul>
-              {itens.map((o) => (
-                <li key={o.id} className={o.status === 'concluido' ? 'cartao cartao-apagado' : 'cartao'}>
-                  <p className="cartao-meta">
-                    <span className="ocorrencias-status">{ROTULO_STATUS[o.status]}</span>
-                    {' · '}
-                    <time dateTime={o.created_at} title={new Date(o.created_at).toLocaleString('pt-BR')}>
-                      {quando(o.created_at)}
-                    </time>
-                  </p>
-                  <p className="cartao-titulo">{o.local ?? 'Local não informado'}</p>
-                  <p className="ocorrencias-descricao">{o.descricao}</p>
-                </li>
-              ))}
-            </ul>
-          )}
+          <ListaOcorrencias carregando={carregando} erro={erroLista} itens={itens} />
         </section>
       </main>
     </>
