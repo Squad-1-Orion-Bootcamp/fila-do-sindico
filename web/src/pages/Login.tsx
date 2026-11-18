@@ -12,7 +12,7 @@ export function Login() {
   const [submitting, setSubmitting] = useState(false)
 
   if (!loading && session) {
-    return <Navigate to={profile ? homeFor(profile.role) : '/sem-acesso'} replace />
+    return <Navigate to={profile ? homeFor(profile) : '/sem-acesso'} replace />
   }
 
   async function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
