@@ -35,4 +35,3 @@ Ainda não está pronta? Abra como rascunho (draft).
 - [ ] Lint e testes da pasta alterada passando
 - [ ] Mudou tabela, rota ou variável de ambiente? Atualizei README e `.env.example`
 - [ ] Nenhuma chave ou senha no código
-- [ ] Sei explicar todo o código desta PR, inclusive o gerado por IA
