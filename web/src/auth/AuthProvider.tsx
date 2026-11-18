@@ -10,7 +10,7 @@ import {
 } from 'react'
 import { supabase } from '../lib/supabase'
 
-export type Role = 'sindico' | 'morador'
+export type Role = 'admin' | 'gestor' | 'morador'
 
 export type Profile = {
   id: string

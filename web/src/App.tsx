@@ -13,7 +13,7 @@ export default function App() {
       <Route
         path="/quadro"
         element={
-          <RequireRole role="sindico">
+          <RequireRole role="gestor">
             <QuadroOcorrencias />
           </RequireRole>
         }
