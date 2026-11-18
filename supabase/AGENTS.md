@@ -78,6 +78,7 @@ solicitação de vínculo pendente. Campo faltando = o cadastro falha com a mens
 | `aprovar_solicitacao_vinculo(p_solicitacao_id)` | gestor ativo do condomínio |
 | `recusar_solicitacao_vinculo(p_solicitacao_id, p_motivo)` | gestor ativo do condomínio |
 | `encerrar_vinculo(p_vinculo_id, p_motivo)` | vínculo de gestor: admin; de morador ou funcionário: gestor do condomínio ou admin |
+| `alterar_status_ocorrencia(p_ocorrencia_id, p_status)` | gestor ativo do condomínio. Muda só o status (`novo`, `em_andamento`, `concluido`), preenche ou limpa `concluido_em` e grava em `historico_status` |
 
 Ninguém aprova, recusa ou encerra o próprio pedido ou vínculo. Motivo é obrigatório na recusa e
 no encerramento.
