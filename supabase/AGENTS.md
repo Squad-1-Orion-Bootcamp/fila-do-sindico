@@ -31,7 +31,9 @@ Studio local: http://127.0.0.1:54323
 
 ## Modelo de dados
 
-Migrações: `20261116000000_profiles.sql` (perfil) e `20261118033000_modelo_de_dados.sql` (resto).
+Migrações: `20261116000000_profiles.sql` (perfil), `20261118033000_modelo_de_dados.sql` (resto),
+`20261118050000_ajustes_revisao_rls.sql` e `20261118191442_alterar_status_ocorrencia.sql`
+(gestor muda o status da ocorrência).
 
 | Tabela | Para quê |
 | --- | --- |
@@ -45,8 +47,9 @@ Migrações: `20261116000000_profiles.sql` (perfil) e `20261118033000_modelo_de_
 | `documentos_comprobatorios` | Comprovantes no bucket privado `documentos`, caminho `<uid>/<arquivo>` |
 | `ocorrencias`, `anexos`, `classificacoes_ia`, `decisoes`, `historico_status` | Ocorrências, arquivos, sugestões da IA, decisões e mudanças de status |
 
-Ainda não existem: `conversas` e `mensagens` (chat), e as políticas de escrita de ocorrências e
-anexos (entram com as histórias que usam).
+Ainda não existem: `conversas` e `mensagens` (chat) e a escrita de anexos (entram com as
+histórias que usam). Ocorrências não têm insert nem update livre: a mudança de status passa por
+`alterar_status_ocorrencia`.
 
 ### Acesso
 

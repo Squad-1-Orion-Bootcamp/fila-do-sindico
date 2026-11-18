@@ -19,13 +19,17 @@ begin
     raise exception using errcode = '22023', message = 'Status inválido.';
   end if;
 
-  select * into v_oco from public.ocorrencias where id = p_ocorrencia_id for update;
-
-  -- Ocorrência de outro condomínio responde igual a inexistente: não revela que ela existe.
-  if not found or not public.eh_gestor_aprovado(v_oco.condominio_id) then
+  -- Autoriza antes de travar a linha. Ocorrência de outro condomínio responde igual a
+  -- inexistente: não revela que ela existe.
+  if not exists (
+    select 1 from public.ocorrencias o
+    where o.id = p_ocorrencia_id and public.eh_gestor_aprovado(o.condominio_id)
+  ) then
     raise exception using errcode = '42501',
       message = 'Apenas o gestor do condomínio pode alterar o status desta ocorrência.';
   end if;
+
+  select * into v_oco from public.ocorrencias where id = p_ocorrencia_id for update;
 
   if v_oco.status = p_status then
     return;
