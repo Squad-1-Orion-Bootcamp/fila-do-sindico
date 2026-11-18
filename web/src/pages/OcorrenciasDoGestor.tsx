@@ -111,38 +111,38 @@ export function OcorrenciasDoGestor() {
 
       {!carregando && !erro && itens.length > 0 && (
         <>
-          <p className="subtitulo ocorrencias-resumo">
+          <p className="subtitulo quadro-resumo">
             {itens.length} {itens.length === 1 ? 'ocorrência' : 'ocorrências'} em{' '}
             {totalCondominios} {totalCondominios === 1 ? 'condomínio' : 'condomínios'}
           </p>
-          <ul className="ocorrencias-lista">
+          <ul className="quadro-lista">
             {itens.map((o) => (
               <li
                 key={o.id}
                 className={o.status === 'concluido' ? 'cartao cartao-apagado' : 'cartao'}
               >
                 <EtiquetaPrioridade urgencia={o.urgencia_atual} />
-                <p className="cartao-meta ocorrencias-onde">
+                <p className="cartao-meta quadro-onde">
                   {o.condominios?.nome ?? 'Condomínio'}
                   {o.local && ` · ${o.local}`}
                 </p>
-                <p id={`descricao-${o.id}`} className="cartao-titulo ocorrencias-descricao">
+                <p id={`descricao-${o.id}`} className="cartao-titulo quadro-descricao">
                   {o.descricao}
                 </p>
-                <p className="cartao-meta ocorrencias-rodape">
-                  <span className="ocorrencias-info">
+                <p className="cartao-meta quadro-rodape">
+                  <span className="quadro-info">
                     <User size={14} aria-hidden />
                     {o.profiles?.nome ?? 'Pessoa não identificada'}
                   </span>
                   <span aria-hidden>·</span>
-                  <span className="ocorrencias-info">
+                  <span className="quadro-info">
                     <Clock size={14} aria-hidden />
                     <time dateTime={o.created_at} title={dataCompleta(o.created_at)}>
                       {tempoRelativo(o.created_at)}
                     </time>
                   </span>
                 </p>
-                <label className="ocorrencias-status">
+                <label className="quadro-status">
                   <span className="cartao-meta">Status</span>
                   <select
                     value={o.status}

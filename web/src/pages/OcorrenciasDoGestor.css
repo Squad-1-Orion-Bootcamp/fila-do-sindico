@@ -1,10 +1,10 @@
 /* Bloco de ocorrências do painel do gestor. Só tokens de src/styles/tokens.css. */
 
-.ocorrencias-resumo {
+.quadro-resumo {
   margin-bottom: var(--espaco-4);
 }
 
-.ocorrencias-lista {
+.quadro-lista {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--largura-cartao)), 1fr));
   gap: var(--espaco-3);
@@ -13,12 +13,12 @@
   list-style: none;
 }
 
-.ocorrencias-onde {
+.quadro-onde {
   margin-top: var(--espaco-2);
 }
 
 /* Descrição pode ter até 800 caracteres: o cartão mostra só o começo. */
-.ocorrencias-descricao {
+.quadro-descricao {
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
@@ -27,7 +27,7 @@
   overflow-wrap: anywhere;
 }
 
-.ocorrencias-rodape {
+.quadro-rodape {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -35,20 +35,20 @@
   margin-top: var(--espaco-2);
 }
 
-.ocorrencias-info {
+.quadro-info {
   display: inline-flex;
   align-items: center;
   gap: var(--espaco-1);
 }
 
-.ocorrencias-status {
+.quadro-status {
   display: flex;
   align-items: center;
   gap: var(--espaco-2);
   margin-top: var(--espaco-3);
 }
 
-.ocorrencias-status select {
+.quadro-status select {
   min-height: var(--altura-controle);
   padding: 0 var(--espaco-3);
   border: var(--borda);
@@ -59,14 +59,7 @@
   font-size: var(--texto-sm);
 }
 
-.ocorrencias-status select:disabled {
+.quadro-status select:disabled {
   opacity: 0.6;
   cursor: progress;
-}
-
-/* Sem urgência da IA ainda: neutra, para não parecer uma prioridade. */
-.etiqueta-triagem {
-  background: var(--cor-superficie-apagada);
-  color: var(--cor-texto-sutil);
-  border: var(--borda);
 }

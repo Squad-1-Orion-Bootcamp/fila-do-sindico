@@ -43,6 +43,7 @@ variável de `tokens.css`. Precisa de um valor novo? Adicione o token e combine 
 | Alta | `.etiqueta-alta` | Importante, com data a combinar |
 | Normal | `.etiqueta-normal` | Rotina que a equipe ou a administradora resolve |
 | Baixa | `.etiqueta-baixa` | Sem risco nem prazo |
+| Aguardando triagem | `.etiqueta-triagem` | Ocorrência que a IA ainda não classificou (neutra, não é prioridade) |
 
 **Prioridade nunca é só cor:** sempre aparece com o nome escrito (`● Urgente`), para quem não
 distingue cores. A cor de prioridade aparece só na etiqueta e nos pontos do resumo, nunca no

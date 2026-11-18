@@ -11,10 +11,15 @@ export function tempoRelativo(iso: string, agora: Date = new Date()) {
   if (diferenca < HORA) return `há ${Math.floor(diferenca / MINUTO)} min`
   if (diferenca < DIA) return `há ${Math.floor(diferenca / HORA)} h`
 
-  const dias = Math.floor(diferenca / DIA)
-  if (dias === 1) return 'ontem'
+  // Dias contados pelo calendário: anteontem às 23h visto hoje às 8h é "há 2 dias", não "ontem".
+  const dias = Math.round((inicioDoDia(agora) - inicioDoDia(data)) / DIA)
+  if (dias <= 1) return 'ontem'
   if (dias < 30) return `há ${dias} dias`
   return data.toLocaleDateString('pt-BR')
+}
+
+function inicioDoDia(data: Date) {
+  return new Date(data.getFullYear(), data.getMonth(), data.getDate()).getTime()
 }
 
 export function dataCompleta(iso: string) {
