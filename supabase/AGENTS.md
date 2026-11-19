@@ -32,8 +32,8 @@ Studio local: http://127.0.0.1:54323
 ## Modelo de dados
 
 Migrações: `20261116000000_profiles.sql` (perfil), `20261118033000_modelo_de_dados.sql` (resto),
-`20261118050000_ajustes_revisao_rls.sql` e `20261118191442_alterar_status_ocorrencia.sql`
-(gestor muda o status da ocorrência).
+`20261118050000_ajustes_revisao_rls.sql`, `20261118180436_registrar_ocorrencia.sql` e
+`20261118191442_alterar_status_ocorrencia.sql` (gestor muda o status da ocorrência).
 
 | Tabela | Para quê |
 | --- | --- |
@@ -48,8 +48,8 @@ Migrações: `20261116000000_profiles.sql` (perfil), `20261118033000_modelo_de_d
 | `ocorrencias`, `anexos`, `classificacoes_ia`, `decisoes`, `historico_status` | Ocorrências, arquivos, sugestões da IA, decisões e mudanças de status |
 
 Ainda não existem: `conversas` e `mensagens` (chat) e a escrita de anexos (entram com as
-histórias que usam). Ocorrências não têm insert nem update livre: a mudança de status passa por
-`alterar_status_ocorrencia`.
+histórias que usam). A ocorrência é criada só pela função `registrar_ocorrencia` (descrição de
+até 800 caracteres), e o status muda só por `alterar_status_ocorrencia`.
 
 ### Acesso
 
@@ -80,6 +80,7 @@ solicitação de vínculo pendente. Campo faltando = o cadastro falha com a mens
 | `recusar_solicitacao_condominio(p_solicitacao_id, p_motivo)` | admin. Para depois da Sprint 1 |
 | `aprovar_solicitacao_vinculo(p_solicitacao_id)` | gestor ativo do condomínio |
 | `recusar_solicitacao_vinculo(p_solicitacao_id, p_motivo)` | gestor ativo do condomínio |
+| `registrar_ocorrencia(p_descricao, p_local, p_condominio_id)` | morador (ou funcionário) com vínculo ativo. Grava em nome de quem chama, com status `novo`. `p_local` é opcional; `p_condominio_id` só é exigido de quem tem vínculo ativo em mais de um condomínio |
 | `encerrar_vinculo(p_vinculo_id, p_motivo)` | vínculo de gestor: admin; de morador ou funcionário: gestor do condomínio ou admin |
 | `alterar_status_ocorrencia(p_ocorrencia_id, p_status)` | gestor ativo do condomínio. Muda só o status (`novo`, `em_andamento`, `concluido`), preenche ou limpa `concluido_em` e grava em `historico_status` |
 

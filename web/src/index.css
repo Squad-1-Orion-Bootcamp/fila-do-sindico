@@ -319,6 +319,37 @@ p {
   background: var(--cor-superficie);
 }
 
+/* Marca no topo da .caixa */
+.caixa-marca {
+  margin-bottom: var(--espaco-6);
+}
+
+/* Links no pé da .caixa (ex.: "Criar conta", "Já tenho conta"). Texto secundário, para o
+   botão principal seguir como única ação em destaque. */
+.caixa-links {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: var(--espaco-6);
+  padding-top: var(--espaco-4);
+  border-top: var(--borda);
+}
+
+.caixa-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--altura-controle);
+  padding: 0 var(--espaco-2);
+  border-radius: var(--raio);
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-secundario);
+  text-decoration: underline;
+}
+
+.caixa-links a:hover {
+  color: var(--cor-texto);
+}
+
 /* ---------- Etiquetas ---------- */
 
 .etiqueta {

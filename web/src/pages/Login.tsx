@@ -3,7 +3,6 @@ import { useState, type SubmitEvent } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthProvider'
 import { homeFor } from '../auth/homeFor'
-import './Login.css'
 
 export function Login() {
   const { session, profile, loading, signIn } = useAuth()
@@ -26,7 +25,7 @@ export function Login() {
   return (
     <main className="tela-centralizada">
       <div className="caixa">
-        <div className="topo-marca login-marca">
+        <div className="topo-marca caixa-marca">
           <span className="topo-marca-icone">
             <Building2 size={20} aria-hidden />
           </span>
@@ -64,7 +63,7 @@ export function Login() {
             {submitting ? 'Entrando…' : 'Entrar'}
           </button>
         </form>
-        <nav className="login-cadastro" aria-label="Criar conta">
+        <nav className="caixa-links" aria-label="Criar conta">
           <Link to="/cadastro-gestor">Criar conta de gestor</Link>
           <Link to="/cadastro">Criar conta de morador</Link>
         </nav>
