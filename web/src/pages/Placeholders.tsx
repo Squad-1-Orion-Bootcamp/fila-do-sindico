@@ -29,7 +29,9 @@ export function QuadroOcorrencias() {
       <Topo />
       <main className="pagina">
         <div className="cabecalho-pagina">
-          <h1>Quadro de ocorrências</h1>
+          <div>
+            <h1>Quadro de ocorrências</h1>
+          </div>
         </div>
         <OcorrenciasDoGestor />
       </main>
