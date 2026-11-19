@@ -48,6 +48,9 @@ function buscarOcorrencias() {
     .overrideTypes<Ocorrencia[], { merge: false }>()
 }
 
+// Valor do filtro que mostra todos os condomínios (a visão padrão do painel).
+const TODOS = 'todos'
+
 // A urgência vem da IA a partir da Sprint 2; até lá a etiqueta mostra "Aguardando triagem".
 function EtiquetaPrioridade({ urgencia }: { urgencia: Urgencia | null }) {
   if (!urgencia) return <span className="etiqueta etiqueta-triagem">Aguardando triagem</span>
@@ -60,6 +63,7 @@ export function OcorrenciasDoGestor() {
   const [erro, setErro] = useState<string | null>(null)
   const [salvandoId, setSalvandoId] = useState<string | null>(null)
   const [erroStatus, setErroStatus] = useState<{ id: string; mensagem: string } | null>(null)
+  const [filtroCondominio, setFiltroCondominio] = useState(TODOS)
 
   useEffect(() => {
     buscarOcorrencias().then(({ data, error }) => {
@@ -89,7 +93,16 @@ export function OcorrenciasDoGestor() {
     setSalvandoId(null)
   }
 
-  const totalCondominios = new Set(itens.map((o) => o.condominio_id)).size
+  // Filtro por condomínio (SQUAD1-31): só de interface, sobre o que o RLS já devolveu.
+  // O padrão é ver todos os condomínios juntos.
+  const condominios = [
+    ...new Map(itens.map((o) => [o.condominio_id, o.condominios?.nome ?? 'Condomínio'])),
+  ].sort(([, a], [, b]) => a.localeCompare(b, 'pt-BR'))
+
+  const visiveis =
+    filtroCondominio === TODOS ? itens : itens.filter((o) => o.condominio_id === filtroCondominio)
+
+  const totalCondominios = new Set(visiveis.map((o) => o.condominio_id)).size
 
   return (
     <section aria-labelledby="titulo-ocorrencias">
@@ -112,11 +125,27 @@ export function OcorrenciasDoGestor() {
       {!carregando && !erro && itens.length > 0 && (
         <>
           <p className="subtitulo quadro-resumo">
-            {itens.length} {itens.length === 1 ? 'ocorrência' : 'ocorrências'} em{' '}
+            {visiveis.length} {visiveis.length === 1 ? 'ocorrência' : 'ocorrências'} em{' '}
             {totalCondominios} {totalCondominios === 1 ? 'condomínio' : 'condomínios'}
           </p>
+          {condominios.length > 1 && (
+            <label className="quadro-filtro">
+              <span className="cartao-meta">Mostrar</span>
+              <select
+                value={filtroCondominio}
+                onChange={(e) => setFiltroCondominio(e.target.value)}
+              >
+                <option value={TODOS}>Todos os condomínios</option>
+                {condominios.map(([id, nome]) => (
+                  <option key={id} value={id}>
+                    {nome}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
           <ul className="quadro-lista">
-            {itens.map((o) => (
+            {visiveis.map((o) => (
               <li
                 key={o.id}
                 className={o.status === 'concluido' ? 'cartao cartao-apagado' : 'cartao'}
