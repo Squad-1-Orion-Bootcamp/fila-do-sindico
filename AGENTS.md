@@ -77,6 +77,9 @@ condomínio é opcional, nunca a visão padrão.
   colunas em português, sem acento (`ocorrencias`, `condominio_id`).
 - **Gitflow**: branch base `develop`; trabalho em `feature/squad1-123-descricao` (o código vem da
   issue do Linear); PR para `develop`. `main` só recebe `release/` e `hotfix/`.
+- **PR que depende de outra ainda aberta**: a branch sai da `develop` e traz a outra por
+  `git merge`; a PR aponta para a `develop` (nunca para a branch da outra PR), como rascunho,
+  com "Depende da #NN" no topo. Detalhes no `README.md`, seção "PR que depende de outra".
 - **Conventional Commits** em português: `feat: tela de cadastro do gestor`.
 - **Título de PR**: `tipo: descrição (SQUAD1-123)`, ex.: `feat: cadastro do gestor (SQUAD1-12)`.
   Vira a mensagem do merge commit na `develop` (merge comum, nunca squash: os commits da branch
