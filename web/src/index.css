@@ -249,6 +249,19 @@ p {
   color: var(--cor-erro);
 }
 
+/* Regra do campo, visível antes do envio; .campo-ajuda-ok quando atendida. */
+.campo-ajuda {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-1);
+  font-size: var(--texto-xs);
+  color: var(--cor-texto-secundario);
+}
+
+.campo-ajuda-ok {
+  color: var(--cor-sucesso);
+}
+
 /* ---------- Mensagens e estados ---------- */
 
 .aviso {
