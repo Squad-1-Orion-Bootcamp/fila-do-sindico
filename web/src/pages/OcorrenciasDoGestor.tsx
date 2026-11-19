@@ -41,7 +41,8 @@ function buscarOcorrencias() {
   return supabase
     .from('ocorrencias')
     .select(
-      'id, condominio_id, local, descricao, status, urgencia_atual, created_at, condominios(nome), profiles(nome)',
+      // FK nomeada: com relatado_por (SQUAD1-30), profiles(nome) fica ambíguo (PGRST201).
+      'id, condominio_id, local, descricao, status, urgencia_atual, created_at, condominios(nome), profiles!ocorrencias_registrado_por_fkey(nome)',
     )
     .order('created_at', { ascending: false })
     // Sem tipos gerados, o supabase-js acha que o join devolve lista; aqui é um objeto só.
