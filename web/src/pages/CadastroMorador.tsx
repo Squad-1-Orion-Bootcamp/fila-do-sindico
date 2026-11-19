@@ -48,7 +48,7 @@ export function CadastroMorador() {
 
   // Quem já está logado não cria outra conta: vai para a própria tela inicial.
   if (!loading && session) {
-    return <Navigate to={profile ? homeFor(profile.role) : '/sem-acesso'} replace />
+    return <Navigate to={profile ? homeFor(profile) : '/sem-acesso'} replace />
   }
 
   const filtrados = condominios.filter((c) => normalizar(c.nome).includes(normalizar(busca)))

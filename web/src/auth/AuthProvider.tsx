@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from 'react'
 import { supabase } from '../lib/supabase'
+import { fetchAcessoMorador, type AcessoMorador } from './acessoMorador'
 
 export type Role = 'admin' | 'gestor' | 'morador'
 
@@ -16,6 +17,8 @@ export type Profile = {
   id: string
   role: Role
   nome: string | null
+  // Só para morador; null para gestor e admin, ou se a situação não carregou.
+  acesso: AcessoMorador | null
 }
 
 type AuthState = {
@@ -38,7 +41,9 @@ async function fetchProfile(userId: string): Promise<Profile | null> {
     console.error('Erro ao carregar o perfil', error)
     return null
   }
-  return data
+  if (!data) return null
+  const acesso = data.role === 'morador' ? await fetchAcessoMorador(userId) : null
+  return { ...data, acesso }
 }
 
 // Fora do componente: não dependem do estado, então têm sempre a mesma identidade.
