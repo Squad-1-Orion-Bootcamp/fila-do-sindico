@@ -1,10 +1,11 @@
 import { Building2, LogOut } from 'lucide-react'
-import { Navigate, useLocation } from 'react-router-dom'
+import { Link, Navigate, NavLink, useLocation } from 'react-router-dom'
 import { useAuth, type Profile } from '../auth/AuthProvider'
+import { OcorrenciasDoGestor } from './OcorrenciasDoGestor'
 
 // Telas provisórias. Cada uma vira uma história da sprint.
 
-function Topo() {
+export function Topo() {
   const { profile, signOut } = useAuth()
   return (
     <header className="topo">
@@ -15,6 +16,16 @@ function Topo() {
         Fila do Síndico
       </div>
       <span className="subtitulo">{profile?.nome}</span>
+      {profile?.role === 'gestor' && (
+        <nav className="topo-nav" aria-label="Painel do gestor">
+          <NavLink className="botao" to="/quadro">
+            Quadro
+          </NavLink>
+          <NavLink className="botao" to="/condominios">
+            Condomínios
+          </NavLink>
+        </nav>
+      )}
       <button className="botao" onClick={signOut}>
         <LogOut size={16} aria-hidden /> Sair
       </button>
@@ -32,20 +43,11 @@ export function QuadroOcorrencias() {
             <h1>Quadro de ocorrências</h1>
             <p className="subtitulo">Ocorrências de todos os seus condomínios</p>
           </div>
+          <Link to="/condominios" className="botao botao-principal">
+            Cadastrar condomínio
+          </Link>
         </div>
-        <p className="estado-vazio">Em construção.</p>
-      </main>
-    </>
-  )
-}
-
-export function MinhasOcorrencias() {
-  return (
-    <>
-      <Topo />
-      <main className="pagina-estreita">
-        <h1>Minhas ocorrências</h1>
-        <p className="estado-vazio">Em construção.</p>
+        <OcorrenciasDoGestor />
       </main>
     </>
   )

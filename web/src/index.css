@@ -77,6 +77,22 @@ p {
   color: var(--cor-acao);
 }
 
+/* Links do topo (ex.: Quadro, Condomínios). A página atual fica destacada. */
+.topo-nav {
+  display: flex;
+  gap: var(--espaco-2);
+}
+
+.topo-nav .botao {
+  text-decoration: none;
+}
+
+.topo-nav .botao[aria-current='page'] {
+  border-color: var(--cor-acao);
+  background: var(--cor-acao-suave);
+  color: var(--cor-acao);
+}
+
 .pagina {
   max-width: var(--largura-pagina);
   margin: 0 auto;
@@ -390,6 +406,13 @@ p {
   color: var(--prioridade-baixa-texto);
 }
 
+/* Ocorrência ainda sem urgência da IA: neutra, para não parecer uma prioridade. */
+.etiqueta-triagem {
+  border: var(--borda);
+  background: var(--cor-superficie-apagada);
+  color: var(--cor-texto-sutil);
+}
+
 .contador {
   padding: 0 var(--espaco-2);
   border-radius: 4px;
@@ -403,6 +426,7 @@ p {
 
 @media (max-width: 640px) {
   .topo {
+    flex-wrap: wrap;
     padding: var(--espaco-3) var(--espaco-4);
   }
 
