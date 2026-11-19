@@ -76,6 +76,7 @@ fundo do cartão inteiro.
 | Componente | Classes | Notas |
 | --- | --- | --- |
 | Topo do app | `.topo`, `.topo-marca`, `.topo-marca-icone` | Ícone `Building2` em fundo verde-claro + "Fila do Síndico" |
+| Navegação do topo | `<nav class="topo-nav">` + `.botao` (`NavLink`) | Página atual (`aria-current`) com borda e texto azul-petróleo |
 | Página larga (quadro) | `.pagina` | Até 1520 px |
 | Página de formulário | `.pagina-estreita` | Até 576 px, centralizada |
 | Cabeçalho da página | `.cabecalho-pagina`, `h1`, `.subtitulo` | Título à esquerda, botão principal à direita |

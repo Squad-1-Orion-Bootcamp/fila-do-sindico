@@ -1,5 +1,5 @@
 import { Building2, LogOut } from 'lucide-react'
-import { Navigate, useLocation } from 'react-router-dom'
+import { Link, Navigate, NavLink, useLocation } from 'react-router-dom'
 import { useAuth } from '../auth/AuthProvider'
 import { OcorrenciasDoGestor } from './OcorrenciasDoGestor'
 
@@ -16,6 +16,16 @@ export function Topo() {
         Fila do Síndico
       </div>
       <span className="subtitulo">{profile?.nome}</span>
+      {profile?.role === 'gestor' && (
+        <nav className="topo-nav" aria-label="Painel do gestor">
+          <NavLink className="botao" to="/quadro">
+            Quadro
+          </NavLink>
+          <NavLink className="botao" to="/condominios">
+            Condomínios
+          </NavLink>
+        </nav>
+      )}
       <button className="botao" onClick={signOut}>
         <LogOut size={16} aria-hidden /> Sair
       </button>
@@ -33,6 +43,9 @@ export function QuadroOcorrencias() {
             <h1>Quadro de ocorrências</h1>
             <p className="subtitulo">Ocorrências de todos os seus condomínios</p>
           </div>
+          <Link to="/condominios" className="botao botao-principal">
+            Cadastrar condomínio
+          </Link>
         </div>
         <OcorrenciasDoGestor />
       </main>

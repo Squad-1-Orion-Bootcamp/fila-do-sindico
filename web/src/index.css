@@ -77,6 +77,22 @@ p {
   color: var(--cor-acao);
 }
 
+/* Links do topo (ex.: Quadro, Condomínios). A página atual fica destacada. */
+.topo-nav {
+  display: flex;
+  gap: var(--espaco-2);
+}
+
+.topo-nav .botao {
+  text-decoration: none;
+}
+
+.topo-nav .botao[aria-current='page'] {
+  border-color: var(--cor-acao);
+  background: var(--cor-acao-suave);
+  color: var(--cor-acao);
+}
+
 .pagina {
   max-width: var(--largura-pagina);
   margin: 0 auto;
@@ -410,6 +426,7 @@ p {
 
 @media (max-width: 640px) {
   .topo {
+    flex-wrap: wrap;
     padding: var(--espaco-3) var(--espaco-4);
   }
 
