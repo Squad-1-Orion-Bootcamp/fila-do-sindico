@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import { RequireRole } from './auth/RequireRole'
 import { Condominios } from './pages/Condominios'
 import { CadastroGestor } from './pages/CadastroGestor'
+import { CadastroMorador } from './pages/CadastroMorador'
 import { Login } from './pages/Login'
 import { MinhasOcorrencias } from './pages/MinhasOcorrencias'
 import { QuadroOcorrencias, SemAcesso } from './pages/Placeholders'
@@ -11,6 +12,7 @@ export default function App() {
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/cadastro-gestor" element={<CadastroGestor />} />
+      <Route path="/cadastro" element={<CadastroMorador />} />
       <Route path="/sem-acesso" element={<SemAcesso />} />
       <Route
         path="/quadro"
