@@ -17,7 +17,9 @@ npm run build     # checagem de tipos + build
   `loading`, `signIn`, `signOut`).
 - `src/auth/RequireRole.tsx` — protege rotas por perfil.
 - `src/auth/homeFor.ts` — tela inicial de cada perfil.
+- `src/auth/cadastro.ts` — senha mínima, validação da senha e `criarConta()` dos cadastros.
 - `src/pages/` — uma página por arquivo.
+- `src/components/` — pedaços usados em mais de uma página (`MarcaCaixa`, `CamposDeAcesso`).
 - `src/App.tsx` — todas as rotas.
 - `src/lib/cnpj.ts` — máscara e limpeza de CNPJ.
 - `src/lib/tempo.ts` — tempo relativo e data completa para listas.

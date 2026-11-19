@@ -1,12 +1,10 @@
-import { Building2 } from 'lucide-react'
 import { useEffect, useState, type SubmitEvent } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
-import { useAuth } from '../auth/AuthProvider'
-import { homeFor } from '../auth/homeFor'
+import { criarConta, validarSenha } from '../auth/cadastro'
+import { useRedirecionarLogado } from '../auth/useRedirecionarLogado'
+import { CamposDeAcesso } from '../components/CamposDeAcesso'
+import { MarcaCaixa } from '../components/MarcaCaixa'
 import { listarCondominios, type CondominioPublico } from '../lib/condominios'
-import { supabase } from '../lib/supabase'
-
-const SENHA_MINIMA = 6 // igual ao minimum_password_length do Supabase
 
 // Para a busca ignorar maiúsculas e acentos ("sao joao" encontra "São João").
 function normalizar(texto: string) {
@@ -18,7 +16,7 @@ function normalizar(texto: string) {
 }
 
 export function CadastroMorador() {
-  const { session, profile, loading } = useAuth()
+  const destinoLogado = useRedirecionarLogado()
   const navigate = useNavigate()
 
   const [condominios, setCondominios] = useState<CondominioPublico[]>([])
@@ -47,8 +45,8 @@ export function CadastroMorador() {
   }, [])
 
   // Quem já está logado não cria outra conta: vai para a própria tela inicial.
-  if (!loading && session) {
-    return <Navigate to={profile ? homeFor(profile) : '/sem-acesso'} replace />
+  if (destinoLogado) {
+    return <Navigate to={destinoLogado} replace />
   }
 
   const filtrados = condominios.filter((c) => normalizar(c.nome).includes(normalizar(busca)))
@@ -79,57 +77,39 @@ export function CadastroMorador() {
       setErro('Informe sua unidade.')
       return
     }
-    if (senha.length < SENHA_MINIMA) {
-      setErro(`A senha precisa ter pelo menos ${SENHA_MINIMA} caracteres.`)
-      return
-    }
-    if (senha !== confirmacao) {
-      setErro('As senhas não são iguais.')
+    const erroSenha = validarSenha(senha, confirmacao)
+    if (erroSenha) {
+      setErro(erroSenha)
       return
     }
 
     setEnviando(true)
     // Nomes combinados com o trigger que cria o perfil e o vínculo pendente. Não mude.
     // O papel e o vínculo de verdade são gravados pelo banco, nunca lidos daqui pelo front.
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password: senha,
-      options: {
-        data: {
-          nome: nome.trim(),
-          tipo_cadastro: 'morador',
-          condominio_id: condominioId,
-          unidade: unidade.trim(),
-        },
-      },
+    const resultado = await criarConta(email, senha, {
+      nome: nome.trim(),
+      tipo_cadastro: 'morador',
+      condominio_id: condominioId,
+      unidade: unidade.trim(),
     })
     setEnviando(false)
 
-    // Qualquer recusa cai aqui: e-mail repetido, senha fraca e também o trigger recusando o
-    // cadastro (ex.: condomínio sem gestor aprovado), que volta como erro do banco.
-    if (error) {
-      console.error('Erro ao criar a conta', error)
-      setErro('Não foi possível criar a conta. Confira os dados e tente de novo.')
+    if (resultado.erro) {
+      setErro(resultado.erro)
       return
     }
-    if (data.session) {
+    if (resultado.comSessao) {
       // Já logado, mas pendente: a tela de acesso não liberado mostra o aviso de cadastro enviado.
       navigate('/sem-acesso', { replace: true, state: { cadastroEnviado: true } })
       return
     }
-    // Sem sessão: a confirmação de e-mail está ligada (produção).
     setEnviado(true)
   }
 
   return (
     <main className="tela-centralizada">
       <div className="caixa">
-        <div className="topo-marca caixa-marca">
-          <span className="topo-marca-icone">
-            <Building2 size={20} aria-hidden />
-          </span>
-          Fila do Síndico
-        </div>
+        <MarcaCaixa />
         <h1>Criar conta de morador</h1>
 
         {enviado ? (
@@ -208,42 +188,14 @@ export function CadastroMorador() {
                 onChange={(e) => setUnidade(e.target.value)}
               />
             </label>
-            <label className="campo">
-              <span className="campo-rotulo">
-                E-mail <span className="obrigatorio">*</span>
-              </span>
-              <input
-                type="email"
-                required
-                autoComplete="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </label>
-            <label className="campo">
-              <span className="campo-rotulo">
-                Senha <span className="obrigatorio">*</span>
-              </span>
-              <input
-                type="password"
-                required
-                autoComplete="new-password"
-                value={senha}
-                onChange={(e) => setSenha(e.target.value)}
-              />
-            </label>
-            <label className="campo">
-              <span className="campo-rotulo">
-                Confirmar senha <span className="obrigatorio">*</span>
-              </span>
-              <input
-                type="password"
-                required
-                autoComplete="new-password"
-                value={confirmacao}
-                onChange={(e) => setConfirmacao(e.target.value)}
-              />
-            </label>
+            <CamposDeAcesso
+              email={email}
+              senha={senha}
+              confirmacao={confirmacao}
+              onEmail={setEmail}
+              onSenha={setSenha}
+              onConfirmacao={setConfirmacao}
+            />
             {erro && (
               <p role="alert" className="aviso aviso-erro">
                 {erro}
