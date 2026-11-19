@@ -1,6 +1,8 @@
 <!--
 Título: tipo: descrição (SQUAD1-123)   ex.: feat: cadastro do gestor (SQUAD1-12)
 Ainda não está pronta? Abra como rascunho (draft).
+Depende de outra PR ainda aberta? Aponte para a develop (nunca para a branch da outra), abra
+como rascunho e escreva "Depende da #NN" no topo. Veja o README, "PR que depende de outra".
 -->
 
 ## O que muda

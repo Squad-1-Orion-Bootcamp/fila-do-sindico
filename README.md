@@ -108,8 +108,11 @@ Studio local do Supabase: http://127.0.0.1:54323
 
 ### Usuários para testar
 
-O `supabase/seed.sql` cria gestores, condomínios e moradores de teste (em construção na
-Sprint 1). Também dá para criar pelo próprio app: cadastro de gestor e pré-cadastro de morador.
+O `supabase/seed.sql` cria gestores, condomínios, moradores e ocorrências de teste, todos com a
+senha `senha123`. A lista de contas está no topo do arquivo. Para a demo, entre como
+`gestora.helena@teste.local`: ela tem 3 condomínios, ocorrências urgentes e simples e um
+cadastro pendente em cada condomínio. Também dá para criar contas pelo próprio app: cadastro
+de gestor e pré-cadastro de morador.
 
 ## Banco de dados
 
@@ -163,13 +166,35 @@ o começo à mão; `release/` é sempre digitada (`release/v0.1.0`).
   `feat: cadastro do gestor (SQUAD1-12)`. O CI confere. PRs de `release/` dispensam a issue.
 - **Uma issue por PR**, de preferência com menos de 400 linhas alteradas.
 - Ainda não está pronta? Abra como **rascunho (draft)**.
+- **PR que depende de outra ainda aberta:** a PR aponta sempre para a `develop`, nunca para a
+  branch da outra PR. Veja [PR que depende de outra](#pr-que-depende-de-outra).
 - Preencha o template; em mudança de tela, inclua **prints**.
 - Rode o **`revisor-pr`** antes de pedir revisão (e o **`revisor-rls`** se mexeu no banco).
 - **Revisão no mesmo dia** ou até a manhã seguinte.
 - **Merge:** sempre por **merge commit** (merge comum), nunca squash: feature → `develop`,
   `release/` e `hotfix/` → `main`. Os commits da branch entram na `develop` como estão, então
-  cada um segue Conventional Commits; o título da PR vira a mensagem do merge commit. Quem abriu
-  a PR faz o merge, depois da aprovação e do CI verde. A branch é apagada depois do merge.
+  cada um segue Conventional Commits; o título da PR vira a mensagem do merge commit. **Quem
+  aprova a PR faz o merge**, com o CI verde e seguindo a ordem das dependências (a PR de que
+  outra depende entra primeiro). A branch é apagada depois do merge.
+
+#### PR que depende de outra
+
+Quando a sua issue precisa do código de uma PR que ainda está em revisão (a #YY):
+
+```bash
+git switch develop && git pull
+git switch -c feature/squad1-12-descricao
+git merge origin/feature/squad1-yy-descricao   # traz o código da PR em revisão
+```
+
+1. Abra a PR **para a `develop`**, como **rascunho**, com "Depende da #YY" no topo da descrição.
+   Nunca aponte a PR para a branch da outra: se a outra entrar antes, a sua é mergeada numa
+   branch que já entrou e o código não chega à `develop`.
+2. Até a #YY entrar, o diff mostra também os commits dela. Depois do merge dela, eles somem
+   sozinhos (não precisa de rebase).
+3. Se a #YY mudar durante a revisão, traga de novo: `git merge origin/feature/squad1-yy-descricao`.
+4. Quando a #YY entrar, traga a `develop` (`git merge origin/develop`), resolva os conflitos e
+   tire a PR do rascunho.
 
 ## Definição de pronto
 
