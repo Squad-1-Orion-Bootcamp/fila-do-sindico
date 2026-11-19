@@ -52,18 +52,6 @@ export function QuadroOcorrencias() {
   )
 }
 
-export function MinhasOcorrencias() {
-  return (
-    <>
-      <Topo />
-      <main className="pagina-estreita">
-        <h1>Minhas ocorrências</h1>
-        <p className="estado-vazio">Em construção.</p>
-      </main>
-    </>
-  )
-}
-
 export function SemAcesso() {
   const { session, loading, signOut } = useAuth()
 
