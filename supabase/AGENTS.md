@@ -48,9 +48,8 @@ Migrações: `20261116000000_profiles.sql` (perfil), `20261118033000_modelo_de_d
 | `ocorrencias`, `anexos`, `classificacoes_ia`, `decisoes`, `historico_status` | Ocorrências, arquivos, sugestões da IA, decisões e mudanças de status |
 
 Ainda não existem: `conversas` e `mensagens` (chat) e a escrita de anexos (entram com as
-histórias que usam). Ocorrências não têm insert nem update livre: a ocorrência é criada só pela
-função `registrar_ocorrencia` (descrição de até 800 caracteres) e a mudança de status passa por
-`alterar_status_ocorrencia`.
+histórias que usam). A ocorrência é criada só pela função `registrar_ocorrencia` (descrição de
+até 800 caracteres), e o status muda só por `alterar_status_ocorrencia`.
 
 ### Acesso
 
