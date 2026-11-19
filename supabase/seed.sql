@@ -97,10 +97,11 @@ where solicitante_id = '00000000-0000-0000-0000-00000000a005';
 -- ---------------------------------------------------------------------------
 -- Ocorrências (urgência e categoria vazias: "Aguardando triagem").
 -- ---------------------------------------------------------------------------
-insert into public.ocorrencias (condominio_id, registrado_por, imovel_id, local, descricao, status) values
+-- As duas da Ana foram registradas pelo app; a do Bosque, pelo gestor, a partir de um telefonema.
+insert into public.ocorrencias (condominio_id, registrado_por, imovel_id, local, descricao, status, origem) values
   ('00000000-0000-0000-0000-00000000c001', '00000000-0000-0000-0000-00000000a005', '00000000-0000-0000-0000-00000000d001',
-   'Apartamento 101', 'Infiltração no teto do banheiro, vindo do andar de cima.', 'novo'),
+   'Apartamento 101', 'Infiltração no teto do banheiro, vindo do andar de cima.', 'novo', 'aplicativo'),
   ('00000000-0000-0000-0000-00000000c001', '00000000-0000-0000-0000-00000000a005', null,
-   'Garagem', 'Lâmpada da vaga 14 queimada há uma semana.', 'em_andamento'),
+   'Garagem', 'Lâmpada da vaga 14 queimada há uma semana.', 'em_andamento', 'aplicativo'),
   ('00000000-0000-0000-0000-00000000c002', '00000000-0000-0000-0000-00000000a003', null,
-   'Portão principal', 'Portão eletrônico fechando devagar.', 'novo');
+   'Portão principal', 'Portão eletrônico fechando devagar.', 'novo', 'telefone');
