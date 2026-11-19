@@ -43,6 +43,7 @@ variável de `tokens.css`. Precisa de um valor novo? Adicione o token e combine 
 | Alta | `.etiqueta-alta` | Importante, com data a combinar |
 | Normal | `.etiqueta-normal` | Rotina que a equipe ou a administradora resolve |
 | Baixa | `.etiqueta-baixa` | Sem risco nem prazo |
+| Aguardando triagem | `.etiqueta-triagem` | Ocorrência que a IA ainda não classificou (neutra, não é prioridade) |
 
 **Prioridade nunca é só cor:** sempre aparece com o nome escrito (`● Urgente`), para quem não
 distingue cores. A cor de prioridade aparece só na etiqueta e nos pontos do resumo, nunca no
@@ -75,6 +76,7 @@ fundo do cartão inteiro.
 | Componente | Classes | Notas |
 | --- | --- | --- |
 | Topo do app | `.topo`, `.topo-marca`, `.topo-marca-icone` | Ícone `Building2` em fundo verde-claro + "Fila do Síndico" |
+| Navegação do topo | `<nav class="topo-nav">` + `.botao` (`NavLink`) | Página atual (`aria-current`) com borda e texto azul-petróleo |
 | Página larga (quadro) | `.pagina` | Até 1520 px |
 | Página de formulário | `.pagina-estreita` | Até 576 px, centralizada |
 | Cabeçalho da página | `.cabecalho-pagina`, `h1`, `.subtitulo` | Título à esquerda, botão principal à direita |

@@ -1,0 +1,79 @@
+/* Bloco de ocorrências do painel do gestor. Só tokens de src/styles/tokens.css. */
+
+.quadro-resumo {
+  margin-bottom: var(--espaco-4);
+}
+
+.quadro-lista {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--largura-cartao)), 1fr));
+  gap: var(--espaco-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.quadro-onde {
+  margin-top: var(--espaco-2);
+}
+
+/* Descrição pode ter até 800 caracteres: o cartão mostra só o começo. */
+.quadro-descricao {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+
+.quadro-rodape {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espaco-1) var(--espaco-2);
+  margin-top: var(--espaco-2);
+}
+
+.quadro-info {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaco-1);
+}
+
+.quadro-status,
+.quadro-filtro {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-2);
+}
+
+.quadro-status {
+  margin-top: var(--espaco-3);
+}
+
+/* Filtro por condomínio (SQUAD1-31), acima da lista. */
+.quadro-filtro {
+  margin-bottom: var(--espaco-4);
+}
+
+.quadro-filtro select {
+  max-width: 100%;
+}
+
+.quadro-status select,
+.quadro-filtro select {
+  min-height: var(--altura-controle);
+  padding: 0 var(--espaco-3);
+  border: var(--borda);
+  border-radius: var(--raio);
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+  font: inherit;
+  font-size: var(--texto-sm);
+}
+
+.quadro-status select:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}

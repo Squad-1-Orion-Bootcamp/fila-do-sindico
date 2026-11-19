@@ -3,6 +3,24 @@
 Registro curto das decisões, com o motivo. Decisão nova entra no topo da sua seção. Quando uma
 decisão for trocada, mova a antiga para "Substituídas", dizendo o que a substituiu.
 
+## 19/11/2026 — Filtro por condomínio no painel
+
+### Produto e acesso
+
+| Decisão | Motivo |
+| --- | --- |
+| O seletor "Mostrar" do quadro só aparece quando há ocorrências de mais de um condomínio (SQUAD1-31) | Com um condomínio só, o filtro não muda nada na lista |
+| As opções do seletor saem das ocorrências carregadas: condomínio sem nenhuma ocorrência não aparece (SQUAD1-31) | A história pede o filtro no front, sobre o que o RLS já devolveu; filtrar um condomínio sem ocorrências daria uma lista vazia |
+
+## 18/11/2026 — PRs dependentes
+
+### Técnica
+
+| Decisão | Motivo |
+| --- | --- |
+| PR que depende de outra ainda aberta aponta para a `develop` (a branch traz a outra por `git merge`), como rascunho e com "Depende da #NN"; nunca para a branch da outra PR | A #6 apontava para a branch da #2; a #2 entrou antes, a #6 foi mergeada nessa branch e o código não chegou à `develop` (foi preciso abrir a #11). Orientação do mentor |
+| Quem aprova a PR faz o merge, seguindo a ordem das dependências | A pessoa que revisou sabe se a PR está pronta e em que ordem as PRs devem entrar |
+
 ## 18/11/2026 — Modelo de dados
 
 ### Produto e acesso
@@ -12,6 +30,9 @@ decisão for trocada, mova a antiga para "Substituídas", dizendo o que a substi
 | Na Sprint 1, o gestor cadastra o condomínio (`cadastrar_condominio`) e já começa a usar; a análise do admin (`solicitacoes_condominio`) fica para depois | Mudança de última hora para a demo da Sprint 1 |
 | O pedido do morador fica em `solicitacoes_vinculo` (`pendente`, `aprovada`, `recusada`); aprovado, vira um vínculo `ativo` com vigência, e a unidade vai para `imoveis` | Segue o documento "Modelo de dados da Fila do Síndico": pedido e acesso são coisas diferentes, e o histórico fica guardado |
 | Vínculo de gestor só é encerrado pelo admin; de morador ou funcionário, pelo gestor do condomínio ou pelo admin. Ninguém encerra o próprio vínculo, e o motivo é obrigatório | Decisão do time |
+| A ocorrência guarda o canal em `origem`: `aplicativo` (registrada pelo morador, o padrão), `whatsapp`, `telefone`, `presencial` ou `vistoria` (registrada pelo gestor) | Toda ocorrência tem origem, e dá para comparar os canais depois (SQUAD1-30) |
+| Quem relatou ao gestor (`relatado_por`) é opcional e precisa ser morador ou funcionário ativo do condomínio; quem não tem conta fica em branco | Decisão do time (SQUAD1-30) |
+| Quem sai do condomínio: o ex-morador continua vendo as ocorrências que registrou pelo app (histórico); o ex-gestor perde o acesso também às que ele registrou | Decisão do time; vínculo encerrado perde o acesso aos dados do condomínio (SQUAD1-30) |
 | Funcionário se cadastra como morador, por enquanto sem enviar documentação | O cadastro de funcionário ficou para depois |
 | Chat (`conversas` e `mensagens`) fica para o futuro | Fora do escopo das primeiras sprints |
 
@@ -84,4 +105,5 @@ decisão for trocada, mova a antiga para "Substituídas", dizendo o que a substi
 | Link de convite por condomínio | Lista pública de condomínios |
 | Papéis `sindico` e `morador` | `admin`, `gestor` e `morador` |
 | PRs de feature para a `develop` por squash merge | Merge commit em todas as PRs (17/11) |
+| Quem abriu a PR faz o merge | Quem aprova a PR faz o merge (18/11) |
 | `vinculos` com `unidade` e `status` `pendente`/`aprovado`/`recusado` | Pedido em `solicitacoes_vinculo`, vínculo `ativo`/`encerrado` com vigência e unidade em `imoveis` (18/11) |
