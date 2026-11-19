@@ -31,7 +31,6 @@ export function QuadroOcorrencias() {
         <div className="cabecalho-pagina">
           <div>
             <h1>Quadro de ocorrências</h1>
-            <p className="subtitulo">Ocorrências de todos os seus condomínios</p>
           </div>
         </div>
         <OcorrenciasDoGestor />
