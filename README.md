@@ -62,13 +62,43 @@ chamar o serviço de IA em `http://host.docker.internal:8000`.
 
 ## Deploy
 
+**Demo:** <https://fila-do-sindico.vercel.app> (publica a `develop`; banco no Supabase na nuvem).
+
+**Banco → Supabase na nuvem.** A integração do Supabase com o GitHub aplica as migrações
+sozinha a cada merge na `develop` (o check "Supabase Preview" mostra o resultado). Não rode
+`supabase db push` à mão: aplicaria a mesma migração duas vezes. Para conferir, veja
+*Database → Migrations* no painel.
+
+O seed **não** vai pela integração. Para aplicar no banco da nuvem (uma vez só, num banco sem
+os dados do seed):
+
+```bash
+npx supabase login
+npx supabase link --project-ref <ref-do-projeto>   # pede a senha do banco
+npx supabase db push --linked --include-seed
+```
+
+Logo depois, troque a senha do `admin@teste.local` no SQL Editor do painel. Ele é admin da
+plataforma e a senha do seed é pública:
+
+```sql
+update auth.users
+set encrypted_password = extensions.crypt('<senha-nova>', extensions.gen_salt('bf'))
+where email = 'admin@teste.local';
+```
+
+No painel (*Authentication*), a confirmação de e-mail fica desligada e *URL Configuration*
+aponta *Site URL* e *Redirect URLs* para o endereço da Vercel.
+
 **Front → Vercel.** O front é estático (o build gera HTML, JS e CSS), então não precisa de
 container em produção. Na Vercel:
 
 1. *Add New → Project* e importe este repositório.
 2. Em *Root Directory*, escolha `web` (a Vercel detecta o Vite sozinha).
 3. Em *Environment Variables*, cadastre `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY` do
-   projeto do Supabase na nuvem.
+   projeto do Supabase na nuvem (*Project Settings → API*: a chave anon ou publishable, nunca
+   a service_role).
+4. Em *Settings → Git → Production Branch*, use `develop`.
 
 O `web/vercel.json` faz rotas como `/quadro` funcionarem ao abrir direto no navegador.
 Cada PR ganha um link de preview automático.
@@ -108,8 +138,11 @@ Studio local do Supabase: http://127.0.0.1:54323
 
 ### Usuários para testar
 
-O `supabase/seed.sql` cria gestores, condomínios e moradores de teste (em construção na
-Sprint 1). Também dá para criar pelo próprio app: cadastro de gestor e pré-cadastro de morador.
+O `supabase/seed.sql` cria gestores, condomínios, moradores e ocorrências de teste, todos com a
+senha `senha123`. A lista de contas está no topo do arquivo. Para a demo, entre como
+`gestora.helena@teste.local`: ela tem 3 condomínios, ocorrências urgentes e simples e um
+cadastro pendente em cada condomínio. Também dá para criar contas pelo próprio app: cadastro
+de gestor e pré-cadastro de morador.
 
 ## Banco de dados
 

@@ -41,14 +41,28 @@
   gap: var(--espaco-1);
 }
 
-.quadro-status {
+.quadro-status,
+.quadro-filtro {
   display: flex;
   align-items: center;
   gap: var(--espaco-2);
+}
+
+.quadro-status {
   margin-top: var(--espaco-3);
 }
 
-.quadro-status select {
+/* Filtro por condomínio (SQUAD1-31), acima da lista. */
+.quadro-filtro {
+  margin-bottom: var(--espaco-4);
+}
+
+.quadro-filtro select {
+  max-width: 100%;
+}
+
+.quadro-status select,
+.quadro-filtro select {
   min-height: var(--altura-controle);
   padding: 0 var(--espaco-3);
   border: var(--borda);

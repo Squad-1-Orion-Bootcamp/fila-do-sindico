@@ -17,16 +17,19 @@ npm run build     # checagem de tipos + build
   `loading`, `signIn`, `signOut`).
 - `src/auth/RequireRole.tsx` — protege rotas por perfil.
 - `src/auth/homeFor.ts` — tela inicial de cada perfil.
+- `src/auth/cadastro.ts` — senha mínima, validação da senha e `criarConta()` dos cadastros.
 - `src/pages/` — uma página por arquivo.
+- `src/components/` — pedaços usados em mais de uma página (`MarcaCaixa`, `CamposDeAcesso`).
 - `src/App.tsx` — todas as rotas.
 - `src/lib/cnpj.ts` — máscara e limpeza de CNPJ.
+- `src/lib/tempo.ts` — tempo relativo e data completa para listas.
 
 ## Rotas
 
 | Rota | Quem acessa | Tela |
 | --- | --- | --- |
 | `/login` | Público | Login |
-| `/quadro` | `gestor` | Quadro de ocorrências (tela inicial do gestor) |
+| `/quadro` | `gestor` | Quadro de ocorrências e aprovação/recusa de cadastros pendentes |
 | `/condominios` | `gestor` | Cadastro (`rpc('cadastrar_condominio')`) e lista dos condomínios do gestor |
 | `/minhas-ocorrencias` | `morador` | Ocorrências do morador |
 | `/sem-acesso` | Logado sem perfil | Acesso ainda não liberado |

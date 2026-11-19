@@ -16,6 +16,15 @@ decisão for trocada, mova a antiga para "Substituídas", dizendo o que a substi
 | Cada ambiente tem o próprio banco: `prod` no projeto atual do Supabase, `stage` num projeto novo, `develop` no banco local. A integração do Supabase com o GitHub aplica as migrações de cada projeto na branch do ambiente | Com um banco só, a `stage` rodaria código novo com o esquema antigo (ou a demo, código antigo com o esquema novo), e os testes da homologação gravariam nos dados da demo |
 | Na Vercel, a `prod` é a Production Branch; a `stage` é um Preview com domínio fixo e variáveis apontando para o Supabase de stage | O plano Hobby não tem ambientes personalizados |
 
+## 19/11/2026 — Filtro por condomínio no painel
+
+### Produto e acesso
+
+| Decisão | Motivo |
+| --- | --- |
+| O seletor "Mostrar" do quadro só aparece quando há ocorrências de mais de um condomínio (SQUAD1-31) | Com um condomínio só, o filtro não muda nada na lista |
+| As opções do seletor saem das ocorrências carregadas: condomínio sem nenhuma ocorrência não aparece (SQUAD1-31) | A história pede o filtro no front, sobre o que o RLS já devolveu; filtrar um condomínio sem ocorrências daria uma lista vazia |
+
 ## 18/11/2026 — PRs dependentes
 
 ### Técnica
@@ -34,6 +43,9 @@ decisão for trocada, mova a antiga para "Substituídas", dizendo o que a substi
 | Na Sprint 1, o gestor cadastra o condomínio (`cadastrar_condominio`) e já começa a usar; a análise do admin (`solicitacoes_condominio`) fica para depois | Mudança de última hora para a demo da Sprint 1 |
 | O pedido do morador fica em `solicitacoes_vinculo` (`pendente`, `aprovada`, `recusada`); aprovado, vira um vínculo `ativo` com vigência, e a unidade vai para `imoveis` | Segue o documento "Modelo de dados da Fila do Síndico": pedido e acesso são coisas diferentes, e o histórico fica guardado |
 | Vínculo de gestor só é encerrado pelo admin; de morador ou funcionário, pelo gestor do condomínio ou pelo admin. Ninguém encerra o próprio vínculo, e o motivo é obrigatório | Decisão do time |
+| A ocorrência guarda o canal em `origem`: `aplicativo` (registrada pelo morador, o padrão), `whatsapp`, `telefone`, `presencial` ou `vistoria` (registrada pelo gestor) | Toda ocorrência tem origem, e dá para comparar os canais depois (SQUAD1-30) |
+| Quem relatou ao gestor (`relatado_por`) é opcional e precisa ser morador ou funcionário ativo do condomínio; quem não tem conta fica em branco | Decisão do time (SQUAD1-30) |
+| Quem sai do condomínio: o ex-morador continua vendo as ocorrências que registrou pelo app (histórico); o ex-gestor perde o acesso também às que ele registrou | Decisão do time; vínculo encerrado perde o acesso aos dados do condomínio (SQUAD1-30) |
 | Funcionário se cadastra como morador, por enquanto sem enviar documentação | O cadastro de funcionário ficou para depois |
 | Chat (`conversas` e `mensagens`) fica para o futuro | Fora do escopo das primeiras sprints |
 

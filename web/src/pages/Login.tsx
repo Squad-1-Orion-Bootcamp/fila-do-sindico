@@ -1,18 +1,19 @@
-import { Building2 } from 'lucide-react'
 import { useState, type SubmitEvent } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthProvider'
-import { homeFor } from '../auth/homeFor'
+import { useRedirecionarLogado } from '../auth/useRedirecionarLogado'
+import { MarcaCaixa } from '../components/MarcaCaixa'
 
 export function Login() {
-  const { session, profile, loading, signIn } = useAuth()
+  const { signIn } = useAuth()
+  const destinoLogado = useRedirecionarLogado()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
-  if (!loading && session) {
-    return <Navigate to={profile ? homeFor(profile.role) : '/sem-acesso'} replace />
+  if (destinoLogado) {
+    return <Navigate to={destinoLogado} replace />
   }
 
   async function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
@@ -25,12 +26,7 @@ export function Login() {
   return (
     <main className="tela-centralizada">
       <div className="caixa">
-        <div className="topo-marca caixa-marca">
-          <span className="topo-marca-icone">
-            <Building2 size={20} aria-hidden />
-          </span>
-          Fila do Síndico
-        </div>
+        <MarcaCaixa />
         <form className="formulario" onSubmit={handleSubmit}>
           <label className="campo">
             <span className="campo-rotulo">E-mail</span>
