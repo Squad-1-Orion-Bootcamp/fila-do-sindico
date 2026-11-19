@@ -1,0 +1,30 @@
+/* Página Meus condomínios. Só tokens de src/styles/tokens.css. */
+
+.condominios {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-8);
+}
+
+.condominios-titulo-bloco {
+  margin-bottom: var(--espaco-4);
+}
+
+.condominios-lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.condominios-item {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-3);
+}
+
+.condominios-item .cartao-titulo {
+  margin-top: 0;
+}

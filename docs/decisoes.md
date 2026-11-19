@@ -16,6 +16,15 @@ decisão for trocada, mova a antiga para "Substituídas", dizendo o que a substi
 | Cada ambiente tem o próprio banco: `prod` no projeto atual do Supabase, `stage` num projeto novo, `develop` no banco local. A integração do Supabase com o GitHub aplica as migrações de cada projeto na branch do ambiente | Com um banco só, a `stage` rodaria código novo com o esquema antigo (ou a demo, código antigo com o esquema novo), e os testes da homologação gravariam nos dados da demo |
 | Na Vercel, a `prod` é a Production Branch; a `stage` é um Preview com domínio fixo e variáveis apontando para o Supabase de stage | O plano Hobby não tem ambientes personalizados |
 
+## 18/11/2026 — PRs dependentes
+
+### Técnica
+
+| Decisão | Motivo |
+| --- | --- |
+| PR que depende de outra ainda aberta aponta para a `develop` (a branch traz a outra por `git merge`), como rascunho e com "Depende da #NN"; nunca para a branch da outra PR | A #6 apontava para a branch da #2; a #2 entrou antes, a #6 foi mergeada nessa branch e o código não chegou à `develop` (foi preciso abrir a #11). Orientação do mentor |
+| Quem aprova a PR faz o merge, seguindo a ordem das dependências | A pessoa que revisou sabe se a PR está pronta e em que ordem as PRs devem entrar |
+
 ## 18/11/2026 — Modelo de dados
 
 ### Produto e acesso
@@ -96,5 +105,6 @@ decisão for trocada, mova a antiga para "Substituídas", dizendo o que a substi
 | Link de convite por condomínio | Lista pública de condomínios |
 | Papéis `sindico` e `morador` | `admin`, `gestor` e `morador` |
 | PRs de feature para a `develop` por squash merge | Merge commit em todas as PRs (17/11) |
+| Quem abriu a PR faz o merge | Quem aprova a PR faz o merge (18/11) |
 | Gitflow com `develop` como branch base; `main` só recebe releases (uma por sprint) e hotfixes | Branches `develop` → `stage` → `prod`, sem `main` nem `release/` (19/11) |
 | `vinculos` com `unidade` e `status` `pendente`/`aprovado`/`recusado` | Pedido em `solicitacoes_vinculo`, vínculo `ativo`/`encerrado` com vigência e unidade em `imoveis` (18/11) |

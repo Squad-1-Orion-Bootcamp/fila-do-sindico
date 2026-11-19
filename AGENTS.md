@@ -79,6 +79,9 @@ condomínio é opcional, nunca a visão padrão.
   (homologação) e `stage → prod` (produção, com tag `vX.Y.Z`). A `stage` só recebe da `develop`;
   a `prod` só recebe da `stage` ou de `hotfix/squad1-123-descricao`, que sai da `prod` e depois
   entra também na `develop`. Não existem `main` nem `release/`.
+- **PR que depende de outra ainda aberta**: a branch sai da `develop` e traz a outra por
+  `git merge`; a PR aponta para a `develop` (nunca para a branch da outra PR), como rascunho,
+  com "Depende da #NN" no topo. Detalhes no `README.md`, seção "PR que depende de outra".
 - **Conventional Commits** em português: `feat: tela de cadastro do gestor`.
 - **Título de PR**: `tipo: descrição (SQUAD1-123)`, ex.: `feat: cadastro do gestor (SQUAD1-12)`.
   Vira a mensagem do merge commit na `develop` (merge comum, nunca squash: os commits da branch
