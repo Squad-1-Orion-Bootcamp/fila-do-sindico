@@ -1,6 +1,7 @@
 import { Building2, LogOut } from 'lucide-react'
 import { Link, Navigate, NavLink } from 'react-router-dom'
 import { useAuth } from '../auth/AuthProvider'
+import { CadastrosPendentes } from './CadastrosPendentes'
 
 // Telas provisórias. Cada uma vira uma história da sprint.
 
@@ -46,6 +47,7 @@ export function QuadroOcorrencias() {
             Cadastrar condomínio
           </Link>
         </div>
+        <CadastrosPendentes />
         <p className="estado-vazio">Em construção.</p>
       </main>
     </>
