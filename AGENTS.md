@@ -74,8 +74,11 @@ condomínio é opcional, nunca a visão padrão.
 
 - Textos da interface, mensagens de erro e comentários em **português**. Nomes de tabelas e
   colunas em português, sem acento (`ocorrencias`, `condominio_id`).
-- **Gitflow**: branch base `develop`; trabalho em `feature/squad1-123-descricao` (o código vem da
-  issue do Linear); PR para `develop`. `main` só recebe `release/` e `hotfix/`.
+- **Branches**: base `develop`; trabalho em `feature/squad1-123-descricao` (o código vem da
+  issue do Linear), com PR para a `develop`. Promoção sempre por PR: `develop → stage`
+  (homologação) e `stage → prod` (produção, com tag `vX.Y.Z`). A `stage` só recebe da `develop`;
+  a `prod` só recebe da `stage` ou de `hotfix/squad1-123-descricao`, que sai da `prod` e depois
+  entra também na `develop`. Não existem `main` nem `release/`.
 - **Conventional Commits** em português: `feat: tela de cadastro do gestor`.
 - **Título de PR**: `tipo: descrição (SQUAD1-123)`, ex.: `feat: cadastro do gestor (SQUAD1-12)`.
   Vira a mensagem do merge commit na `develop` (merge comum, nunca squash: os commits da branch

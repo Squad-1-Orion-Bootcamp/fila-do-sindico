@@ -1,9 +1,10 @@
 name: Título da PR
 
-# O título da PR vira a mensagem do merge commit na develop (merge comum, sem squash), então
-# precisa seguir o padrão:
+# O título da PR vira a mensagem do merge commit (merge comum, sem squash), então precisa
+# seguir o padrão:
 #   feat: cadastro do gestor (SQUAD1-12)
-# Branches release/ não precisam do código da issue.
+# As promoções (develop → stage e stage → prod) não precisam do código da issue.
+# Hotfix continua exigindo.
 
 on:
   pull_request:
@@ -19,15 +20,19 @@ jobs:
       - name: Conferir o título
         env:
           TITULO: ${{ github.event.pull_request.title }}
-          BRANCH: ${{ github.event.pull_request.head.ref }}
+          ORIGEM: ${{ github.event.pull_request.head.ref }}
+          DESTINO: ${{ github.event.pull_request.base.ref }}
         run: |
           tipos='feat|fix|docs|refactor|test|chore|style|perf|ci|build'
           if ! printf '%s' "$TITULO" | grep -Eq "^($tipos)(\([a-z0-9-]+\))?!?: .+"; then
             echo "::error::O título deve começar com um tipo do Conventional Commits, ex.: 'feat: cadastro do gestor (SQUAD1-12)'. Tipos: ${tipos//|/, }."
             exit 1
           fi
-          case "$BRANCH" in
-            release/*) exit 0 ;;
+          case "$ORIGEM:$DESTINO" in
+            develop:stage | stage:prod)
+              echo "Título ok (promoção $ORIGEM → $DESTINO): $TITULO"
+              exit 0
+              ;;
           esac
           if ! printf '%s' "$TITULO" | grep -Eq '\(SQUAD1-[0-9]+\)$'; then
             echo "::error::O título deve terminar com o código da issue do Linear entre parênteses, ex.: '(SQUAD1-12)'."

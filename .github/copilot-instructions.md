@@ -17,7 +17,9 @@ código feitas pelo Copilot.
 
 ## Em revisões de PR, verifique
 
-- A PR aponta para `develop` e o nome da branch segue `feature/squad1-123-descricao`.
+- A base da PR é permitida para a origem: `feature/squad1-123-descricao` → `develop`;
+  `develop` → `stage`; `stage` → `prod`; `hotfix/squad1-123-descricao` → `prod` e depois
+  `develop`. Não existem `main` nem `release/`.
 - Textos de interface em português.
 - Lint e testes da pasta alterada passando.
 - README atualizado quando muda tabela, rota ou variável de ambiente.
