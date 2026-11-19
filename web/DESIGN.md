@@ -86,6 +86,7 @@ fundo do cartão inteiro.
 | Grupo de opções | `.opcoes` + `.botao` com `aria-pressed` | A opção marcada fica com borda e texto azul-petróleo |
 | Ação fixa no rodapé | `.rodape-acao` | Formulários longos: o botão de enviar fica sempre visível |
 | Campo | `.campo`, `.campo-rotulo`, `input`/`select`/`textarea` | Rótulo acima, em 600 |
+| Regra do campo | `.campo-ajuda`, `.campo-ajuda-ok` | Abaixo do campo, ligada por `aria-describedby`. Fica verde com `CircleCheck` quando atendida; nunca vermelha enquanto a pessoa digita |
 | Obrigatório / opcional | `<span class="obrigatorio">*</span>`, `<span class="opcional">(opcional)</span>` | Dentro do rótulo |
 | Dois campos lado a lado | `.linha-campos` | Vira uma coluna no celular |
 | Cartão | `.cartao`, `.cartao-meta`, `.cartao-titulo` | No máximo quatro linhas de conteúdo |
