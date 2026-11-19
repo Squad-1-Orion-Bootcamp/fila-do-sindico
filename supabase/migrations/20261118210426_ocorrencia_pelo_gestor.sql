@@ -84,3 +84,51 @@ comment on function public.registrar_ocorrencia_gestor(uuid, text, text, text, u
 revoke execute on function public.registrar_ocorrencia_gestor(uuid, text, text, text, uuid) from public, anon;
 grant execute on function public.registrar_ocorrencia_gestor(uuid, text, text, text, uuid) to authenticated;
 
+-- ---------------------------------------------------------------------------
+-- Leitura por quem registrou: vale só para a ocorrência registrada pelo app (a do morador).
+-- O ex-morador mantém o histórico das próprias ocorrências; a ocorrência registrada pelo
+-- gestor é vista só por quem tem vínculo ativo (eh_gestor_aprovado). Assim o ex-gestor perde
+-- o acesso às que registrou, como qualquer outro dado do condomínio.
+
+alter policy ocorrencias_ler_registrante_gestor_ou_admin on public.ocorrencias
+  using (
+    (registrado_por = (select auth.uid()) and origem = 'aplicativo')
+    or public.eh_gestor_aprovado(condominio_id)
+    or (select public.eh_admin_plataforma())
+  );
+
+alter policy anexos_ler_ocorrencia_autorizada on public.anexos
+  using (exists (
+    select 1 from public.ocorrencias o
+    where o.id = anexos.ocorrencia_id
+      and ((o.registrado_por = (select auth.uid()) and o.origem = 'aplicativo')
+           or public.eh_gestor_aprovado(o.condominio_id)
+           or (select public.eh_admin_plataforma()))
+  ));
+
+alter policy classificacoes_ia_ler_ocorrencia_autorizada on public.classificacoes_ia
+  using (exists (
+    select 1 from public.ocorrencias o
+    where o.id = classificacoes_ia.ocorrencia_id
+      and ((o.registrado_por = (select auth.uid()) and o.origem = 'aplicativo')
+           or public.eh_gestor_aprovado(o.condominio_id)
+           or (select public.eh_admin_plataforma()))
+  ));
+
+alter policy decisoes_ler_ocorrencia_autorizada on public.decisoes
+  using (exists (
+    select 1 from public.ocorrencias o
+    where o.id = decisoes.ocorrencia_id
+      and ((o.registrado_por = (select auth.uid()) and o.origem = 'aplicativo')
+           or public.eh_gestor_aprovado(o.condominio_id)
+           or (select public.eh_admin_plataforma()))
+  ));
+
+alter policy historico_status_ler_ocorrencia_autorizada on public.historico_status
+  using (exists (
+    select 1 from public.ocorrencias o
+    where o.id = historico_status.ocorrencia_id
+      and ((o.registrado_por = (select auth.uid()) and o.origem = 'aplicativo')
+           or public.eh_gestor_aprovado(o.condominio_id)
+           or (select public.eh_admin_plataforma()))
+  ));

@@ -59,6 +59,10 @@ o morador que relatou ao gestor.
 - Acesso a um condomínio = vínculo `ativo` e vigente. Use `public.eh_gestor_aprovado(condominio_id)`
   nas políticas do gestor e `public.eh_admin_plataforma()` nas do admin.
 - Vínculo encerrado perde o acesso na hora; a pessoa continua vendo o próprio vínculo (histórico).
+  O ex-morador continua vendo as ocorrências que registrou pelo app (`origem = 'aplicativo'`);
+  a ocorrência registrada pelo gestor só é vista por quem tem vínculo ativo.
+  Toda função nova que grave ocorrência precisa manter isso: `origem = 'aplicativo'` só para
+  ocorrência registrada por morador.
 - A lista pública de condomínios (`anon`) mostra só `id` e `nome`, e só de condomínios com gestor
   ativo: o front precisa usar `.select('id, nome')`.
 

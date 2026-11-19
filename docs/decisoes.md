@@ -14,6 +14,7 @@ decisão for trocada, mova a antiga para "Substituídas", dizendo o que a substi
 | Vínculo de gestor só é encerrado pelo admin; de morador ou funcionário, pelo gestor do condomínio ou pelo admin. Ninguém encerra o próprio vínculo, e o motivo é obrigatório | Decisão do time |
 | A ocorrência guarda o canal em `origem`: `aplicativo` (registrada pelo morador, o padrão), `whatsapp`, `telefone`, `presencial` ou `vistoria` (registrada pelo gestor) | Toda ocorrência tem origem, e dá para comparar os canais depois (SQUAD1-30) |
 | Quem relatou ao gestor (`relatado_por`) é opcional e precisa ser morador ou funcionário ativo do condomínio; quem não tem conta fica em branco | Decisão do time (SQUAD1-30) |
+| Quem sai do condomínio: o ex-morador continua vendo as ocorrências que registrou pelo app (histórico); o ex-gestor perde o acesso também às que ele registrou | Decisão do time; vínculo encerrado perde o acesso aos dados do condomínio (SQUAD1-30) |
 | Funcionário se cadastra como morador, por enquanto sem enviar documentação | O cadastro de funcionário ficou para depois |
 | Chat (`conversas` e `mensagens`) fica para o futuro | Fora do escopo das primeiras sprints |
 
