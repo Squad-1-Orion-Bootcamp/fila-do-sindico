@@ -12,6 +12,15 @@ decisão for trocada, mova a antiga para "Substituídas", dizendo o que a substi
 | O seletor "Mostrar" do quadro só aparece quando há ocorrências de mais de um condomínio (SQUAD1-31) | Com um condomínio só, o filtro não muda nada na lista |
 | As opções do seletor saem das ocorrências carregadas: condomínio sem nenhuma ocorrência não aparece (SQUAD1-31) | A história pede o filtro no front, sobre o que o RLS já devolveu; filtrar um condomínio sem ocorrências daria uma lista vazia |
 
+## 18/11/2026 — PRs dependentes
+
+### Técnica
+
+| Decisão | Motivo |
+| --- | --- |
+| PR que depende de outra ainda aberta aponta para a `develop` (a branch traz a outra por `git merge`), como rascunho e com "Depende da #NN"; nunca para a branch da outra PR | A #6 apontava para a branch da #2; a #2 entrou antes, a #6 foi mergeada nessa branch e o código não chegou à `develop` (foi preciso abrir a #11). Orientação do mentor |
+| Quem aprova a PR faz o merge, seguindo a ordem das dependências | A pessoa que revisou sabe se a PR está pronta e em que ordem as PRs devem entrar |
+
 ## 18/11/2026 — Modelo de dados
 
 ### Produto e acesso
@@ -93,4 +102,5 @@ decisão for trocada, mova a antiga para "Substituídas", dizendo o que a substi
 | Link de convite por condomínio | Lista pública de condomínios |
 | Papéis `sindico` e `morador` | `admin`, `gestor` e `morador` |
 | PRs de feature para a `develop` por squash merge | Merge commit em todas as PRs (17/11) |
+| Quem abriu a PR faz o merge | Quem aprova a PR faz o merge (18/11) |
 | `vinculos` com `unidade` e `status` `pendente`/`aprovado`/`recusado` | Pedido em `solicitacoes_vinculo`, vínculo `ativo`/`encerrado` com vigência e unidade em `imoveis` (18/11) |
