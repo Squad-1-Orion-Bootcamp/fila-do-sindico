@@ -41,8 +41,10 @@ function buscarOcorrencias() {
   return supabase
     .from('ocorrencias')
     .select(
-      'id, condominio_id, local, descricao, status, urgencia_atual, created_at, condominios(nome), profiles(nome)',
+      'id, condominio_id, local, descricao, status, urgencia_atual, created_at, condominios(nome), profiles!ocorrencias_registrado_por_fkey(nome)',
     )
+    // ocorrencias tem duas ligações com profiles (registrado_por e relatado_por, da SQUAD1-30):
+    // o nome da chave diz que aqui é quem registrou. Sem ele, o Supabase devolve erro PGRST201.
     .order('created_at', { ascending: false })
     // Sem tipos gerados, o supabase-js acha que o join devolve lista; aqui é um objeto só.
     .overrideTypes<Ocorrencia[], { merge: false }>()
