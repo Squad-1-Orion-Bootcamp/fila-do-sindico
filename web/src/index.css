@@ -406,6 +406,13 @@ p {
   color: var(--prioridade-baixa-texto);
 }
 
+/* Ocorrência ainda sem urgência da IA: neutra, para não parecer uma prioridade. */
+.etiqueta-triagem {
+  border: var(--borda);
+  background: var(--cor-superficie-apagada);
+  color: var(--cor-texto-sutil);
+}
+
 .contador {
   padding: 0 var(--espaco-2);
   border-radius: 4px;
