@@ -1,6 +1,7 @@
 import { Building2, LogOut } from 'lucide-react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../auth/AuthProvider'
+import { OcorrenciasDoGestor } from './OcorrenciasDoGestor'
 
 // Telas provisórias. Cada uma vira uma história da sprint.
 
@@ -33,7 +34,7 @@ export function QuadroOcorrencias() {
             <p className="subtitulo">Ocorrências de todos os seus condomínios</p>
           </div>
         </div>
-        <p className="estado-vazio">Em construção.</p>
+        <OcorrenciasDoGestor />
       </main>
     </>
   )
