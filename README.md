@@ -163,15 +163,17 @@ Nunca altere o banco da nuvem direto pelo painel sem criar a migração correspo
 - Toda mudança entra por Pull Request com pelo menos uma revisão. O CI precisa passar.
 - Chaves e senhas ficam em `.env` / `.env.local`, nunca no repositório.
 
-### Branches (Gitflow)
+### Branches e ambientes
 
-| Branch | Para quê | Sai de | Volta para |
-| --- | --- | --- | --- |
-| `main` | Versão entregue (demo para a banca) | — | — |
-| `develop` | Integração do dia a dia; **branch base** | `main` | — |
-| `feature/squad1-123-descricao` | Uma issue do Linear | `develop` | `develop` (PR) |
-| `release/vX.Y.Z` | Preparar uma entrega (fim de sprint) | `develop` | `main` e `develop` |
-| `hotfix/squad1-123-descricao` | Correção urgente no que já foi entregue | `main` | `main` e `develop` |
+| Branch | Função | Recebe PR de | Front | Banco |
+| --- | --- | --- | --- | --- |
+| `develop` | Integração do dia a dia; **branch base** | `feature/*` e `hotfix/*` | `localhost:5173` e um preview por PR | Supabase local de cada um |
+| `stage` | Homologação e ensaio | só `develop` | a definir (domínio fixo na Vercel) | Supabase de stage (a definir) |
+| `prod` | Produção: a demo para a banca | `stage` e `hotfix/*` | <https://fila-do-sindico.vercel.app> | Supabase de produção |
+
+Não existem `main` nem `release/`. O CI (`origem-pr`) recusa PR para a `stage` ou a `prod` vinda
+de outra origem. Cada ambiente tem o próprio banco, e a integração do Supabase com o GitHub
+aplica as migrações quando a branch do ambiente recebe um merge.
 
 Dia a dia:
 
@@ -182,18 +184,26 @@ git switch -c feature/squad1-12-tela-login
 git push -u origin feature/squad1-12-tela-login   # abra a PR para develop
 ```
 
-Fim de sprint: uma `release/` sai da `develop`, recebe só ajustes finais, entra na `main` com
-uma tag (`v0.1.0` na Sprint 1, `v0.2.0` na Sprint 2...) e volta para a `develop`.
+Fim de sprint (promoção):
+
+1. PR `develop → stage`. Depois do merge, o time testa no endereço da `stage`.
+2. Tudo certo? PR `stage → prod`. Depois do merge, crie a tag (`v0.1.0` na Sprint 1, `v0.2.0` na
+   Sprint 2...): `git switch prod && git pull && git tag v0.1.0 && git push origin v0.1.0`.
+
+Correção urgente na demo (hotfix): a branch `hotfix/squad1-123-descricao` sai da `prod`, entra
+por PR na `prod` e, logo depois, a mesma branch entra por PR na `develop`. A `stage` recebe a
+correção na próxima promoção.
 
 O código da issue (`squad1-12`) no nome da branch faz o Linear ligar a PR à issue
 automaticamente. Use o atalho **"Copy git branch name"** da issue no Linear
 (`Ctrl/Cmd + Shift + .`): ele já gera `feature/squad1-12-titulo-da-issue`. Para `hotfix/`, troque
-o começo à mão; `release/` é sempre digitada (`release/v0.1.0`).
+o começo à mão.
 
 ### Pull Requests
 
 - **Título** no padrão Conventional Commits, terminando com a issue:
-  `feat: cadastro do gestor (SQUAD1-12)`. O CI confere. PRs de `release/` dispensam a issue.
+  `feat: cadastro do gestor (SQUAD1-12)`. O CI confere. As promoções (`develop → stage` e
+  `stage → prod`) dispensam a issue, ex.: `chore: entrega da Sprint 1 (v0.1.0)`.
 - **Uma issue por PR**, de preferência com menos de 400 linhas alteradas.
 - Ainda não está pronta? Abra como **rascunho (draft)**.
 - **PR que depende de outra ainda aberta:** a PR aponta sempre para a `develop`, nunca para a
@@ -201,11 +211,12 @@ o começo à mão; `release/` é sempre digitada (`release/v0.1.0`).
 - Preencha o template; em mudança de tela, inclua **prints**.
 - Rode o **`revisor-pr`** antes de pedir revisão (e o **`revisor-rls`** se mexeu no banco).
 - **Revisão no mesmo dia** ou até a manhã seguinte.
-- **Merge:** sempre por **merge commit** (merge comum), nunca squash: feature → `develop`,
-  `release/` e `hotfix/` → `main`. Os commits da branch entram na `develop` como estão, então
-  cada um segue Conventional Commits; o título da PR vira a mensagem do merge commit. **Quem
-  aprova a PR faz o merge**, com o CI verde e seguindo a ordem das dependências (a PR de que
-  outra depende entra primeiro). A branch é apagada depois do merge.
+- **Merge:** sempre por **merge commit** (merge comum), nunca squash, inclusive nas promoções
+  (com squash, as branches divergem e cada promoção dá conflito). Os commits da branch entram
+  como estão, então cada um segue Conventional Commits; o título da PR vira a mensagem do merge
+  commit. **Quem aprova a PR faz o merge**, com o CI verde e seguindo a ordem das dependências
+  (a PR de que outra depende entra primeiro). A branch de feature ou hotfix é apagada depois do
+  merge; `develop`, `stage` e `prod` nunca.
 
 #### PR que depende de outra
 
