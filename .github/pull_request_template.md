@@ -1,18 +1,39 @@
+<!--
+Título: tipo: descrição (SQUAD1-123)   ex.: feat: cadastro do gestor (SQUAD1-12)
+Ainda não está pronta? Abra como rascunho (draft).
+Depende de outra PR ainda aberta? Aponte para a develop (nunca para a branch da outra), abra
+como rascunho e escreva "Depende da #NN" no topo. Veja o README, "PR que depende de outra".
+-->
+
 ## O que muda
 
-<!-- Uma ou duas frases. -->
+<!-- Uma ou duas frases, em linguagem de produto. -->
 
 ## Issue
 
-<!-- Ex.: LUCAS-12 -->
+<!-- Ex.: SQUAD1-12 -->
 
 ## Como testar
 
 1.
 
+## Prints
+
+<!-- Obrigatório se mudou tela: antes e depois, de preferência também no celular. -->
+
+## Banco de dados
+
+<!-- Apague esta seção se a PR não mexe em supabase/. -->
+
+- [ ] Migração nova (nenhuma migração já aplicada foi editada)
+- [ ] RLS ligado e políticas para cada operação usada
+- [ ] Testei com dois usuários diferentes e cada um vê só o que deve
+- [ ] Rodei o `revisor-rls`
+
 ## Checklist
 
 - [ ] Critérios de aceite da história conferidos
-- [ ] Testei localmente
-- [ ] Mudou tabela, rota ou variável de ambiente? Atualizei o README ou a migração
+- [ ] Rodei o `revisor-pr` (ou conferi o checklist dele)
+- [ ] Lint e testes da pasta alterada passando
+- [ ] Mudou tabela, rota ou variável de ambiente? Atualizei README e `.env.example`
 - [ ] Nenhuma chave ou senha no código
