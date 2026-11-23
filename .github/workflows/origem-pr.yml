@@ -1,0 +1,43 @@
+name: Origem da PR
+
+# Fluxo de branches: develop → stage → prod.
+#   stage só recebe PR da develop.
+#   prod recebe PR da stage ou de hotfix/*.
+# Torne este check obrigatório nos rulesets da stage e da prod.
+
+on:
+  pull_request:
+    branches: [stage, prod]
+    types: [opened, edited, reopened, synchronize]
+
+permissions:
+  contents: read
+
+jobs:
+  origem:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Conferir a origem
+        env:
+          ORIGEM: ${{ github.head_ref }}
+          DESTINO: ${{ github.base_ref }}
+          REPO_ORIGEM: ${{ github.event.pull_request.head.repo.full_name }}
+        run: |
+          # Uma branch "develop" num fork não é a develop do time.
+          if [ "$REPO_ORIGEM" != "$GITHUB_REPOSITORY" ]; then
+            echo "::error::PR para a $DESTINO precisa sair de uma branch deste repositório, não de um fork."
+            exit 1
+          fi
+          case "$DESTINO:$ORIGEM" in
+            stage:develop) ;;
+            prod:stage | prod:hotfix/*) ;;
+            stage:*)
+              echo "::error::A stage só recebe PR da develop (esta vem de '$ORIGEM'). Abra a PR para a develop."
+              exit 1
+              ;;
+            prod:*)
+              echo "::error::A prod só recebe PR da stage ou de uma branch hotfix/ (esta vem de '$ORIGEM')."
+              exit 1
+              ;;
+          esac
+          echo "Origem ok: $ORIGEM → $DESTINO"
