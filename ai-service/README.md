@@ -21,6 +21,29 @@ uv run pytest
 uv run ruff check . && uv run ruff format --check .
 ```
 
+## Produção (Render)
+
+Publicado no Render (plano Free), um serviço por ambiente:
+
+- **stage** (branch `stage`): <https://fila-do-sindico-r38q.onrender.com>
+- **prod** (branch `prod`, a demo): <https://fila-do-sindico-31lo.onrender.com>
+
+Na `develop`, o serviço roda só local.
+
+- **Imagem:** o Render constrói este `Dockerfile` a partir desta pasta (*Root Directory*
+  `ai-service`) e usa o último estágio, o `prod`: sem reload, sem dependências de
+  desenvolvimento e com usuário sem privilégios.
+- **Health check:** `GET /health`.
+- **Variáveis**, cadastradas no painel de cada serviço, nunca no repositório (valores
+  diferentes em stage e prod):
+  - `PORT=8000`: a porta do uvicorn, para o Render saber para onde mandar as requisições.
+  - `WEBHOOK_SECRET`: o mesmo valor cadastrado no Vault do Supabase do mesmo ambiente.
+  - `LLM_API_KEY`: chave da Gemini, vazia por enquanto.
+- **Dorme depois de 15 minutos sem uso** e leva cerca de 1 minuto para voltar. Antes de uma
+  demo, abra <https://fila-do-sindico-31lo.onrender.com/health> para acordá-lo.
+
+A configuração completa está no README da raiz, seção Deploy.
+
 ## Estrutura
 
 - `app/main.py`: rotas (`GET /health`, `POST /classificar`)

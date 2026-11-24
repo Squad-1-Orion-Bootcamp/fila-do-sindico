@@ -144,7 +144,10 @@ export function CadastrosPendentes() {
   }
 
   function formatarLocal(bloco: string, unidade: string | null) {
-    const u = unidade ? `Unidade ${unidade}` : ''
+    // A unidade é texto livre do cadastro. "Unidade" só entra quando o morador digitou só o
+    // número (ex.: "302", "12A"); "Apto 77" ou "Casa 21" aparecem como ele escreveu.
+    const texto = unidade?.trim() ?? ''
+    const u = /^\d+[a-z]?$/i.test(texto) ? `Unidade ${texto}` : texto
     const b = bloco ? `Bloco ${bloco}` : ''
     if (b && u) return `${b} · ${u}`
     return b || u || 'Unidade não informada'
