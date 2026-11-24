@@ -35,11 +35,12 @@ Migrações: `20261116000000_profiles.sql` (perfil), `20261118033000_modelo_de_d
 `20261118050000_ajustes_revisao_rls.sql`, `20261118180436_registrar_ocorrencia.sql`,
 `20261118191442_alterar_status_ocorrencia.sql` (gestor muda o status da ocorrência),
 `20261118210426_ocorrencia_pelo_gestor.sql`, `20261124035604_classificacao_ia.sql` (gatilho que
-avisa o ai-service e gravação da classificação), `20261124041425_morador_sem_prioridade.sql` (o
-morador não lê a prioridade nem a classificação), `20261124174433_criar_funcionarios.sql`
-(funcionários do condomínio), `20261124192621_status_delegado.sql` (status `delegado`),
-`20261124200657_criar_delegacoes.sql` (delegação ao funcionário pelo link) e
-`20261124201343_delegar_ocorrencia.sql` (o gestor delega e a troca de status revoga o link).
+`20261124041425_morador_sem_prioridade.sql` (o morador não lê a prioridade nem a classificação),
+`20261124045005_gestor_altera_prioridade.sql` (o gestor confirma ou muda a prioridade),
+`20261124174433_criar_funcionarios.sql` (funcionários do condomínio),
+`20261124192621_status_delegado.sql` (status `delegado`), `20261124200657_criar_delegacoes.sql`
+(delegação ao funcionário pelo link) e `20261124201343_delegar_ocorrencia.sql` (o gestor delega e a
+troca de status revoga o link).
 
 | Tabela | Para quê |
 | --- | --- |
@@ -120,6 +121,7 @@ solicitação de vínculo pendente. Campo faltando = o cadastro falha com a mens
 | `delegar_ocorrencia(p_ocorrencia_id, p_funcionario_id)` | gestor ativo do condomínio. O funcionário precisa estar ativo e ser do mesmo condomínio; a ocorrência não pode estar concluída. Revoga a delegação anterior (trocar o responsável é delegar de novo), cria a nova, muda o status para `delegado` (com histórico) e **devolve o token do link uma vez** (43 caracteres, base64url); o banco guarda só o hash |
 | `cadastrar_funcionario(p_condominio_id, p_nome, p_celular, p_funcao)` | gestor ativo do condomínio. Devolve o `id`. `p_celular` só com dígitos (`5511999998888`; o front converte a máscara); nome até 120 e função até 60 caracteres (a função tira os espaços das pontas). Recusa celular já usado por um funcionário ativo do mesmo condomínio |
 | `desativar_funcionario(p_funcionario_id)` | gestor ativo do condomínio do funcionário. Marca `ativo = false`; repetir não muda nada |
+| `definir_prioridade_ocorrencia(p_ocorrencia_id, p_urgencia, p_justificativa)` | gestor ativo do condomínio. Confirma ou muda a prioridade (`urgente`, `alta`, `normal` ou `baixa`); `p_justificativa` é opcional. Grava em `decisoes` (`acao = 'definir_prioridade'`) e atualiza `urgencia_atual`. Depois disso, a IA não muda mais a urgência. Não vale para ocorrência concluída |
 | `listar_ocorrencias_gestor()` | qualquer usuário logado; devolve só as ocorrências dos condomínios em que quem chama é gestor ativo (para os outros, lista vazia), das mais novas para as mais antigas: `id`, `condominio_id`, `condominio_nome`, `local`, `descricao`, `status`, `urgencia_atual`, `categoria_atual`, `created_at`, `registrado_por_nome` |
 
 Ninguém aprova, recusa ou encerra o próprio pedido ou vínculo. Motivo é obrigatório na recusa e
@@ -140,7 +142,7 @@ no encerramento.
 
 | Função | Quem pode |
 | --- | --- |
-| `gravar_classificacao(p_ocorrencia_id, p_urgencia, p_categoria, p_justificativa, p_origem, p_modelo_versao)` | só a `service_role` (o ai-service; o front nunca chama). `p_urgencia`: `urgente`, `alta`, `normal` ou `baixa`. `p_origem`: `ia`, `regra`, `ia+trava` ou `regra+trava`. `p_modelo_versao` é opcional. Grava o histórico em `classificacoes_ia` (`status_processamento = 'sucesso'`) e atualiza `urgencia_atual` e `categoria_atual`. Se a ocorrência já foi classificada, devolve a classificação existente sem mudar nada |
+| `gravar_classificacao(p_ocorrencia_id, p_urgencia, p_categoria, p_justificativa, p_origem, p_modelo_versao)` | só a `service_role` (o ai-service; o front nunca chama). `p_urgencia`: `urgente`, `alta`, `normal` ou `baixa`. `p_origem`: `ia`, `regra`, `ia+trava` ou `regra+trava`. `p_modelo_versao` é opcional. Grava o histórico em `classificacoes_ia` (`status_processamento = 'sucesso'`) e atualiza `categoria_atual` e `urgencia_atual`; se o gestor já definiu a prioridade (`definir_prioridade_ocorrencia`), a urgência dele fica. Se a ocorrência já foi classificada, devolve a classificação existente sem mudar nada |
 
 ## Estado atual
 
