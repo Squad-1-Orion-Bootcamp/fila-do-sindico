@@ -9,7 +9,7 @@ from app import banco, webhook
 from app.banco import OcorrenciaParaClassificar
 from app.config import settings
 from app.main import app
-from app.schemas import Classificacao
+from app.schemas import Classificacao, ResultadoClassificacao
 
 SEGREDO = "segredo-de-teste"
 
@@ -99,8 +99,29 @@ def test_sucesso_responde_202_sem_corpo_e_grava(monkeypatch):
     assert ocorrencia_id == alvo.id
     assert classificacao.urgencia == "urgente"
     assert classificacao.categoria == "seguranca"
-    assert origem == "regra"
+    # Sem LLM_API_KEY nos testes, as regras decidem; "gás" aciona a trava.
+    assert origem == "regra+trava"
     assert modelo_versao == "regras-provisorias"
+
+
+def test_grava_a_origem_e_o_modelo_que_o_classificar_devolve(monkeypatch):
+    alvo = ocorrencia("Infiltração no teto do salão")
+    falso = instalar_banco(monkeypatch, alvo)
+    vindo_da_ia = ResultadoClassificacao(
+        classificacao=Classificacao(
+            urgencia="alta", categoria="hidraulica", justificativa="Classificada como Alta pela IA."
+        ),
+        origem="ia",
+        modelo_versao="gemini-decision-1",
+        confianca=0.93,
+    )
+    monkeypatch.setattr(webhook, "classificar", lambda _ocorrencia: vindo_da_ia)
+
+    assert avisar(alvo.id).status_code == 202
+
+    assert falso.gravadas == [
+        (alvo.id, vindo_da_ia.classificacao, "ia", "gemini-decision-1"),
+    ]
 
 
 def test_classifica_pelo_texto_do_banco_e_nao_pelo_do_corpo(monkeypatch):
@@ -216,7 +237,7 @@ def test_gravar_classificacao_com_erro_do_banco_levanta(monkeypatch):
     cliente_falso(
         monkeypatch, lambda _: httpx.Response(400, json={"message": "Urgência inválida."})
     )
-    classificacao = Classificacao(urgencia="alta", categoria="x", justificativa="y")
+    classificacao = Classificacao(urgencia="alta", categoria="outros", justificativa="y")
     with pytest.raises(httpx.HTTPStatusError):
         banco.gravar_classificacao(uuid4(), classificacao, "regra", "regras-provisorias")
 

@@ -17,8 +17,12 @@ class Settings(BaseSettings):
     # Segredo do gatilho do banco que chama o POST /webhook (o mesmo valor do Vault do
     # Supabase). Vazio, o webhook recusa toda chamada.
     webhook_secret: str = ""
-    # Chave do provedor de LLM (Gemini), quando o classificador passar a usar o LLM.
+    # Chave da API da Gemini (aistudio.google.com). Vazia, o classificar() nem chama o
+    # Decision 1 e usa só as regras provisórias (origem "regra").
     llm_api_key: str = ""
+    # Modelo do System 1 (Decisions API, v1beta) e o tempo limite da chamada.
+    llm_modelo_decisao: str = "gemini-decision-1"
+    llm_timeout_segundos: float = 3.0
 
 
 settings = Settings()

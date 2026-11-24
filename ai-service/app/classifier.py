@@ -1,13 +1,41 @@
-import re
+"""Orquestração da classificação (SQUAD1-84).
 
-from app.schemas import Classificacao, OcorrenciaEntrada, Urgencia
+1. Trava de palavras de risco (app/trava.py).
+2. System 1: o Gemini Decision 1 decide a urgência e a categoria (app/decisao.py).
+   Sem LLM_API_KEY, com erro ou demora, as regras provisórias abaixo decidem.
+3. Com a trava ativa, a urgência vira "urgente" e a origem ganha "+trava".
+4. Justificativa: por enquanto um motivo padrão; a frase gerada pela Gemini (System 2) entra
+   na SQUAD1-85 pelo parâmetro justificar.
+"""
+
+import logging
+import re
+from collections.abc import Callable
+
+from app.config import settings
+from app.contrato import ROTULOS_URGENCIA
+from app.decisao import Decisao, decidir
+from app.schemas import (
+    Categoria,
+    Classificacao,
+    OcorrenciaEntrada,
+    Origem,
+    ResultadoClassificacao,
+    Urgencia,
+)
 from app.trava import aplicar_trava, normalizar_texto
 
-# PROVISÓRIO: regras por palavra-chave, como no protótipo.
-# Na Sprint 2 este módulo passa a chamar o LLM com saída estruturada,
-# mantendo a mesma assinatura para o resto do sistema não mudar.
+logger = logging.getLogger(__name__)
+
+MODELO_REGRAS = "regras-provisorias"
+
+Decisor = Callable[[str, str | None], Decisao]
+# (descricao, local, urgencia) -> frase do motivo. Interface do System 2 (SQUAD1-85).
+Justificador = Callable[[str, str | None, Urgencia], str]
+
+# Reserva: regras por palavra-chave, usadas quando o Decision 1 não responde.
 # A primeira regra que bate decide, então as mais graves vêm antes.
-_REGRAS: list[tuple[tuple[str, ...], str, Urgencia]] = [
+_REGRAS: list[tuple[tuple[str, ...], Categoria, Urgencia]] = [
     (("gás", "fogo", "incêndio", "fumaça"), "seguranca", "urgente"),
     (("preso", "presa"), "elevador", "urgente"),
     (("vazamento", "vazando", "alagado", "infiltração"), "hidraulica", "alta"),
@@ -54,17 +82,77 @@ def classificar_por_regras(ocorrencia: OcorrenciaEntrada) -> Classificacao:
     )
 
 
-def classificar(ocorrencia: OcorrenciaEntrada) -> Classificacao:
-    """Classifica a ocorrência aplicando a trava de risco sobre a descrição."""
-    resultado = classificar_por_regras(ocorrencia)
-    termo_risco = aplicar_trava(ocorrencia.descricao)
+def motivo_padrao(urgencia: Urgencia, origem: Origem, termo_risco: str | None) -> str:
+    """Motivo usado enquanto não há justificativa gerada, ou quando ela falha."""
     if termo_risco is not None:
-        # Com regras provisórias, a justificativa cita o termo da trava; na Sprint 2 com
-        # LLM (SQUAD1-62), a justificativa gerada pela IA pode ser preservada.
-        return resultado.model_copy(
-            update={
-                "urgencia": "urgente",
-                "justificativa": f"Trava de risco: a descrição menciona '{termo_risco}'.",
-            }
+        return f"Trava de risco: a descrição menciona '{termo_risco}'."
+    rotulo = ROTULOS_URGENCIA[urgencia]
+    if origem == "ia":
+        return f"Classificada como {rotulo} pela IA."
+    return f"Classificada como {rotulo} pelas regras provisórias."
+
+
+def classificar(
+    ocorrencia: OcorrenciaEntrada,
+    *,
+    decisor: Decisor = decidir,
+    justificar: Justificador | None = None,
+) -> ResultadoClassificacao:
+    """Classifica a ocorrência. Nunca levanta exceção por falha da IA: as regras assumem."""
+    termo_risco = aplicar_trava(ocorrencia.descricao)
+
+    decisao: Decisao | None = None
+    if settings.llm_api_key:
+        try:
+            decisao = decisor(ocorrencia.descricao, ocorrencia.local)
+        except Exception as erro:
+            logger.warning("Decision 1 falhou (%s): usando as regras.", type(erro).__name__)
+
+    if decisao is not None:
+        urgencia: Urgencia = decisao.urgencia
+        categoria: Categoria = decisao.categoria
+        origem: Origem = "ia"
+        modelo_versao = settings.llm_modelo_decisao
+        justificativa_regra = None
+    else:
+        pelas_regras = classificar_por_regras(ocorrencia)
+        urgencia, categoria = pelas_regras.urgencia, pelas_regras.categoria
+        origem, modelo_versao = "regra", MODELO_REGRAS
+        justificativa_regra = pelas_regras.justificativa
+
+    if termo_risco is not None:
+        urgencia = "urgente"
+        origem = "ia+trava" if origem == "ia" else "regra+trava"
+
+    justificativa = ""
+    if justificar is not None:
+        try:
+            justificativa = justificar(ocorrencia.descricao, ocorrencia.local, urgencia).strip()
+        except Exception as erro:
+            logger.warning(
+                "Justificativa falhou (%s): usando o motivo padrão.", type(erro).__name__
+            )
+    if not justificativa:
+        # Sem trava e pelas regras, a frase da regra já diz qual palavra decidiu.
+        justificativa = (
+            justificativa_regra
+            if justificativa_regra and termo_risco is None
+            else motivo_padrao(urgencia, origem, termo_risco)
         )
-    return resultado
+
+    confianca = decisao.confianca if decisao is not None else None
+    logger.info(
+        "Classificada como %s/%s (origem %s, confiança %s).",
+        urgencia,
+        categoria,
+        origem,
+        "—" if confianca is None else f"{confianca:.2f}",
+    )
+    return ResultadoClassificacao(
+        classificacao=Classificacao(
+            urgencia=urgencia, categoria=categoria, justificativa=justificativa
+        ),
+        origem=origem,
+        modelo_versao=modelo_versao,
+        confianca=confianca,
+    )

@@ -1,8 +1,12 @@
 import pytest
 
-from app.classifier import classificar
-from app.schemas import OcorrenciaEntrada
+from app.classifier import classificar as _classificar
+from app.schemas import Classificacao, OcorrenciaEntrada
 from app.trava import PALAVRAS_DE_RISCO, aplicar_trava
+
+
+def classificar(ocorrencia: OcorrenciaEntrada) -> Classificacao:
+    return _classificar(ocorrencia).classificacao
 
 
 @pytest.mark.parametrize(
