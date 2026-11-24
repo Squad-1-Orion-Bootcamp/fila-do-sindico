@@ -35,12 +35,12 @@ Migrações: `20261116000000_profiles.sql` (perfil), `20261118033000_modelo_de_d
 `20261118050000_ajustes_revisao_rls.sql`, `20261118180436_registrar_ocorrencia.sql`,
 `20261118191442_alterar_status_ocorrencia.sql` (gestor muda o status da ocorrência),
 `20261118210426_ocorrencia_pelo_gestor.sql`, `20261124035604_classificacao_ia.sql` (gatilho que
-`20261124041425_morador_sem_prioridade.sql` (o morador não lê a prioridade nem a classificação),
-`20261124045005_gestor_altera_prioridade.sql` (o gestor confirma ou muda a prioridade),
-`20261124174433_criar_funcionarios.sql` (funcionários do condomínio),
-`20261124192621_status_delegado.sql` (status `delegado`), `20261124200657_criar_delegacoes.sql`
-(delegação ao funcionário pelo link) e `20261124201343_delegar_ocorrencia.sql` (o gestor delega e a
-troca de status revoga o link).
+avisa o ai-service e gravação da classificação), `20261124041425_morador_sem_prioridade.sql` (o
+morador não lê a prioridade nem a classificação), `20261124045005_gestor_altera_prioridade.sql` (o
+gestor confirma ou muda a prioridade), `20261124174433_criar_funcionarios.sql` (funcionários do
+condomínio), `20261124192621_status_delegado.sql` (status `delegado`),
+`20261124200657_criar_delegacoes.sql` (delegação ao funcionário pelo link) e
+`20261124201343_delegar_ocorrencia.sql` (o gestor delega e a troca de status revoga o link).
 
 | Tabela | Para quê |
 | --- | --- |
