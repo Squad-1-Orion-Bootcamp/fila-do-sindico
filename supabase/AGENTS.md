@@ -35,7 +35,7 @@ Migrações: `20261116000000_profiles.sql` (perfil), `20261118033000_modelo_de_d
 `20261118050000_ajustes_revisao_rls.sql`, `20261118180436_registrar_ocorrencia.sql`,
 `20261118191442_alterar_status_ocorrencia.sql` (gestor muda o status da ocorrência),
 `20261118210426_ocorrencia_pelo_gestor.sql`, `20261124174433_criar_funcionarios.sql`
-(funcionários do condomínio), `20261124192621_status_delegado.sql` (status `delegado`) e
+(funcionários do condomínio), `20261124192621_status_delegado.sql` (status `delegado`),
 `20261124200657_criar_delegacoes.sql` (delegação ao funcionário pelo link) e
 `20261124201343_delegar_ocorrencia.sql` (o gestor delega e a troca de status revoga o link).
 

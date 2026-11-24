@@ -41,10 +41,12 @@ begin
       message = 'Não é possível delegar uma ocorrência concluída.';
   end if;
 
-  -- O funcionário precisa estar ativo e ser do mesmo condomínio da ocorrência.
+  -- O funcionário precisa estar ativo e ser do mesmo condomínio da ocorrência. O "for share"
+  -- trava a linha até o fim: um desativar_funcionario ao mesmo tempo espera esta delegação.
   if not exists (
     select 1 from public.funcionarios f
     where f.id = p_funcionario_id and f.ativo and f.condominio_id = v_oco.condominio_id
+    for share
   ) then
     raise exception using errcode = '22023',
       message = 'Funcionário não encontrado ou inativo neste condomínio.';
