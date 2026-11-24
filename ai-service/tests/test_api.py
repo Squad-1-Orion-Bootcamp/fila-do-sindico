@@ -23,3 +23,27 @@ def test_classifica_vazamento_como_alta():
 def test_descricao_vazia_e_rejeitada():
     resposta = client.post("/classificar", json={"descricao": ""})
     assert resposta.status_code == 422
+
+
+def test_cheiro_de_gas_e_urgente():
+    resposta = client.post("/classificar", json={"descricao": "Cheiro forte de gás no corredor"})
+    assert resposta.status_code == 200
+    assert resposta.json()["urgencia"] == "urgente"
+
+
+def test_pessoa_presa_no_elevador_e_urgente():
+    resposta = client.post(
+        "/classificar",
+        json={"descricao": "Elevador parou com uma pessoa presa", "local": "Bloco A"},
+    )
+    assert resposta.json()["urgencia"] == "urgente"
+    assert resposta.json()["categoria"] == "elevador"
+
+
+def test_sem_palavra_chave_e_normal():
+    resposta = client.post("/classificar", json={"descricao": "Pedido de segunda via do boleto"})
+    assert resposta.json() == {
+        "urgencia": "normal",
+        "categoria": "outros",
+        "justificativa": "Regra provisória: nenhuma palavra-chave reconhecida.",
+    }
