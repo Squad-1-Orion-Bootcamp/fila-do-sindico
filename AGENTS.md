@@ -66,6 +66,9 @@ Detalhes, regras de acesso e funções em `supabase/AGENTS.md`.
   partir da Sprint 2, com o histórico em `classificacoes_ia`)
 - `funcionarios`: contatos dos funcionários de cada condomínio, sem conta (`nome`, `celular`,
   `funcao`, `ativo`), cadastrados pelo gestor para a delegação; não usam `vinculos`
+- `delegacoes`: ocorrência delegada a um funcionário pelo link do WhatsApp (US 3): `situacao`
+  (`ativa`, `concluida`, `revogada`) e `comentario` do funcionário. Guarda só o hash do token;
+  escrita só por funções
 
 Acesso a um condomínio = vínculo `ativo` e vigente (nas políticas, use
 `public.eh_gestor_aprovado(condominio_id)`). Uma conta tem um tipo só. Gestor vê os
