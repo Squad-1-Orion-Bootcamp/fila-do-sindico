@@ -20,7 +20,7 @@ client = TestClient(app)
 def configuracao(monkeypatch):
     monkeypatch.setattr(settings, "webhook_secret", SEGREDO)
     monkeypatch.setattr(settings, "supabase_url", "http://banco.teste")
-    monkeypatch.setattr(settings, "supabase_service_role_key", "chave-service-role")
+    monkeypatch.setattr(settings, "supabase_secret_key", "sb_secret_chave-de-teste")
 
 
 class BancoFalso:
@@ -154,7 +154,7 @@ def cliente_falso(monkeypatch, responder):
     return pedidos
 
 
-def test_buscar_ocorrencia_usa_a_service_role_e_ve_se_ja_foi_classificada(monkeypatch):
+def test_buscar_ocorrencia_usa_a_chave_secreta_e_ve_se_ja_foi_classificada(monkeypatch):
     alvo = uuid4()
     linha = {"id": str(alvo), "descricao": "Vazamento", "local": None, "classificacoes_ia": []}
     pedidos = cliente_falso(monkeypatch, lambda _: httpx.Response(200, json=[linha]))
@@ -166,8 +166,19 @@ def test_buscar_ocorrencia_usa_a_service_role_e_ve_se_ja_foi_classificada(monkey
     assert pedido.url.path == "/rest/v1/ocorrencias"
     assert pedido.url.params["id"] == f"eq.{alvo}"
     assert pedido.url.params["classificacoes_ia.status_processamento"] == "eq.sucesso"
-    assert pedido.headers["apikey"] == "chave-service-role"
-    assert pedido.headers["authorization"] == "Bearer chave-service-role"
+    assert pedido.headers["apikey"] == "sb_secret_chave-de-teste"
+    # A chave nova não é JWT: o Supabase pede que ela não vá no Authorization.
+    assert "authorization" not in pedido.headers
+
+
+def test_chave_antiga_em_jwt_vai_tambem_no_authorization(monkeypatch):
+    monkeypatch.setattr(settings, "supabase_secret_key", "eyJ.chave.antiga")
+    pedidos = cliente_falso(monkeypatch, lambda _: httpx.Response(200, json=[]))
+
+    banco.buscar_ocorrencia(uuid4())
+
+    assert pedidos[0].headers["apikey"] == "eyJ.chave.antiga"
+    assert pedidos[0].headers["authorization"] == "Bearer eyJ.chave.antiga"
 
 
 def test_buscar_ocorrencia_classificada(monkeypatch):
@@ -211,6 +222,6 @@ def test_gravar_classificacao_com_erro_do_banco_levanta(monkeypatch):
 
 
 def test_sem_service_role_nao_chama_o_banco(monkeypatch):
-    monkeypatch.setattr(settings, "supabase_service_role_key", "")
+    monkeypatch.setattr(settings, "supabase_secret_key", "")
     with pytest.raises(banco.BancoNaoConfigurado):
         banco.buscar_ocorrencia(uuid4())

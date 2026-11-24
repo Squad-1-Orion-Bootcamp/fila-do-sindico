@@ -34,8 +34,8 @@ Publicado no Render (plano Free): <https://fila-do-sindico.onrender.com>.
 - **Variáveis**, cadastradas no painel do Render, nunca no repositório:
   - `PORT=8000`: a porta do uvicorn, para o Render saber para onde mandar as requisições.
   - `WEBHOOK_SECRET`: o mesmo valor cadastrado no Vault do Supabase para o gatilho.
-  - `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY`: o projeto do Supabase do ambiente e a chave
-    `service_role` dele, para ler a ocorrência e gravar a classificação.
+  - `SUPABASE_URL` e `SUPABASE_SECRET_KEY`: o projeto do Supabase do ambiente e a chave secreta
+    dele (`sb_secret_...`), para ler a ocorrência e gravar a classificação.
   - `LLM_API_KEY`: chave da Gemini, vazia por enquanto.
 - **Dorme depois de 15 minutos sem uso** e leva cerca de 1 minuto para voltar. Antes de uma
   demo, abra <https://fila-do-sindico.onrender.com/health> para acordá-lo.

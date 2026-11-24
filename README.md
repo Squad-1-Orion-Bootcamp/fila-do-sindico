@@ -75,7 +75,7 @@ Para conferir as chamadas: `select * from net._http_response order by id desc;` 
 401 é segredo diferente do `ai-service/.env`).
 
 Para o ai-service gravar a classificação, o `ai-service/.env` também precisa da
-`SUPABASE_SERVICE_ROLE_KEY` local (a `service_role` que o `npx supabase status` mostra).
+`SUPABASE_SECRET_KEY` local (a "Secret key", `sb_secret_...`, que o `npx supabase status` mostra).
 
 ## Deploy
 
@@ -150,7 +150,7 @@ Em produção, o serviço fica no Render: <https://fila-do-sindico.onrender.com>
   | `PORT` | `8000`, a porta em que o uvicorn escuta. Diz ao Render para onde mandar as requisições |
   | `WEBHOOK_SECRET` | Segredo compartilhado com o gatilho do Supabase: o mesmo valor fica no Vault do Supabase. Nunca no repositório. Vazio, o `/webhook` recusa tudo |
   | `SUPABASE_URL` | URL do projeto do Supabase do ambiente (stage agora, prod depois da promoção) |
-  | `SUPABASE_SERVICE_ROLE_KEY` | Chave `service_role` desse mesmo projeto: o webhook lê a ocorrência e grava a classificação com ela. Só no Render, nunca no front nem no repositório |
+  | `SUPABASE_SECRET_KEY` | Chave secreta (`sb_secret_...`) desse mesmo projeto, em *Project Settings → API Keys*: o webhook lê a ocorrência e grava a classificação com ela. Só no Render, nunca no front nem no repositório |
   | `LLM_API_KEY` | Chave da Gemini. Vazia até o serviço passar a usar o LLM |
 
 - **Ele dorme.** No plano grátis, o serviço desliga depois de 15 minutos sem uso e leva cerca de

@@ -1,4 +1,4 @@
-"""Acesso ao banco pela API REST do Supabase, com a chave service_role.
+"""Acesso ao banco pela API REST do Supabase, com a chave secreta (papel service_role).
 
 Só o que o webhook precisa: ler a ocorrência e gravar a classificação pela função
 gravar_classificacao (migração 20261124035604_classificacao_ia.sql).
@@ -20,7 +20,7 @@ _transporte: httpx.BaseTransport | None = None
 
 
 class BancoNaoConfigurado(RuntimeError):
-    """Falta SUPABASE_SERVICE_ROLE_KEY no ambiente."""
+    """Falta SUPABASE_SECRET_KEY no ambiente."""
 
 
 @dataclass(frozen=True)
@@ -31,13 +31,21 @@ class OcorrenciaParaClassificar:
     ja_classificada: bool
 
 
+def _cabecalhos(chave: str) -> dict[str, str]:
+    """A chave nova (sb_secret_...) não é JWT: vai só no apikey, como pede a documentação do
+    Supabase. A chave antiga (JWT service_role) precisa também do Authorization."""
+    if chave.startswith("sb_secret_"):
+        return {"apikey": chave}
+    return {"apikey": chave, "Authorization": f"Bearer {chave}"}
+
+
 def _cliente() -> httpx.Client:
-    chave = settings.supabase_service_role_key
+    chave = settings.supabase_secret_key
     if not chave:
-        raise BancoNaoConfigurado("SUPABASE_SERVICE_ROLE_KEY não configurada.")
+        raise BancoNaoConfigurado("SUPABASE_SECRET_KEY não configurada.")
     return httpx.Client(
         base_url=f"{settings.supabase_url.rstrip('/')}/rest/v1",
-        headers={"apikey": chave, "Authorization": f"Bearer {chave}"},
+        headers=_cabecalhos(chave),
         timeout=TEMPO_LIMITE_SEGUNDOS,
         transport=_transporte,
     )
