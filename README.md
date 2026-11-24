@@ -13,7 +13,7 @@ condomínios. Projeto do Squad 1 no Orion Bootcamp (New Rizon), com entrega em 1
 | `docs/` | Decisões do time | Markdown |
 
 ```
-morador registra ocorrência (web) → Supabase grava → Database Webhook → ai-service classifica
+morador registra ocorrência (web) → Supabase grava → gatilho (pg_net) → ai-service classifica
 → grava urgência, categoria e justificativa → quadro do síndico atualiza (Realtime)
 ```
 
@@ -57,8 +57,21 @@ duplicaria a configuração sem ganho.
 
 **Endereços entre containers:** o navegador acessa o Supabase por `127.0.0.1:54321`, mas de
 dentro de um container o endereço é `host.docker.internal:54321` (o compose já define
-`SUPABASE_URL` assim no ai-service). Pelo mesmo motivo, o Database Webhook do Supabase deve
-chamar o serviço de IA em `http://host.docker.internal:8000`.
+`SUPABASE_URL` assim no ai-service). Pelo mesmo motivo, o banco chama o serviço de IA em
+`http://host.docker.internal:8000`.
+
+**Classificação automática no local.** A cada ocorrência nova, o gatilho `classificar_ocorrencia`
+chama o `POST /webhook` do ai-service. O endereço e o segredo ficam no Vault do banco, nunca no
+código. O `db reset` apaga o Vault, então rode isto depois de cada reset (no SQL Editor do Studio
+ou com `psql`), usando o mesmo valor de `WEBHOOK_SECRET` do `ai-service/.env`:
+
+```sql
+select vault.create_secret('http://host.docker.internal:8000', 'ai_service_url');
+select vault.create_secret('<o WEBHOOK_SECRET do ai-service/.env>', 'ai_webhook_secret');
+```
+
+Sem esses dois valores, a ocorrência é registrada normalmente e fica em "Aguardando triagem".
+Para conferir as chamadas: `select * from net._http_response order by id desc;`.
 
 ## Deploy
 
@@ -86,6 +99,12 @@ update auth.users
 set encrypted_password = extensions.crypt('<senha-nova>', extensions.gen_salt('bf'))
 where email = 'admin@teste.local';
 ```
+
+**Classificação na nuvem.** Em cada projeto do Supabase (stage e prod), cadastre uma vez no SQL
+Editor o endereço do ai-service daquele ambiente e o segredo do webhook (o mesmo `WEBHOOK_SECRET`
+configurado no ai-service publicado), com os comandos `vault.create_secret` acima. Os valores
+ficam só no Vault do projeto. Fora do local, o endereço precisa ser `https://`: o segredo e a
+descrição da ocorrência vão nessa chamada.
 
 No painel (*Authentication*), a confirmação de e-mail fica desligada e *URL Configuration*
 aponta *Site URL* e *Redirect URLs* para o endereço da Vercel.
