@@ -103,7 +103,7 @@ container em produção. Na Vercel:
 O `web/vercel.json` faz rotas como `/quadro` funcionarem ao abrir direto no navegador.
 Cada PR ganha um link de preview automático.
 
-**Serviço de IA → container.** Ele é um servidor de verdade, então usa a imagem de produção:
+**Serviço de IA → Render.** Ele é um servidor de verdade, então usa a imagem de produção:
 
 ```bash
 docker build --target prod -t fila-ai-service ai-service
@@ -111,6 +111,41 @@ docker build --target prod -t fila-ai-service ai-service
 
 Ela roda sem reload, sem dependências de desenvolvimento e com usuário sem privilégios.
 O CI constrói a imagem a cada PR.
+
+O serviço fica no Render, com um serviço para cada ambiente. No Render, cada serviço acompanha
+uma branch só, então a `stage` e a `prod` são dois serviços:
+
+| Ambiente | Branch | Endereço | Supabase |
+| --- | --- | --- | --- |
+| stage | `stage` | <https://fila-do-sindico-r38q.onrender.com> ([`/health`](https://fila-do-sindico-r38q.onrender.com/health)) | projeto de stage |
+| prod | `prod` | <https://fila-do-sindico-31lo.onrender.com> ([`/health`](https://fila-do-sindico-31lo.onrender.com/health)) | projeto de produção (a demo) |
+
+Na `develop` não há serviço no Render: o ai-service roda local, com o Supabase local.
+
+- **Configuração** (feita pelo painel do Render, igual nos dois): Web Service com runtime
+  Docker, plano Free, este repositório com *Root Directory* `ai-service` e health check em
+  `/health`. O Render constrói o último estágio do `ai-service/Dockerfile`, que é o `prod`.
+  Só muda a branch e as variáveis.
+- **Por que dois:** cada serviço acompanha a mesma branch que o banco do seu ambiente, então o
+  código do ai-service sempre combina com o esquema do banco. As 750 horas grátis por mês são
+  do workspace inteiro, e serviço dormindo não gasta hora, então os dois cabem no plano Free.
+- **Variáveis** (no painel, *Environment*), com valores próprios em cada serviço:
+
+  | Variável | Para quê |
+  | --- | --- |
+  | `PORT` | `8000`, a porta em que o uvicorn escuta. Diz ao Render para onde mandar as requisições |
+  | `WEBHOOK_SECRET` | Segredo compartilhado com o gatilho do Supabase: o mesmo valor fica no Vault do projeto do Supabase do mesmo ambiente. Um segredo diferente em cada ambiente. Nunca no repositório |
+  | `LLM_API_KEY` | Chave da Gemini. Vazia até o serviço passar a usar o LLM |
+
+- **No Vault de cada projeto do Supabase**, `ai_service_url` aponta para o serviço do mesmo
+  ambiente (stage → endereço de stage; prod → endereço de prod).
+- **Ele dorme.** No plano grátis, o serviço desliga depois de 15 minutos sem uso e leva cerca de
+  1 minuto para voltar. **Antes de uma demo**, abra
+  <https://fila-do-sindico-31lo.onrender.com/health> e espere a resposta. Quando ele responder,
+  já está acordado.
+
+Não há `render.yaml`: a documentação do Render não garante que um Blueprint assuma os serviços
+criados pelo painel sem criar outros. Mudou algo no painel? Atualize esta seção.
 
 ## Rodar sem Docker
 
@@ -165,15 +200,16 @@ Nunca altere o banco da nuvem direto pelo painel sem criar a migração correspo
 
 ### Branches e ambientes
 
-| Branch | Função | Recebe PR de | Front | Banco |
-| --- | --- | --- | --- | --- |
-| `develop` | Integração do dia a dia; **branch base** | `feature/*` e `hotfix/*` | `localhost:5173` e um preview por PR | Supabase local de cada um |
-| `stage` | Homologação e ensaio | só `develop` | a definir (domínio fixo na Vercel) | Supabase de stage (a definir) |
-| `prod` | Produção: a demo para a banca | `stage` e `hotfix/*` | <https://fila-do-sindico.vercel.app> | Supabase de produção |
+| Branch | Função | Recebe PR de | Front | Serviço de IA | Banco |
+| --- | --- | --- | --- | --- | --- |
+| `develop` | Integração do dia a dia; **branch base** | `feature/*` e `hotfix/*` | `localhost:5173` e um preview por PR | `localhost:8000` | Supabase local de cada um |
+| `stage` | Homologação e ensaio | só `develop` | a definir (domínio fixo na Vercel) | <https://fila-do-sindico-r38q.onrender.com> | Supabase de stage |
+| `prod` | Produção: a demo para a banca | `stage` e `hotfix/*` | <https://fila-do-sindico.vercel.app> | <https://fila-do-sindico-31lo.onrender.com> | Supabase de produção |
 
 Não existem `main` nem `release/`. O CI (`origem-pr`) recusa PR para a `stage` ou a `prod` vinda
-de outra origem. Cada ambiente tem o próprio banco, e a integração do Supabase com o GitHub
-aplica as migrações quando a branch do ambiente recebe um merge.
+de outra origem. Cada ambiente tem o próprio banco e o próprio serviço de IA: a integração do
+Supabase com o GitHub aplica as migrações, e o Render publica o ai-service, quando a branch do
+ambiente recebe um merge. Para testar a IA num endereço público, promova `develop → stage`.
 
 Dia a dia:
 
