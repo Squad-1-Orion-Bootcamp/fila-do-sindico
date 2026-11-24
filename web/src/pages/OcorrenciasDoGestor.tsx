@@ -17,8 +17,8 @@ type Ocorrencia = {
   status: Status
   urgencia_atual: Urgencia | null
   created_at: string
-  condominios: { nome: string } | null
-  profiles: { nome: string } | null
+  condominio_nome: string | null
+  registrado_por_nome: string | null
 }
 
 // Mesmos rótulos da história SQUAD1-5 e da página do morador.
@@ -35,18 +35,11 @@ const ROTULO_URGENCIA: Record<Urgencia, string> = {
   baixa: 'Baixa',
 }
 
-// Sem filtro por usuário: o RLS (ocorrencias_ler_registrante_gestor_ou_admin) já devolve só
-// as ocorrências dos condomínios em que o gestor tem vínculo ativo.
+// A função do banco devolve só as ocorrências dos condomínios em que o gestor tem vínculo
+// ativo, já das mais novas para as mais antigas. A urgência não vem de .from('ocorrencias'):
+// essa coluna é fechada para o morador, e permissão por coluna vale para todo usuário logado.
 function buscarOcorrencias() {
-  return supabase
-    .from('ocorrencias')
-    .select(
-      // FK nomeada: com relatado_por (SQUAD1-30), profiles(nome) fica ambíguo (PGRST201).
-      'id, condominio_id, local, descricao, status, urgencia_atual, created_at, condominios(nome), profiles!ocorrencias_registrado_por_fkey(nome)',
-    )
-    .order('created_at', { ascending: false })
-    // Sem tipos gerados, o supabase-js acha que o join devolve lista; aqui é um objeto só.
-    .overrideTypes<Ocorrencia[], { merge: false }>()
+  return supabase.rpc('listar_ocorrencias_gestor')
 }
 
 // Valor do filtro que mostra todos os condomínios (a visão padrão do painel).
@@ -72,7 +65,8 @@ export function OcorrenciasDoGestor() {
         console.error('Erro ao carregar as ocorrências', error)
         setErro('Não foi possível carregar as ocorrências.')
       } else {
-        setItens(data)
+        // Sem tipos gerados, o supabase-js não sabe o formato que a função devolve.
+        setItens(data as Ocorrencia[])
       }
       setCarregando(false)
     })
@@ -94,10 +88,10 @@ export function OcorrenciasDoGestor() {
     setSalvandoId(null)
   }
 
-  // Filtro por condomínio (SQUAD1-31): só de interface, sobre o que o RLS já devolveu.
+  // Filtro por condomínio (SQUAD1-31): só de interface, sobre o que o banco já devolveu.
   // O padrão é ver todos os condomínios juntos.
   const condominios = [
-    ...new Map(itens.map((o) => [o.condominio_id, o.condominios?.nome ?? 'Condomínio'])),
+    ...new Map(itens.map((o) => [o.condominio_id, o.condominio_nome ?? 'Condomínio'])),
   ].sort(([, a], [, b]) => a.localeCompare(b, 'pt-BR'))
 
   const visiveis =
@@ -153,7 +147,7 @@ export function OcorrenciasDoGestor() {
               >
                 <EtiquetaPrioridade urgencia={o.urgencia_atual} />
                 <p className="cartao-meta quadro-onde">
-                  {o.condominios?.nome ?? 'Condomínio'}
+                  {o.condominio_nome ?? 'Condomínio'}
                   {o.local && ` · ${o.local}`}
                 </p>
                 <p id={`descricao-${o.id}`} className="cartao-titulo quadro-descricao">
@@ -162,7 +156,7 @@ export function OcorrenciasDoGestor() {
                 <p className="cartao-meta quadro-rodape">
                   <span className="quadro-info">
                     <User size={14} aria-hidden />
-                    {o.profiles?.nome ?? 'Pessoa não identificada'}
+                    {o.registrado_por_nome ?? 'Pessoa não identificada'}
                   </span>
                   <span aria-hidden>·</span>
                   <span className="quadro-info">
