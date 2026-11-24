@@ -81,3 +81,9 @@ def test_sem_palavra_chave_e_normal():
         "categoria": "outros",
         "justificativa": "Regra provisória: nenhuma palavra-chave reconhecida.",
     }
+
+
+def test_portao_preso_nao_vira_urgente_de_elevador():
+    resposta = client.post("/classificar", json={"descricao": "Portão da garagem ficou preso"})
+    assert resposta.json()["urgencia"] != "urgente"
+    assert resposta.json()["categoria"] != "elevador"

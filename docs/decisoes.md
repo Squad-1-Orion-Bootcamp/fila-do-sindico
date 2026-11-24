@@ -5,6 +5,12 @@ decisão for trocada, mova a antiga para "Substituídas", dizendo o que a substi
 
 ## 24/11/2026 — Classificação pelo Gemini Decision 1 (SQUAD1-84)
 
+### Produto e acesso
+
+| Decisão | Motivo |
+| --- | --- |
+| Emergência com risco de vida (incêndio, fogo, pessoa presa no elevador) entra na trava e vira sempre `urgente` | Decisão do Lucas: o formulário vai avisar para ligar 193 ou 192 (card de front à parte), mas o morador pode ignorar o aviso, ou ligar e registrar também |
+
 ### Técnica
 
 | Decisão | Motivo |
@@ -14,7 +20,7 @@ decisão for trocada, mova a antiga para "Substituídas", dizendo o que a substi
 | `modelo_versao` é `gemini-decision-1` quando o Decision 1 decidiu e `regras-provisorias` quando as regras decidiram | Saber qual modelo classificou cada ocorrência |
 | A confiança do Decision 1 vai só para o log; gravar no banco e sinalizar "revisar a prioridade" ficam para a Sprint 3 | Precisa de coluna nova (migração), fora do escopo da Sprint 2 |
 | As urgências e as categorias, com a descrição de cada uma, ficam em `ai-service/app/contrato.py`; a lista ainda é proposta | O Pedro revisa na SQUAD1-56; no Decision 1, as descrições fazem o papel do prompt |
-| Nas regras de reserva, as palavras casam inteiras, sem acento, e as regras de `urgente` olham só a descrição, como a trava | "gas" não casa com "vagas" nem "desgaste", e o local sozinho ("Abrigo de gás") não torna a ocorrência urgente. Fogo, incêndio e "preso" como `urgente` ainda precisam do aval do Lucas |
+| Nas regras de reserva, as palavras casam inteiras, sem acento, e as regras de `urgente` olham só a descrição, como a trava | "gas" não casa com "vagas" nem "desgaste", e o local sozinho ("Abrigo de gás") não torna a ocorrência urgente |
 
 ## 24/11/2026 — Webhook do ai-service (SQUAD1-63)
 

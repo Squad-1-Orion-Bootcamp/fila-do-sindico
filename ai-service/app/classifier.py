@@ -37,7 +37,7 @@ Justificador = Callable[[str, str | None, Urgencia], str]
 # A primeira regra que bate decide, então as mais graves vêm antes.
 _REGRAS: list[tuple[tuple[str, ...], Categoria, Urgencia]] = [
     (("gás", "fogo", "incêndio", "fumaça"), "seguranca", "urgente"),
-    (("preso", "presa"), "elevador", "urgente"),
+    (("preso no elevador", "presa no elevador"), "elevador", "urgente"),
     (("vazamento", "vazando", "alagado", "infiltração"), "hidraulica", "alta"),
     (("elevador",), "elevador", "alta"),
     (("barulho", "som alto", "festa"), "convivencia", "baixa"),

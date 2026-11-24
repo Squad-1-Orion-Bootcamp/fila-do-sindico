@@ -9,6 +9,13 @@ PALAVRAS_DE_RISCO: tuple[str, ...] = (
     "fumaça",
     "vazamento grave",
     "rachadura",
+    # Emergências com risco de vida (decisão do Lucas, 24/11): o formulário avisa para ligar
+    # 193 ou 192, mas, se o morador registrar mesmo assim, a ocorrência entra como urgente.
+    "incêndio",
+    "fogo",
+    "pessoa presa",
+    "preso no elevador",
+    "presa no elevador",
 )
 
 

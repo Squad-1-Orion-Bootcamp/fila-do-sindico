@@ -18,6 +18,11 @@ def classificar(ocorrencia: OcorrenciaEntrada) -> Classificacao:
         ("fumaça", "Muita fumaça saindo da casa de máquinas"),
         ("vazamento grave", "Vazamento grave na tubulação principal"),
         ("rachadura", "Apareceu uma rachadura na parede da escada"),
+        ("incêndio", "Princípio de incêndio na lixeira do térreo"),
+        ("fogo", "Fogo no quadro de luz da garagem"),
+        ("pessoa presa", "Elevador parou com uma pessoa presa"),
+        ("preso no elevador", "Meu filho ficou preso no elevador"),
+        ("presa no elevador", "Vizinha está presa no elevador social"),
     ],
 )
 def test_trava_dispara_para_cada_palavra_de_risco(termo: str, descricao: str) -> None:
@@ -29,7 +34,7 @@ def test_trava_dispara_para_cada_palavra_de_risco(termo: str, descricao: str) ->
 
 
 def test_todas_as_palavras_de_risco_tem_cobertura() -> None:
-    assert len(PALAVRAS_DE_RISCO) == 6
+    assert len(PALAVRAS_DE_RISCO) == 11
     for termo in PALAVRAS_DE_RISCO:
         assert aplicar_trava(f"Ocorrência com {termo} no local") == termo
 
@@ -45,6 +50,8 @@ def test_todas_as_palavras_de_risco_tem_cobertura() -> None:
         ("FUMACA saindo da garagem", "fumaça"),
         ("VAZAMENTO   GRAVE no subsolo", "vazamento grave"),
         ("RACHADURA na viga", "rachadura"),
+        ("INCENDIO no salão", "incêndio"),
+        ("Pessoa  PRESA na cabine", "pessoa presa"),
     ],
 )
 def test_trava_ignora_maiusculas_e_acentos(descricao: str, termo_esperado: str) -> None:
@@ -108,3 +115,15 @@ def test_trava_tem_precedencia_sobre_classificacao_baixa() -> None:
     assert resultado.urgencia == "urgente"
     assert resultado.categoria == "convivencia"
     assert resultado.justificativa == "Trava de risco: a descrição menciona 'choque'."
+
+
+@pytest.mark.parametrize(
+    "descricao",
+    [
+        "Fogão do salão de festas não acende",
+        "Fogos de artifício no réveillon do prédio",
+        "Portão da garagem ficou preso aberto",
+    ],
+)
+def test_novos_termos_de_emergencia_nao_disparam_por_engano(descricao: str) -> None:
+    assert aplicar_trava(descricao) is None
