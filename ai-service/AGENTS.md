@@ -20,7 +20,10 @@ uv add <pacote>          # nunca pip install
 - `app/banco.py` — API REST do Supabase com a chave secreta (ler a ocorrência, chamar
   `gravar_classificacao`)
 - `app/schemas.py` — contratos Pydantic de entrada e saída
-- `app/classifier.py` — lógica de classificação (regras provisórias na Sprint 1; LLM na Sprint 2)
+- `app/contrato.py` — urgências e categorias com as descrições (fonte única do contrato)
+- `app/classifier.py` — orquestração: trava → Decision 1 → regras de reserva → justificativa
+- `app/decisao.py` — System 1: Gemini Decision 1 (Decisions API, `v1beta`)
+- `app/trava.py` — trava de palavras de risco
 - `app/config.py` — variáveis de ambiente via `pydantic-settings`
 - `tests/` — pytest com `TestClient`
 
