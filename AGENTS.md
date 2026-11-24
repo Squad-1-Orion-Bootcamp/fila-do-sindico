@@ -80,9 +80,19 @@ condomínio é opcional, nunca a visão padrão.
   (homologação) e `stage → prod` (produção, com tag `vX.Y.Z`). A `stage` só recebe da `develop`;
   a `prod` só recebe da `stage` ou de `hotfix/squad1-123-descricao`, que sai da `prod` e depois
   entra também na `develop`. Não existem `main` nem `release/`.
-- **PR que depende de outra ainda aberta**: a branch sai da `develop` e traz a outra por
-  `git merge`; a PR aponta para a `develop` (nunca para a branch da outra PR), como rascunho,
-  com "Depende da #NN" no topo. Detalhes no `README.md`, seção "PR que depende de outra".
+- **PR que depende de outra ainda aberta**:
+  1. Atualize a `develop` (`git switch develop` e `git pull`) e crie a branch da issue a partir
+     dela: `git switch -c feature/squad1-XX-descricao`.
+  2. Traga a branch da PR dependente por merge, por exemplo:
+     `git merge origin/feature/squad1-YY-descricao`.
+  3. Aponte a PR nova para `develop` (nunca para a branch da dependência), como rascunho,
+     começando a descrição com `Depende da #YY`.
+  4. Enquanto a dependência não entrar em `develop`, é esperado que o diff da PR nova também
+     mostre os commits dela. Quando a PR dependente for atualizada durante a revisão, incorpore
+     os novos commits com outro `git merge origin/feature/squad1-YY-descricao`.
+  5. Se houver conflito com a `develop`, resolva com `git merge origin/develop`. Não faça rebase:
+     as PRs apontam para `develop` e os merge commits preservam a ordem do Gitflow.
+  Consulte também a seção "PR que depende de outra" no `README.md`.
 - **Conventional Commits** em português: `feat: tela de cadastro do gestor`.
 - **Título de PR**: `tipo: descrição (SQUAD1-123)`, ex.: `feat: cadastro do gestor (SQUAD1-12)`.
   Vira a mensagem do merge commit na `develop` (merge comum, nunca squash: os commits da branch
@@ -90,6 +100,8 @@ condomínio é opcional, nunca a visão padrão.
   prints se mudou tela.
 - Mudanças pequenas e focadas na issue. Não refatore o que não foi pedido.
 - Mudou tabela, rota ou variável de ambiente? Atualize o README da pasta.
+- **Git remoto:** não faça push, abra/altere PR ou execute outra escrita remota sem autorização
+  explícita da usuária. Use a identidade Git já configurada para ela e não a substitua.
 
 ## Skills e revisores
 

@@ -36,8 +36,9 @@ Migrações: `20261116000000_profiles.sql` (perfil), `20261118033000_modelo_de_d
 `20261118191442_alterar_status_ocorrencia.sql` (gestor muda o status da ocorrência),
 `20261118210426_ocorrencia_pelo_gestor.sql`, `20261124035604_classificacao_ia.sql` (gatilho que
 avisa o ai-service e gravação da classificação), `20261124041425_morador_sem_prioridade.sql`
-(o morador não lê a prioridade nem a classificação) e `20261124045005_gestor_altera_prioridade.sql`
-(o gestor confirma ou muda a prioridade).
+(o morador não lê a prioridade nem a classificação), `20261124045005_gestor_altera_prioridade.sql`
+(o gestor confirma ou muda a prioridade) e `20261124205149_funcoes_publicas_delegacao.sql`
+(consulta e conclusão pelo link público).
 
 | Tabela | Para quê |
 | --- | --- |
@@ -103,6 +104,8 @@ solicitação de vínculo pendente. Campo faltando = o cadastro falha com a mens
 | `registrar_ocorrencia_gestor(p_condominio_id, p_descricao, p_origem, p_local, p_relatado_por)` | gestor ativo do condomínio. Grava em nome de quem chama, com status `novo`. `p_origem`: `whatsapp`, `telefone`, `presencial` ou `vistoria`. `p_relatado_por` é opcional e precisa ser morador ou funcionário ativo do mesmo condomínio |
 | `encerrar_vinculo(p_vinculo_id, p_motivo)` | vínculo de gestor: admin; de morador ou funcionário: gestor do condomínio ou admin |
 | `alterar_status_ocorrencia(p_ocorrencia_id, p_status)` | gestor ativo do condomínio. Muda só o status (`novo`, `em_andamento`, `concluido`), preenche ou limpa `concluido_em` e grava em `historico_status` |
+| `ver_tarefa(p_token)` | visitante (`anon`). Devolve apenas nome do condomínio, local, descrição e situação para token ativo e ocorrência ainda delegada; token inválido, revogado, concluído ou fora de `delegado` resulta em lista vazia |
+| `concluir_tarefa(p_token, p_comentario)` | visitante (`anon`). Exige delegação ativa e ocorrência `delegado`, trava a ocorrência antes de revalidar o token, limita comentário a 800 caracteres, conclui ocorrência e delegação e grava histórico com `autor_id` nulo |
 | `definir_prioridade_ocorrencia(p_ocorrencia_id, p_urgencia, p_justificativa)` | gestor ativo do condomínio. Confirma ou muda a prioridade (`urgente`, `alta`, `normal` ou `baixa`); `p_justificativa` é opcional. Grava em `decisoes` (`acao = 'definir_prioridade'`) e atualiza `urgencia_atual`. Depois disso, a IA não muda mais a urgência. Não vale para ocorrência concluída |
 | `listar_ocorrencias_gestor()` | qualquer usuário logado; devolve só as ocorrências dos condomínios em que quem chama é gestor ativo (para os outros, lista vazia), das mais novas para as mais antigas: `id`, `condominio_id`, `condominio_nome`, `local`, `descricao`, `status`, `urgencia_atual`, `categoria_atual`, `created_at`, `registrado_por_nome` |
 

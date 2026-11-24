@@ -3,6 +3,15 @@
 Registro curto das decisões, com o motivo. Decisão nova entra no topo da sua seção. Quando uma
 decisão for trocada, mova a antiga para "Substituídas", dizendo o que a substituiu.
 
+## 24/11/2026 — Link público da tarefa (SQUAD1-75)
+
+### Técnica
+
+| Decisão | Motivo |
+| --- | --- |
+| `ver_tarefa` devolve lista vazia e `concluir_tarefa` usa a mesma mensagem genérica quando o token é inválido, revogado, concluído ou a ocorrência não está delegada | Não revelar se um token já foi válido nem qual é o estado da tarefa |
+| A conclusão pelo visitante grava o histórico com `autor_id = null` | O funcionário não tem conta e a coluna permite ausência de autor |
+
 ## 24/11/2026 — Gestor altera a prioridade (SQUAD1-60)
 
 ### Produto e acesso
