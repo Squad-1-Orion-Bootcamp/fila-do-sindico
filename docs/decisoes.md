@@ -3,19 +3,6 @@
 Registro curto das decisões, com o motivo. Decisão nova entra no topo da sua seção. Quando uma
 decisão for trocada, mova a antiga para "Substituídas", dizendo o que a substituiu.
 
-## 23/11/2026 — Link de delegação (US 3)
-
-### Produto e acesso
-
-Aprovadas pelo Lucas em 23/11 (SQUAD1-72).
-
-| Decisão | Motivo |
-| --- | --- |
-| Desativar um funcionário **não** mexe no link de uma tarefa já delegada a ele | A tarefa já foi combinada com ele; desativar só tira o funcionário da lista na hora de delegar de novo |
-| Qualquer troca de status pelo gestor (Novo, Em andamento ou Concluído) **revoga** o link ativo. "Assumir de volta" é isso, sem botão próprio | O gestor retoma a ocorrência pelo que já existe no painel, e o link antigo para de valer |
-| O link **não expira** com o tempo: só deixa de valer quando a tarefa é concluída, quando o responsável é trocado ou quando o gestor muda o status | Tarefas de rotina podem levar dias; um prazo fixo derrubaria links ainda em uso |
-| O comentário do funcionário ao concluir é visto **só pelo gestor**. O morador continua vendo apenas o status | Mesma regra da SQUAD1-56: o morador vê só o status |
-
 ## 24/11/2026 — Classificação pela IA no banco (SQUAD1-59)
 
 ### Produto e acesso
@@ -36,6 +23,19 @@ Aprovadas pelo Lucas em 23/11 (SQUAD1-72).
 | `gravar_classificacao` só pode ser chamada pela `service_role`, e chamar de novo para a mesma ocorrência não muda nada | Só o ai-service grava a classificação; o `pg_net` e o "classificar pendentes" podem mandar a mesma ocorrência duas vezes |
 | Cada classificação guarda a origem: `ia`, `regra`, `ia+trava` ou `regra+trava` | Mostra quantas vezes a IA respondeu e quantas vezes as regras assumiram (proposta da IA de 23/11) |
 | O painel do gestor lê as ocorrências pela função `listar_ocorrencias_gestor()`, e não por `.from('ocorrencias')` | Gestor e morador usam o mesmo papel no banco, e permissão por coluna vale para o papel inteiro: para fechar `urgencia_atual` para o morador, a coluna sai da leitura direta de todos |
+
+## 23/11/2026 — Link de delegação (US 3)
+
+### Produto e acesso
+
+Aprovadas pelo Lucas em 23/11 (SQUAD1-72).
+
+| Decisão | Motivo |
+| --- | --- |
+| Desativar um funcionário **não** mexe no link de uma tarefa já delegada a ele | A tarefa já foi combinada com ele; desativar só tira o funcionário da lista na hora de delegar de novo |
+| Qualquer troca de status pelo gestor (Novo, Em andamento ou Concluído) **revoga** o link ativo. "Assumir de volta" é isso, sem botão próprio | O gestor retoma a ocorrência pelo que já existe no painel, e o link antigo para de valer |
+| O link **não expira** com o tempo: só deixa de valer quando a tarefa é concluída, quando o responsável é trocado ou quando o gestor muda o status | Tarefas de rotina podem levar dias; um prazo fixo derrubaria links ainda em uso |
+| O comentário do funcionário ao concluir é visto **só pelo gestor**. O morador continua vendo apenas o status | Mesma regra da SQUAD1-56: o morador vê só o status |
 
 ## 23/11/2026 — Publicação do ai-service
 
