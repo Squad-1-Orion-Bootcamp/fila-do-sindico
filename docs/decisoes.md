@@ -3,6 +3,15 @@
 Registro curto das decisões, com o motivo. Decisão nova entra no topo da sua seção. Quando uma
 decisão for trocada, mova a antiga para "Substituídas", dizendo o que a substituiu.
 
+## 24/11/2026 — Status Delegado (SQUAD1-57)
+
+### Produto e acesso
+
+| Decisão | Motivo |
+| --- | --- |
+| A ocorrência tem quatro status: `novo`, `em_andamento`, `delegado` e `concluido`. `delegado` só vem da delegação para um funcionário (US 3); a troca manual do gestor continua entre os outros três | A US 1 pede as quatro colunas, e a US 3 diz que o status muda para Delegado ao delegar |
+| O gestor pode tirar uma ocorrência de `delegado` trocando o status manualmente | A US 3 prevê que o síndico "assuma de volta" ou conclua; o link antigo deixa de valer (SQUAD1-74) |
+
 ## 19/11/2026 — Branches e ambientes
 
 ### Técnica

@@ -33,8 +33,9 @@ Studio local: http://127.0.0.1:54323
 
 Migrações: `20261116000000_profiles.sql` (perfil), `20261118033000_modelo_de_dados.sql` (resto),
 `20261118050000_ajustes_revisao_rls.sql`, `20261118180436_registrar_ocorrencia.sql`,
-`20261118191442_alterar_status_ocorrencia.sql` (gestor muda o status da ocorrência) e
-`20261118210426_ocorrencia_pelo_gestor.sql`.
+`20261118191442_alterar_status_ocorrencia.sql` (gestor muda o status da ocorrência),
+`20261118210426_ocorrencia_pelo_gestor.sql` e `20261124192621_status_delegado.sql` (status
+`delegado`).
 
 | Tabela | Para quê |
 | --- | --- |
@@ -51,7 +52,9 @@ Migrações: `20261116000000_profiles.sql` (perfil), `20261118033000_modelo_de_d
 Ainda não existem: `conversas` e `mensagens` (chat) e a escrita de anexos (entram com as
 histórias que usam). A ocorrência é criada só pelas funções `registrar_ocorrencia` (morador) e
 `registrar_ocorrencia_gestor` (descrição de até 800 caracteres), e o status muda só por
-`alterar_status_ocorrencia`. `ocorrencias.origem` diz o canal (`aplicativo` para a do morador;
+`alterar_status_ocorrencia`. O status é `novo`, `em_andamento`, `delegado` ou `concluido`;
+`delegado` só vem da delegação para um funcionário (US 3), nunca da troca manual.
+`ocorrencias.origem` diz o canal (`aplicativo` para a do morador;
 `whatsapp`, `telefone`, `presencial` ou `vistoria` para a do gestor) e `relatado_por`, opcional,
 aponta para o morador que relatou ao gestor.
 
@@ -91,7 +94,7 @@ solicitação de vínculo pendente. Campo faltando = o cadastro falha com a mens
 | `registrar_ocorrencia(p_descricao, p_local, p_condominio_id)` | morador (ou funcionário) com vínculo ativo. Grava em nome de quem chama, com status `novo`. `p_local` é opcional; `p_condominio_id` só é exigido de quem tem vínculo ativo em mais de um condomínio |
 | `registrar_ocorrencia_gestor(p_condominio_id, p_descricao, p_origem, p_local, p_relatado_por)` | gestor ativo do condomínio. Grava em nome de quem chama, com status `novo`. `p_origem`: `whatsapp`, `telefone`, `presencial` ou `vistoria`. `p_relatado_por` é opcional e precisa ser morador ou funcionário ativo do mesmo condomínio |
 | `encerrar_vinculo(p_vinculo_id, p_motivo)` | vínculo de gestor: admin; de morador ou funcionário: gestor do condomínio ou admin |
-| `alterar_status_ocorrencia(p_ocorrencia_id, p_status)` | gestor ativo do condomínio. Muda só o status (`novo`, `em_andamento`, `concluido`), preenche ou limpa `concluido_em` e grava em `historico_status` |
+| `alterar_status_ocorrencia(p_ocorrencia_id, p_status)` | gestor ativo do condomínio. Muda só o status (`novo`, `em_andamento`, `concluido`; não aceita `delegado`, mas tira a ocorrência de `delegado`), preenche ou limpa `concluido_em` e grava em `historico_status` |
 
 Ninguém aprova, recusa ou encerra o próprio pedido ou vínculo. Motivo é obrigatório na recusa e
 no encerramento.
