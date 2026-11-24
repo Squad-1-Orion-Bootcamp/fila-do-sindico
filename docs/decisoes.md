@@ -3,6 +3,47 @@
 Registro curto das decisões, com o motivo. Decisão nova entra no topo da sua seção. Quando uma
 decisão for trocada, mova a antiga para "Substituídas", dizendo o que a substituiu.
 
+## 24/11/2026 — Webhook do ai-service (SQUAD1-63)
+
+### Técnica
+
+| Decisão | Motivo |
+| --- | --- |
+| O ai-service usa os valores de urgência do banco (`urgente`, `alta`, `normal`, `baixa`) também no `/classificar`; as regras provisórias marcam gás, fogo e pessoa presa como `urgente` | Contrato da SQUAD1-56; com `media`, o banco recusaria a gravação |
+| O `/webhook` usa só o `id` do aviso: a descrição e o local vêm do banco, com a `service_role`, e a ocorrência já classificada é ignorada antes de chamar o classificador | Com o segredo vazado, ninguém muda a prioridade mandando outro texto; e o reenvio do gatilho não gasta a cota da Gemini (sugestões do `revisor-rls` na #24) |
+| Com `WEBHOOK_SECRET` vazio no servidor, o `/webhook` recusa toda chamada (401) | Um servidor sem segredo configurado não pode aceitar qualquer chamada |
+
+## 24/11/2026 — Classificação pela IA no banco (SQUAD1-59)
+
+### Produto e acesso
+
+| Decisão | Motivo |
+| --- | --- |
+| O morador não vê a prioridade nem o motivo da IA da própria ocorrência, só o status. Vale no banco, não só na tela: ele não lê `urgencia_atual`, `categoria_atual` nem `classificacoes_ia` pela API | Decisão do Lucas (SQUAD1-56); com a SQUAD1-59 esses dados passam a ser preenchidos |
+| As decisões do gestor (`decisoes`: prioridade escolhida, justificativa, notas, destinatário) também são só do gestor ativo e do admin. Responde a SQUAD1-49 | Mesma regra: o morador vê só o status (SQUAD1-56 e US 3, em que o comentário do funcionário fica só para o síndico) |
+
+### Técnica
+
+| Decisão | Motivo |
+| --- | --- |
+| O banco avisa o ai-service por um gatilho com `pg_net` criado em migração, e não pelos "Database Webhooks" do painel | A regra 3 do `AGENTS.md`: toda mudança no banco é migração; o gatilho vai igual para local, stage e prod |
+| O endereço do ai-service e o segredo do webhook ficam no Vault de cada banco, cadastrados à mão uma vez por ambiente | Cada ambiente tem o próprio ai-service, e a regra 6 proíbe segredo no código |
+| O gatilho nunca impede o registro da ocorrência: sem o Vault configurado ou com erro no `pg_net`, a ocorrência fica sem prioridade | Registrar a ocorrência é mais importante que classificá-la na hora; o "classificar pendentes" (SQUAD1-80) pega depois |
+| `gravar_classificacao` só pode ser chamada pela `service_role`, e chamar de novo para a mesma ocorrência não muda nada | Só o ai-service grava a classificação; o `pg_net` e o "classificar pendentes" podem mandar a mesma ocorrência duas vezes |
+| Cada classificação guarda a origem: `ia`, `regra`, `ia+trava` ou `regra+trava` | Mostra quantas vezes a IA respondeu e quantas vezes as regras assumiram (proposta da IA de 23/11) |
+| O painel do gestor lê as ocorrências pela função `listar_ocorrencias_gestor()`, e não por `.from('ocorrencias')` | Gestor e morador usam o mesmo papel no banco, e permissão por coluna vale para o papel inteiro: para fechar `urgencia_atual` para o morador, a coluna sai da leitura direta de todos |
+
+## 23/11/2026 — Publicação do ai-service
+
+### Técnica
+
+| Decisão | Motivo |
+| --- | --- |
+| ai-service publicado no Render, plano grátis (SQUAD1-65) | Custo zero. O risco de o serviço dormir depois de 15 minutos sem uso é coberto pelo endpoint "classificar pendentes" (cartão a criar) |
+| Dois serviços no Render, como na Vercel: um acompanha a `stage` (Supabase de stage), outro a `prod` (Supabase de produção). A `develop` não tem serviço: roda local | No Render, cada serviço acompanha uma branch só. Com o serviço na mesma branch do banco do ambiente, o código e o esquema sempre combinam. As 750 horas grátis são do workspace e serviço dormindo não gasta hora |
+| Um `WEBHOOK_SECRET` diferente em cada ambiente | Se um vazar, o outro continua protegido |
+| Sem `render.yaml`: a configuração do Render fica documentada no README | A documentação do Render não garante que um Blueprint assuma os serviços criados pelo painel sem criar outros |
+
 ## 19/11/2026 — Branches e ambientes
 
 ### Técnica
