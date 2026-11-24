@@ -34,9 +34,9 @@ Studio local: http://127.0.0.1:54323
 Migrações: `20261116000000_profiles.sql` (perfil), `20261118033000_modelo_de_dados.sql` (resto),
 `20261118050000_ajustes_revisao_rls.sql`, `20261118180436_registrar_ocorrencia.sql`,
 `20261118191442_alterar_status_ocorrencia.sql` (gestor muda o status da ocorrência),
-`20261118210426_ocorrencia_pelo_gestor.sql`, `20261124174433_criar_funcionarios.sql` e
-`20261124200657_criar_delegacoes.sql` (delegação ao funcionário pelo link)
-(funcionários do condomínio).
+`20261118210426_ocorrencia_pelo_gestor.sql`, `20261124174433_criar_funcionarios.sql`
+(funcionários do condomínio) e `20261124200657_criar_delegacoes.sql` (delegação ao funcionário
+pelo link).
 
 | Tabela | Para quê |
 | --- | --- |
