@@ -103,7 +103,7 @@ container em produção. Na Vercel:
 O `web/vercel.json` faz rotas como `/quadro` funcionarem ao abrir direto no navegador.
 Cada PR ganha um link de preview automático.
 
-**Serviço de IA → container.** Ele é um servidor de verdade, então usa a imagem de produção:
+**Serviço de IA → Render.** Ele é um servidor de verdade, então usa a imagem de produção:
 
 ```bash
 docker build --target prod -t fila-ai-service ai-service
@@ -111,6 +111,30 @@ docker build --target prod -t fila-ai-service ai-service
 
 Ela roda sem reload, sem dependências de desenvolvimento e com usuário sem privilégios.
 O CI constrói a imagem a cada PR.
+
+Em produção, o serviço fica no Render: <https://fila-do-sindico.onrender.com> (saúde em
+[`/health`](https://fila-do-sindico.onrender.com/health)).
+
+- **Configuração** (feita pelo painel do Render): Web Service com runtime Docker, plano Free,
+  este repositório com *Root Directory* `ai-service` e health check em `/health`. O Render
+  constrói o último estágio do `ai-service/Dockerfile`, que é o `prod`.
+- **Branch:** durante a Sprint 2, acompanha a `develop`. Depois da promoção
+  `develop → stage → prod`, passa a acompanhar a `prod`, como a Vercel.
+- **Variáveis** (no painel, *Environment*):
+
+  | Variável | Para quê |
+  | --- | --- |
+  | `PORT` | `8000`, a porta em que o uvicorn escuta. Diz ao Render para onde mandar as requisições |
+  | `WEBHOOK_SECRET` | Segredo compartilhado com o gatilho do Supabase: o mesmo valor fica no Vault do Supabase. Nunca no repositório |
+  | `LLM_API_KEY` | Chave da Gemini. Vazia até o serviço passar a usar o LLM |
+
+- **Ele dorme.** No plano grátis, o serviço desliga depois de 15 minutos sem uso e leva cerca de
+  1 minuto para voltar. **Antes de uma demo**, abra
+  <https://fila-do-sindico.onrender.com/health> e espere a resposta. Quando ele responder, já
+  está acordado.
+
+Não há `render.yaml`: a documentação do Render não garante que um Blueprint assuma o serviço
+criado pelo painel sem criar um segundo. Mudou algo no painel? Atualize esta seção.
 
 ## Rodar sem Docker
 
