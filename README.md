@@ -71,7 +71,11 @@ select vault.create_secret('<o WEBHOOK_SECRET do ai-service/.env>', 'ai_webhook_
 ```
 
 Sem esses dois valores, a ocorrência é registrada normalmente e fica em "Aguardando triagem".
-Para conferir as chamadas: `select * from net._http_response order by id desc;`.
+Para conferir as chamadas: `select * from net._http_response order by id desc;` (202 é sucesso,
+401 é segredo diferente do `ai-service/.env`).
+
+Para o ai-service gravar a classificação, o `ai-service/.env` também precisa da
+`SUPABASE_SERVICE_ROLE_KEY` local (a `service_role` que o `npx supabase status` mostra).
 
 ## Deploy
 
@@ -144,7 +148,9 @@ Em produção, o serviço fica no Render: <https://fila-do-sindico.onrender.com>
   | Variável | Para quê |
   | --- | --- |
   | `PORT` | `8000`, a porta em que o uvicorn escuta. Diz ao Render para onde mandar as requisições |
-  | `WEBHOOK_SECRET` | Segredo compartilhado com o gatilho do Supabase: o mesmo valor fica no Vault do Supabase. Nunca no repositório |
+  | `WEBHOOK_SECRET` | Segredo compartilhado com o gatilho do Supabase: o mesmo valor fica no Vault do Supabase. Nunca no repositório. Vazio, o `/webhook` recusa tudo |
+  | `SUPABASE_URL` | URL do projeto do Supabase do ambiente (stage agora, prod depois da promoção) |
+  | `SUPABASE_SERVICE_ROLE_KEY` | Chave `service_role` desse mesmo projeto: o webhook lê a ocorrência e grava a classificação com ela. Só no Render, nunca no front nem no repositório |
   | `LLM_API_KEY` | Chave da Gemini. Vazia até o serviço passar a usar o LLM |
 
 - **Ele dorme.** No plano grátis, o serviço desliga depois de 15 minutos sem uso e leva cerca de

@@ -3,6 +3,16 @@
 Registro curto das decisões, com o motivo. Decisão nova entra no topo da sua seção. Quando uma
 decisão for trocada, mova a antiga para "Substituídas", dizendo o que a substituiu.
 
+## 24/11/2026 — Webhook do ai-service (SQUAD1-63)
+
+### Técnica
+
+| Decisão | Motivo |
+| --- | --- |
+| O ai-service usa os valores de urgência do banco (`urgente`, `alta`, `normal`, `baixa`) também no `/classificar`; as regras provisórias marcam gás, fogo e pessoa presa como `urgente` | Contrato da SQUAD1-56; com `media`, o banco recusaria a gravação |
+| O `/webhook` usa só o `id` do aviso: a descrição e o local vêm do banco, com a `service_role`, e a ocorrência já classificada é ignorada antes de chamar o classificador | Com o segredo vazado, ninguém muda a prioridade mandando outro texto; e o reenvio do gatilho não gasta a cota da Gemini (sugestões do `revisor-rls` na #24) |
+| Com `WEBHOOK_SECRET` vazio no servidor, o `/webhook` recusa toda chamada (401) | Um servidor sem segredo configurado não pode aceitar qualquer chamada |
+
 ## 24/11/2026 — Classificação pela IA no banco (SQUAD1-59)
 
 ### Produto e acesso
