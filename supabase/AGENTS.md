@@ -34,7 +34,8 @@ Studio local: http://127.0.0.1:54323
 Migrações: `20261116000000_profiles.sql` (perfil), `20261118033000_modelo_de_dados.sql` (resto),
 `20261118050000_ajustes_revisao_rls.sql`, `20261118180436_registrar_ocorrencia.sql`,
 `20261118191442_alterar_status_ocorrencia.sql` (gestor muda o status da ocorrência),
-`20261118210426_ocorrencia_pelo_gestor.sql` e `20261124174433_criar_funcionarios.sql`
+`20261118210426_ocorrencia_pelo_gestor.sql`, `20261124174433_criar_funcionarios.sql` e
+`20261124200657_criar_delegacoes.sql` (delegação ao funcionário pelo link)
 (funcionários do condomínio).
 
 | Tabela | Para quê |
@@ -49,6 +50,7 @@ Migrações: `20261116000000_profiles.sql` (perfil), `20261118033000_modelo_de_d
 | `documentos_comprobatorios` | Comprovantes no bucket privado `documentos`, caminho `<uid>/<arquivo>` |
 | `ocorrencias`, `anexos`, `classificacoes_ia`, `decisoes`, `historico_status` | Ocorrências, arquivos, sugestões da IA, decisões e mudanças de status |
 | `funcionarios` | Contatos dos funcionários de cada condomínio, **sem conta nem login**, cadastrados pelo gestor para a delegação: `nome`, `celular` (só dígitos, `55` + DDD + 9 dígitos), `funcao` (texto livre), `ativo`, `criado_por`. Celular único entre os ativos do mesmo condomínio. Não usa `vinculos` |
+| `delegacoes` | Ocorrências delegadas a funcionários (US 3): `ocorrencia_id`, `condominio_id`, `funcionario_id` (do mesmo condomínio, garantido por chave composta), `situacao` (`ativa`, `concluida`, `revogada`), `comentario` do funcionário (até 800, só na conclusão), `criado_por` e as datas. Guarda só o hash do token (`token_hash`, SHA-256); o token puro nunca é gravado. Só uma delegação ativa por ocorrência |
 
 Ainda não existem: `conversas` e `mensagens` (chat) e a escrita de anexos (entram com as
 histórias que usam). A ocorrência é criada só pelas funções `registrar_ocorrencia` (morador) e
@@ -72,6 +74,10 @@ aponta para o morador que relatou ao gestor.
   só é escrita por `cadastrar_funcionario` e `desativar_funcionario`. Desativado continua na lista
   (`ativo = false`) e some da delegação; desativar não mexe em tarefas já delegadas. Edição e
   reativação ficam fora da Sprint 2: para "reativar", cadastre de novo.
+- `delegacoes` só é lida pelo gestor ativo do condomínio, e nunca a coluna `token_hash`
+  (morador, visitante e admin não leem). Não tem `insert`, `update` nem `delete` livres: a escrita
+  é pelas funções do gestor (SQUAD1-74) e do link público (SQUAD1-75). Visitante não lê a tabela
+  de jeito nenhum; a página do link usa só as funções.
 
 ### Cadastro (`supabase.auth.signUp`, campo `options.data`)
 
