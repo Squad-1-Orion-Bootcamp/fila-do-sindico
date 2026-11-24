@@ -26,4 +26,5 @@ uv run ruff check . && uv run ruff format --check .
 - `app/main.py`: rotas (`GET /health`, `POST /classificar`)
 - `app/schemas.py`: contratos de entrada e saída (urgência, categoria, justificativa)
 - `app/classifier.py`: lógica de classificação (provisória)
+- `app/trava.py`: trava de palavras de risco (força urgência `urgente`)
 - `app/config.py`: variáveis de ambiente
