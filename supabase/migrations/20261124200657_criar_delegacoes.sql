@@ -6,6 +6,9 @@
 -- O banco guarda só o hash do token (decisão de 24/11): a função de delegar devolve o token
 -- uma vez, para o link do WhatsApp. Se a tabela vazar, nenhum link funciona.
 
+-- pgcrypto (gen_random_bytes e digest) já vem no Supabase, no schema extensions; garante aqui.
+create extension if not exists pgcrypto with schema extensions;
+
 -- Chave (id, condominio_id) em funcionarios para a FK composta abaixo: garante no banco que o
 -- funcionário é do mesmo condomínio da ocorrência.
 alter table public.funcionarios
