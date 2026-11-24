@@ -106,7 +106,7 @@ grant execute on function public.gravar_classificacao(uuid, text, text, text, te
 -- O endereço e o segredo ficam no Vault de cada banco (local, stage e prod), nunca aqui:
 --   select vault.create_secret('<endereço do ai-service>', 'ai_service_url');
 --   select vault.create_secret('<segredo do webhook>', 'ai_webhook_secret');
--- Passo a passo no supabase/README.md.
+-- Passo a passo no README.md da raiz (seção do ambiente local e de deploy).
 create or replace function private.avisar_ai_service()
 returns trigger
 language plpgsql
@@ -139,7 +139,9 @@ begin
         'Content-Type', 'application/json',
         'X-Webhook-Secret', v_segredo
       ),
-      timeout_milliseconds := 5000
+      -- 90 s: no plano grátis o Render dorme depois de 15 minutos e leva de 13 a 18 s para
+      -- acordar. O pg_net é assíncrono (envia depois do commit), então o registro não espera.
+      timeout_milliseconds := 90000
     );
   exception when others then
     raise log 'avisar_ai_service: falha ao avisar o ai-service: %', sqlerrm;
