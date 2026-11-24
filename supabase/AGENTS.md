@@ -34,9 +34,11 @@ Studio local: http://127.0.0.1:54323
 Migrações: `20261116000000_profiles.sql` (perfil), `20261118033000_modelo_de_dados.sql` (resto),
 `20261118050000_ajustes_revisao_rls.sql`, `20261118180436_registrar_ocorrencia.sql`,
 `20261118191442_alterar_status_ocorrencia.sql` (gestor muda o status da ocorrência),
-`20261118210426_ocorrencia_pelo_gestor.sql`, `20261124174433_criar_funcionarios.sql`
-(funcionários do condomínio) e `20261124200657_criar_delegacoes.sql` (delegação ao funcionário
-pelo link).
+`20261118210426_ocorrencia_pelo_gestor.sql`, `20261124035604_classificacao_ia.sql` (gatilho que
+avisa o ai-service e gravação da classificação), `20261124041425_morador_sem_prioridade.sql` (o
+morador não lê a prioridade nem a classificação), `20261124174433_criar_funcionarios.sql`
+(funcionários do condomínio) e `20261124200657_criar_delegacoes.sql` (delegação ao funcionário pelo
+link).
 
 | Tabela | Para quê |
 | --- | --- |
@@ -78,6 +80,14 @@ aponta para o morador que relatou ao gestor.
   (morador, visitante e admin não leem). Não tem `insert`, `update` nem `delete` livres: a escrita
   é pelas funções do gestor (SQUAD1-74) e do link público (SQUAD1-75). Visitante não lê a tabela
   de jeito nenhum; a página do link usa só as funções.
+- O morador não vê a prioridade nem o motivo da IA, só o status. `urgencia_atual` e
+  `categoria_atual` ficam fora da leitura direta de `ocorrencias` para todo usuário logado
+  (permissão por coluna vale para o papel inteiro), e `classificacoes_ia` e `decisoes` só são
+  lidas pelo gestor ativo e pelo admin. O painel do gestor lê a lista com a prioridade pela função
+  `listar_ocorrencias_gestor()`. Um `.select('*')` ou com `urgencia_atual` em `ocorrencias` dá erro
+  de permissão.
+- `ocorrencias` é liberada por coluna para `authenticated`: coluna nova que o front precise ler
+  entra na migração com `grant select (coluna) on public.ocorrencias to authenticated`.
 
 ### Cadastro (`supabase.auth.signUp`, campo `options.data`)
 
@@ -106,9 +116,27 @@ solicitação de vínculo pendente. Campo faltando = o cadastro falha com a mens
 | `alterar_status_ocorrencia(p_ocorrencia_id, p_status)` | gestor ativo do condomínio. Muda só o status (`novo`, `em_andamento`, `concluido`), preenche ou limpa `concluido_em` e grava em `historico_status` |
 | `cadastrar_funcionario(p_condominio_id, p_nome, p_celular, p_funcao)` | gestor ativo do condomínio. Devolve o `id`. `p_celular` só com dígitos (`5511999998888`; o front converte a máscara); nome até 120 e função até 60 caracteres (a função tira os espaços das pontas). Recusa celular já usado por um funcionário ativo do mesmo condomínio |
 | `desativar_funcionario(p_funcionario_id)` | gestor ativo do condomínio do funcionário. Marca `ativo = false`; repetir não muda nada |
+| `listar_ocorrencias_gestor()` | qualquer usuário logado; devolve só as ocorrências dos condomínios em que quem chama é gestor ativo (para os outros, lista vazia), das mais novas para as mais antigas: `id`, `condominio_id`, `condominio_nome`, `local`, `descricao`, `status`, `urgencia_atual`, `categoria_atual`, `created_at`, `registrado_por_nome` |
 
 Ninguém aprova, recusa ou encerra o próprio pedido ou vínculo. Motivo é obrigatório na recusa e
 no encerramento.
+
+### Classificação pela IA
+
+- O gatilho `classificar_ocorrencia` (`after insert` em `ocorrencias`) chama
+  `private.avisar_ai_service()`, que envia `{id, descricao, local}` para `<ai_service_url>/webhook`
+  pelo `pg_net`, com o cabeçalho `X-Webhook-Secret`. Nada de quem registrou sai do banco.
+- `ai_service_url` e `ai_webhook_secret` ficam no Vault de cada banco (passo a passo no
+  `README.md` da raiz). Sem eles, ou se o `pg_net` falhar, a ocorrência é registrada normalmente
+  e fica sem prioridade ("Aguardando triagem").
+- O schema `private` guarda funções internas: sem acesso para `anon` e `authenticated` e fora da API.
+- O Supabase dá a `anon` e `authenticated` acesso ao schema `net` do `pg_net`, onde o segredo fica
+  até o envio, e uma migração não consegue tirar. Ele só fica protegido porque a API não expõe `net`:
+  nunca inclua `net` ou `extensions` nos schemas da API (`config.toml` ou painel).
+
+| Função | Quem pode |
+| --- | --- |
+| `gravar_classificacao(p_ocorrencia_id, p_urgencia, p_categoria, p_justificativa, p_origem, p_modelo_versao)` | só a `service_role` (o ai-service; o front nunca chama). `p_urgencia`: `urgente`, `alta`, `normal` ou `baixa`. `p_origem`: `ia`, `regra`, `ia+trava` ou `regra+trava`. `p_modelo_versao` é opcional. Grava o histórico em `classificacoes_ia` (`status_processamento = 'sucesso'`) e atualiza `urgencia_atual` e `categoria_atual`. Se a ocorrência já foi classificada, devolve a classificação existente sem mudar nada |
 
 ## Estado atual
 
