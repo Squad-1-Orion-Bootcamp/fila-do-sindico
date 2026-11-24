@@ -223,5 +223,11 @@ def test_gravar_classificacao_com_erro_do_banco_levanta(monkeypatch):
 
 def test_sem_service_role_nao_chama_o_banco(monkeypatch):
     monkeypatch.setattr(settings, "supabase_secret_key", "")
-    with pytest.raises(banco.BancoNaoConfigurado):
+    with pytest.raises(banco.BancoNaoConfigurado, match="SUPABASE_SECRET_KEY"):
+        banco.buscar_ocorrencia(uuid4())
+
+
+def test_sem_url_do_supabase_nao_chama_o_banco(monkeypatch):
+    monkeypatch.setattr(settings, "supabase_url", "")
+    with pytest.raises(banco.BancoNaoConfigurado, match="SUPABASE_URL"):
         banco.buscar_ocorrencia(uuid4())

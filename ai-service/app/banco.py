@@ -20,7 +20,7 @@ _transporte: httpx.BaseTransport | None = None
 
 
 class BancoNaoConfigurado(RuntimeError):
-    """Falta SUPABASE_SECRET_KEY no ambiente."""
+    """Falta SUPABASE_URL ou SUPABASE_SECRET_KEY no ambiente."""
 
 
 @dataclass(frozen=True)
@@ -41,6 +41,8 @@ def _cabecalhos(chave: str) -> dict[str, str]:
 
 def _cliente() -> httpx.Client:
     chave = settings.supabase_secret_key
+    if not settings.supabase_url:
+        raise BancoNaoConfigurado("SUPABASE_URL não configurada.")
     if not chave:
         raise BancoNaoConfigurado("SUPABASE_SECRET_KEY não configurada.")
     return httpx.Client(
