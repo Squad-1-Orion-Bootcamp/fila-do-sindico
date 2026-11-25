@@ -268,6 +268,11 @@ o começo à mão.
   `feat: cadastro do gestor (SQUAD1-12)`. O CI confere. As promoções (`develop → stage` e
   `stage → prod`) dispensam a issue, ex.: `chore: entrega da Sprint 1 (v0.1.0)`.
 - **Uma issue por PR**, de preferência com menos de 400 linhas alteradas.
+- **Para evitar conflito:** decisão nova é um arquivo novo em `docs/decisoes/`;
+  linha nova em tabela de funções entra em ordem alfabética;
+  no máximo um nível de dependência entre PRs;
+  e PR aberta por mais de um dia traz a `develop` todo dia.
+  Detalhes em `docs/decisoes/2026-11-25-squad1-87-menos-conflitos-na-documentacao.md`.
 - Ainda não está pronta? Abra como **rascunho (draft)**.
 - **PR que depende de outra ainda aberta:** a PR aponta sempre para a `develop`, nunca para a
   branch da outra PR. Veja [PR que depende de outra](#pr-que-depende-de-outra).

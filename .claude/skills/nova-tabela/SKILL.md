@@ -101,4 +101,4 @@ Repita com o gestor B e com um morador. Teste também que uma escrita proibida f
 
 - Peça a revisão do agente `revisor-rls` (ou peça a um colega para seguir o checklist dele).
 - Atualize o `supabase/AGENTS.md` (e o resumo no `AGENTS.md` da raiz) se o modelo de dados mudou.
-- Registre em `docs/decisoes.md` qualquer regra de acesso nova.
+- Registre qualquer regra de acesso nova num arquivo novo em `docs/decisoes/` (veja o README da pasta).
