@@ -17,4 +17,4 @@ def health() -> dict[str, str]:
 
 @app.post("/classificar", response_model=Classificacao)
 def classificar_ocorrencia(ocorrencia: OcorrenciaEntrada) -> Classificacao:
-    return classificar(ocorrencia)
+    return classificar(ocorrencia).classificacao
