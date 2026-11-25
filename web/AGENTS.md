@@ -7,6 +7,7 @@ Siga também o `AGENTS.md` da raiz.
 ```bash
 npm run dev       # http://localhost:5173 (ou docker compose up na raiz)
 npm run lint      # oxlint
+npm test          # testes (vitest), arquivos *.test.ts ao lado do código
 npm run build     # checagem de tipos + build
 ```
 
@@ -22,6 +23,8 @@ npm run build     # checagem de tipos + build
 - `src/components/` — pedaços usados em mais de uma página (`MarcaCaixa`, `CamposDeAcesso`).
 - `src/App.tsx` — todas as rotas.
 - `src/lib/cnpj.ts` — máscara e limpeza de CNPJ.
+- `src/lib/celular.ts` — máscara do celular e conversão para o formato do WhatsApp
+  (`5511999998888`, como o banco guarda).
 - `src/lib/tempo.ts` — tempo relativo e data completa para listas.
 
 ## Rotas

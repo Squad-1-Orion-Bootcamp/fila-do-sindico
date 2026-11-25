@@ -24,7 +24,8 @@ uv add <pacote>          # nunca pip install
 - `app/classifier.py` — orquestração: trava → Decision 1 → regras de reserva → justificativa
 - `app/decisao.py` — System 1: Gemini Decision 1 (Decisions API, `v1beta`)
 - `app/justificativa.py` — System 2: frase da justificativa (Pydantic AI + Gemini 2.5 Flash)
-- `app/trava.py` — trava de palavras de risco
+- `app/trava.py` — trava de palavras de risco (força `urgente`) e a comparação por palavra usada
+  também pelas regras
 - `app/config.py` — variáveis de ambiente via `pydantic-settings`
 - `tests/` — pytest com `TestClient`
 
