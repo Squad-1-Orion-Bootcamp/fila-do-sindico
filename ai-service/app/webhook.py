@@ -23,10 +23,6 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-# Enquanto o LLM (SQUAD1-62) não entra, toda classificação sai das regras provisórias.
-ORIGEM = "regra"
-MODELO_VERSAO = "regras-provisorias"
-
 
 class AvisoOcorrencia(BaseModel):
     """Corpo que o gatilho manda. descricao e local chegam, mas não são usados."""
@@ -61,8 +57,10 @@ def classificar_e_gravar(ocorrencia_id: UUID) -> None:
         resultado = classificar(
             OcorrenciaEntrada(descricao=ocorrencia.descricao, local=ocorrencia.local)
         )
-        banco.gravar_classificacao(ocorrencia_id, resultado, ORIGEM, MODELO_VERSAO)
-        logger.info("Ocorrência %s classificada como %s.", ocorrencia_id, resultado.urgencia)
+        banco.gravar_classificacao(
+            ocorrencia_id, resultado.classificacao, resultado.origem, resultado.modelo_versao
+        )
+        logger.info("Ocorrência %s classificada e gravada.", ocorrencia_id)
     except Exception:
         logger.exception("Falha ao classificar a ocorrência %s.", ocorrencia_id)
 
