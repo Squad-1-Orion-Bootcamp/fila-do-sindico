@@ -3,13 +3,32 @@
 Registro curto das decisões, com o motivo. Decisão nova entra no topo da sua seção. Quando uma
 decisão for trocada, mova a antiga para "Substituídas", dizendo o que a substituiu.
 
+## 25/11/2026 — Trava de palavras de risco (SQUAD1-58)
+
+Decidido pelo time, sem product builder no momento.
+
+### Produto e acesso
+
+| Decisão | Motivo |
+| --- | --- |
+| A trava força `urgente` com: gás (e "gases"), choque, elétrica, fumaça, vazamento grave, rachadura, fogo e incêndio. Sem diferenciar maiúsculas e acentos ("incendio" vale) e aceitando plural ("rachaduras", "choques", "vazamentos graves") | A lista do card (SQUAD1-58) mais fogo e incêndio, que são risco de vida. O plural é um jeito comum de escrever, e a trava existe para não deixar passar risco |
+| Pessoa presa no elevador também força `urgente`: a descrição precisa ter "preso", "presa", "presos" ou "presas" **e** "elevador", em qualquer ordem | "Preso" sozinho daria falso urgente ("portão preso", "carro preso na garagem") |
+| A trava olha só a descrição, nunca o local | Um local como "Sala elétrica" ou "Abrigo de gás" deixaria urgente toda ocorrência registrada ali |
+| Quando a trava dispara, a justificativa cita o termo encontrado ("Trava de risco: a descrição menciona 'gás'.") | O gestor vê por que a ocorrência ficou urgente |
+
+### Técnica
+
+| Decisão | Motivo |
+| --- | --- |
+| A trava e as regras provisórias usam a mesma comparação por palavra inteira (`padrao_de_termo` em `app/trava.py`) | "gas" não casa com "gasto", "vagas" nem "desgaste", nem na trava nem nas regras |
+
 ## 24/11/2026 — Webhook do ai-service (SQUAD1-63)
 
 ### Técnica
 
 | Decisão | Motivo |
 | --- | --- |
-| O ai-service usa os valores de urgência do banco (`urgente`, `alta`, `normal`, `baixa`) também no `/classificar`; as regras provisórias marcam gás, fogo e pessoa presa como `urgente` | Contrato da SQUAD1-56; com `media`, o banco recusaria a gravação |
+| O ai-service usa os valores de urgência do banco (`urgente`, `alta`, `normal`, `baixa`) também no `/classificar` | Contrato da SQUAD1-56; com `media`, o banco recusaria a gravação |
 | O `/webhook` usa só o `id` do aviso: a descrição e o local vêm do banco, com a `service_role`, e a ocorrência já classificada é ignorada antes de chamar o classificador | Com o segredo vazado, ninguém muda a prioridade mandando outro texto; e o reenvio do gatilho não gasta a cota da Gemini (sugestões do `revisor-rls` na #24) |
 | Com `WEBHOOK_SECRET` vazio no servidor, o `/webhook` recusa toda chamada (401) | Um servidor sem segredo configurado não pode aceitar qualquer chamada |
 
@@ -49,6 +68,19 @@ decisão for trocada, mova a antiga para "Substituídas", dizendo o que a substi
 | `gravar_classificacao` só pode ser chamada pela `service_role`, e chamar de novo para a mesma ocorrência não muda nada | Só o ai-service grava a classificação; o `pg_net` e o "classificar pendentes" podem mandar a mesma ocorrência duas vezes |
 | Cada classificação guarda a origem: `ia`, `regra`, `ia+trava` ou `regra+trava` | Mostra quantas vezes a IA respondeu e quantas vezes as regras assumiram (proposta da IA de 23/11) |
 | O painel do gestor lê as ocorrências pela função `listar_ocorrencias_gestor()`, e não por `.from('ocorrencias')` | Gestor e morador usam o mesmo papel no banco, e permissão por coluna vale para o papel inteiro: para fechar `urgencia_atual` para o morador, a coluna sai da leitura direta de todos |
+
+## 23/11/2026 — Link de delegação (US 3)
+
+### Produto e acesso
+
+Aprovadas pelo Lucas em 23/11 (SQUAD1-72).
+
+| Decisão | Motivo |
+| --- | --- |
+| Desativar um funcionário **não** mexe no link de uma tarefa já delegada a ele | A tarefa já foi combinada com ele; desativar só tira o funcionário da lista na hora de delegar de novo |
+| Qualquer troca de status pelo gestor (Novo, Em andamento ou Concluído) **revoga** o link ativo. "Assumir de volta" é isso, sem botão próprio | O gestor retoma a ocorrência pelo que já existe no painel, e o link antigo para de valer |
+| O link **não expira** com o tempo: só deixa de valer quando a tarefa é concluída, quando o responsável é trocado ou quando o gestor muda o status | Tarefas de rotina podem levar dias; um prazo fixo derrubaria links ainda em uso |
+| O comentário do funcionário ao concluir é visto **só pelo gestor**. O morador continua vendo apenas o status | Mesma regra da SQUAD1-56: o morador vê só o status |
 
 ## 23/11/2026 — Publicação do ai-service
 

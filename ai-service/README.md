@@ -66,4 +66,20 @@ Falhas ficam no log, e a ocorrência continua em "Aguardando triagem".
 - `app/banco.py`: leitura da ocorrência e gravação da classificação pela API do Supabase
 - `app/schemas.py`: contratos de entrada e saída (urgência, categoria, justificativa)
 - `app/classifier.py`: lógica de classificação (provisória)
+- `app/trava.py`: trava de palavras de risco (força urgência `urgente`)
 - `app/config.py`: variáveis de ambiente
+
+## Trava de palavras de risco
+
+Antes de qualquer classificação, `app/trava.py` procura na **descrição** (nunca no local)
+termos de risco. Se achar, a urgência vira `urgente`, a categoria continua a da classificação e
+a justificativa cita o termo ("Trava de risco: a descrição menciona 'gás'.").
+
+- Termos: gás (e "gases"), choque, elétrica, fumaça, vazamento grave, rachadura, fogo e incêndio.
+- Pessoa presa no elevador: "preso", "presa", "presos" ou "presas" **e** "elevador" na mesma
+  descrição, em qualquer ordem.
+- Sem diferenciar maiúsculas e acentos, com plural ("rachaduras", "choques") e só palavra
+  inteira ("gasto", "vagas" e "desgaste" não disparam).
+
+As regras provisórias (`app/classifier.py`) usam a mesma comparação por palavra. Decisões em
+`docs/decisoes.md` (25/11/2026).
