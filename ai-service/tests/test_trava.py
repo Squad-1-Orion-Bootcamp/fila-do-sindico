@@ -2,7 +2,7 @@ import pytest
 
 from app.classifier import classificar
 from app.schemas import OcorrenciaEntrada
-from app.trava import PALAVRAS_DE_RISCO, aplicar_trava
+from app.trava import PALAVRAS_DE_RISCO, TERMO_ELEVADOR, aplicar_trava
 
 
 @pytest.mark.parametrize(
@@ -14,6 +14,8 @@ from app.trava import PALAVRAS_DE_RISCO, aplicar_trava
         ("fumaça", "Muita fumaça saindo da casa de máquinas"),
         ("vazamento grave", "Vazamento grave na tubulação principal"),
         ("rachadura", "Apareceu uma rachadura na parede da escada"),
+        ("fogo", "Cheiro de fogo no corredor"),
+        ("incêndio", "Incêndio no lixo"),
     ],
 )
 def test_trava_dispara_para_cada_palavra_de_risco(termo: str, descricao: str) -> None:
@@ -25,7 +27,6 @@ def test_trava_dispara_para_cada_palavra_de_risco(termo: str, descricao: str) ->
 
 
 def test_todas_as_palavras_de_risco_tem_cobertura() -> None:
-    assert len(PALAVRAS_DE_RISCO) == 6
     for termo in PALAVRAS_DE_RISCO:
         assert aplicar_trava(f"Ocorrência com {termo} no local") == termo
 
@@ -41,6 +42,7 @@ def test_todas_as_palavras_de_risco_tem_cobertura() -> None:
         ("FUMACA saindo da garagem", "fumaça"),
         ("VAZAMENTO   GRAVE no subsolo", "vazamento grave"),
         ("RACHADURA na viga", "rachadura"),
+        ("incendio na casa de máquinas", "incêndio"),
     ],
 )
 def test_trava_ignora_maiusculas_e_acentos(descricao: str, termo_esperado: str) -> None:
@@ -72,6 +74,50 @@ def test_frases_sem_risco_nao_disparam_trava(
 
 
 @pytest.mark.parametrize(
+    ("descricao", "termo"),
+    [
+        ("Rachaduras na parede da garagem", "rachadura"),
+        ("Fios desencapados dando choques", "choque"),
+        ("Vazamentos graves no subsolo", "vazamento grave"),
+        ("Vazamento de gases na cozinha", "gases"),
+    ],
+)
+def test_trava_aceita_plural(descricao: str, termo: str) -> None:
+    assert aplicar_trava(descricao) == termo
+    assert classificar(OcorrenciaEntrada(descricao=descricao)).urgencia == "urgente"
+
+
+@pytest.mark.parametrize(
+    "descricao",
+    [
+        "Pessoa presa no elevador",
+        "elevador parado com duas pessoas presas",
+        "Meu filho ficou preso no elevador social",
+        "Elevadores parados e moradores presos",
+    ],
+)
+def test_trava_dispara_com_pessoa_presa_no_elevador(descricao: str) -> None:
+    assert aplicar_trava(descricao) == TERMO_ELEVADOR
+
+    resultado = classificar(OcorrenciaEntrada(descricao=descricao))
+    assert resultado.urgencia == "urgente"
+    assert resultado.justificativa == f"Trava de risco: a descrição menciona '{TERMO_ELEVADOR}'."
+
+
+@pytest.mark.parametrize(
+    "descricao",
+    [
+        "Portão da garagem preso",
+        "Carro preso na garagem",
+        "elevador barulhento",
+    ],
+)
+def test_preso_ou_elevador_sozinhos_nao_disparam(descricao: str) -> None:
+    assert aplicar_trava(descricao) is None
+    assert classificar(OcorrenciaEntrada(descricao=descricao)).urgencia != "urgente"
+
+
+@pytest.mark.parametrize(
     "descricao",
     [
         "Carro ocupando duas vagas na garagem",
@@ -79,11 +125,14 @@ def test_frases_sem_risco_nao_disparam_trava(
         "Gasto alto de água no bloco B",
     ],
 )
-def test_trava_evita_falsos_positivos_por_substring(descricao: str) -> None:
+def test_palavra_dentro_de_outra_nao_dispara_trava_nem_regra(descricao: str) -> None:
+    # "gas" dentro de "vagas", "desgaste" e "gasto": nem a trava nem as regras provisórias
+    # podem tratar a frase como gás (urgente ou segurança).
     assert aplicar_trava(descricao) is None
 
     resultado = classificar(OcorrenciaEntrada(descricao=descricao))
     assert resultado.urgencia != "urgente"
+    assert resultado.categoria != "seguranca"
     assert not resultado.justificativa.startswith("Trava de risco:")
 
 
@@ -97,6 +146,11 @@ def test_local_nao_aciona_a_trava() -> None:
         OcorrenciaEntrada(descricao="Fechadura quebrada", local="Sala elétrica")
     )
     assert com_eletrica_no_local.urgencia == "normal"
+
+    com_elevador_no_local = classificar(
+        OcorrenciaEntrada(descricao="Vizinho preso do lado de fora", local="Hall do elevador")
+    )
+    assert com_elevador_no_local.urgencia != "urgente"
 
 
 def test_trava_tem_precedencia_sobre_classificacao_baixa() -> None:

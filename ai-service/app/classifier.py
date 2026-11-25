@@ -1,5 +1,5 @@
 from app.schemas import Classificacao, OcorrenciaEntrada, Urgencia
-from app.trava import aplicar_trava
+from app.trava import aplicar_trava, normalizar_texto, padrao_de_termo
 
 # PROVISÓRIO: regras por palavra-chave, como no protótipo.
 # Na Sprint 2 este módulo passa a chamar o LLM com saída estruturada,
@@ -12,12 +12,18 @@ _REGRAS: list[tuple[tuple[str, ...], str, Urgencia]] = [
     (("lâmpada", "lampada", "luz"), "eletrica", "normal"),
 ]
 
+# Mesma comparação por palavra da trava: "gas" não casa com "gasto", "vagas" nem "desgaste".
+_REGRAS_COMPILADAS = [
+    (tuple((termo, padrao_de_termo(termo)) for termo in termos), categoria, urgencia)
+    for termos, categoria, urgencia in _REGRAS
+]
+
 
 def classificar_por_regras(ocorrencia: OcorrenciaEntrada) -> Classificacao:
     """Classifica a ocorrência usando apenas as regras provisórias por palavra-chave."""
-    texto = f"{ocorrencia.descricao} {ocorrencia.local or ''}".lower()
-    for palavras, categoria, urgencia in _REGRAS:
-        encontrada = next((p for p in palavras if p in texto), None)
+    texto = normalizar_texto(f"{ocorrencia.descricao} {ocorrencia.local or ''}")
+    for termos, categoria, urgencia in _REGRAS_COMPILADAS:
+        encontrada = next((termo for termo, padrao in termos if padrao.search(texto)), None)
         if encontrada:
             return Classificacao(
                 urgencia=urgencia,
