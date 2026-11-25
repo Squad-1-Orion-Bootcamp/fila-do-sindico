@@ -64,6 +64,8 @@ Detalhes, regras de acesso e funções em `supabase/AGENTS.md`.
   `em_andamento`, `delegado` (só pela delegação, US 3), `concluido`), `origem` (`aplicativo` para a do morador; `whatsapp`, `telefone`,
   `presencial` ou `vistoria` para a do gestor), `relatado_por` (opcional), e `urgencia_atual`, `categoria_atual` (preenchidas pela IA a
   partir da Sprint 2, com o histórico em `classificacoes_ia`)
+- `funcionarios`: contatos dos funcionários de cada condomínio, sem conta (`nome`, `celular`,
+  `funcao`, `ativo`), cadastrados pelo gestor para a delegação; não usam `vinculos`
 
 Acesso a um condomínio = vínculo `ativo` e vigente (nas políticas, use
 `public.eh_gestor_aprovado(condominio_id)`). Uma conta tem um tipo só. Gestor vê os
