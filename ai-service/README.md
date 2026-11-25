@@ -59,11 +59,24 @@ O gatilho do banco chama `POST /webhook` a cada ocorrência nova (contrato na SQ
 
 Falhas ficam no log, e a ocorrência continua em "Aguardando triagem".
 
+### Classificar pendentes
+
+Rede de segurança para quando o aviso se perde (ai-service fora do ar, reinício no meio da
+classificação, Vault sem configuração). Ao abrir o painel, o front chama a função do banco
+`classificar_pendentes()`, que chama `POST /classificar-pendentes` pelo `pg_net`:
+
+1. Mesmo `X-Webhook-Secret` do webhook. Sem ele: **401**.
+2. Responde **202** sem corpo, na hora.
+3. Em segundo plano: lista até **20** ocorrências com `urgencia_atual` vazia, das mais antigas
+   para as mais novas (as que o gestor classificou à mão já ficam de fora), e passa cada uma
+   pelo mesmo caminho do webhook. Se uma rodada já está em andamento, a nova não começa.
+
 ## Estrutura
 
 - `app/main.py`: rotas (`GET /health`, `POST /classificar`)
 - `app/webhook.py`: `POST /webhook`, o aviso do banco
-- `app/banco.py`: leitura da ocorrência e gravação da classificação pela API do Supabase
+- `app/pendentes.py`: `POST /classificar-pendentes`, a rede de segurança do webhook
+- `app/banco.py`: leitura e listagem das ocorrências e gravação da classificação pela API do Supabase
 - `app/schemas.py`: contratos de entrada e saída (urgência, categoria, justificativa)
 - `app/classifier.py`: lógica de classificação (provisória)
 - `app/config.py`: variáveis de ambiente
