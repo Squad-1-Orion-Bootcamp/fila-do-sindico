@@ -85,6 +85,13 @@ function porOcorrencia(lista: Delegacao[], conclusoes: Conclusao[]): Record<stri
   return mapa
 }
 
+// O comentário aparece em até 3 linhas; o "Ver tudo" só aparece quando ele pode passar disso.
+// A conta é aproximada (cerca de 40 caracteres por linha num card de celular).
+function comentarioLongo(comentario: string | null): boolean {
+  if (!comentario) return false
+  return comentario.length > 120 || comentario.split('\n').length > 3
+}
+
 // Nomes das colunas da US 1 (SQUAD1-61), também no seletor do card. O morador continua vendo
 // os da SQUAD1-5 (Pendente, Em análise, Resolvido) na página dele.
 const ROTULO_STATUS: Record<Status, string> = {
@@ -153,6 +160,17 @@ export function OcorrenciasDoGestor() {
   const [versaoDelegacoes, setVersaoDelegacoes] = useState(0)
   // No celular o quadro mostra uma coluna por vez (DESIGN.md), escolhida nas abas.
   const [colunaAberta, setColunaAberta] = useState<Status>('novo')
+  // Comentários do funcionário abertos por inteiro ("Ver tudo"), por ocorrência.
+  const [comentariosAbertos, setComentariosAbertos] = useState<Set<string>>(new Set())
+
+  function alternarComentario(id: string) {
+    setComentariosAbertos((atuais) => {
+      const novos = new Set(atuais)
+      if (novos.has(id)) novos.delete(id)
+      else novos.add(id)
+      return novos
+    })
+  }
 
   useEffect(() => {
     buscarOcorrencias().then(({ data, error }) => {
@@ -253,7 +271,11 @@ export function OcorrenciasDoGestor() {
           <span className="cartao-meta">Status</span>
           <select
             value={o.status}
-            aria-describedby={`descricao-${o.id}`}
+            aria-describedby={
+              o.status === 'delegado'
+                ? `descricao-${o.id} aviso-status-${o.id}`
+                : `descricao-${o.id}`
+            }
             disabled={salvandoId === o.id}
             onChange={(e) => alterarStatus(o.id, e.target.value as Status)}
           >
@@ -277,6 +299,10 @@ export function OcorrenciasDoGestor() {
               Responsável:{' '}
               {delegacoes[o.id]?.ativa?.nome ?? (erroDelegacoes ? 'não carregado' : '…')}
             </p>
+            {/* Trocar o status revoga o link na hora ("assumir de volta"): avisa antes */}
+            <p id={`aviso-status-${o.id}`} className="campo-ajuda quadro-aviso-status">
+              Mudar o status tira a tarefa do funcionário, e o link dele deixa de funcionar.
+            </p>
             <button
               type="button"
               className="botao quadro-delegar"
@@ -293,9 +319,27 @@ export function OcorrenciasDoGestor() {
               <MessageSquareText size={14} aria-hidden />
               Concluída por {concluida.nome}
             </p>
-            <p className="quadro-comentario-texto" title={concluida.comentario ?? undefined}>
+            <p
+              id={`comentario-${o.id}`}
+              className={
+                comentariosAbertos.has(o.id)
+                  ? 'quadro-comentario-texto quadro-comentario-aberto'
+                  : 'quadro-comentario-texto'
+              }
+            >
               {concluida.comentario ?? 'Sem comentário.'}
             </p>
+            {comentarioLongo(concluida.comentario) && (
+              <button
+                type="button"
+                className="quadro-acao-texto"
+                aria-expanded={comentariosAbertos.has(o.id)}
+                aria-controls={`comentario-${o.id}`}
+                onClick={() => alternarComentario(o.id)}
+              >
+                {comentariosAbertos.has(o.id) ? 'Ver menos' : 'Ver tudo'}
+              </button>
+            )}
           </div>
         )}
         {(o.status === 'novo' || o.status === 'em_andamento') && (

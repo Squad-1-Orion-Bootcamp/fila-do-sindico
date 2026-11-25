@@ -178,3 +178,29 @@
   overflow-wrap: anywhere;
   white-space: pre-line;
 }
+
+/* Comentário aberto por inteiro ("Ver tudo") e aviso no status do card delegado. */
+.quadro-comentario-aberto {
+  display: block;
+  -webkit-line-clamp: none;
+  line-clamp: none;
+}
+
+.quadro-comentario .quadro-acao-texto {
+  margin-top: var(--espaco-1);
+}
+
+.quadro-aviso-status {
+  margin-top: var(--espaco-1);
+}
+
+.quadro-acao-texto {
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: var(--texto-sm);
+  color: var(--cor-acao);
+  text-decoration: underline;
+  cursor: pointer;
+}
