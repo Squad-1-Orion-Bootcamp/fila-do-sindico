@@ -2,7 +2,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-Urgencia = Literal["alta", "media", "baixa"]
+Urgencia = Literal["urgente", "alta", "normal", "baixa"]
 
 
 class OcorrenciaEntrada(BaseModel):
