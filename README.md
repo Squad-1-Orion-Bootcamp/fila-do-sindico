@@ -119,7 +119,9 @@ container em produção. Na Vercel:
    a service_role).
 4. Em *Settings → Git → Production Branch*, use `develop`.
 
-O `web/vercel.json` faz rotas como `/quadro` funcionarem ao abrir direto no navegador.
+O `web/vercel.json` faz rotas como `/quadro` funcionarem ao abrir direto no navegador e
+manda `Referrer-Policy: no-referrer` em `/tarefa/*`, para o token do link não vazar para outros
+sites. Não tire esse bloco `headers`.
 Cada PR ganha um link de preview automático.
 
 **Serviço de IA → Render.** Ele é um servidor de verdade, então usa a imagem de produção:

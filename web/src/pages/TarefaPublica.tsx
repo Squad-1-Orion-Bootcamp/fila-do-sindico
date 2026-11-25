@@ -140,6 +140,10 @@ export function TarefaPublica() {
   const { token = '' } = useParams()
   const [estado, setEstado] = useState<Estado>({ tipo: 'carregando' })
 
+  // Sobe a cada "Tentar de novo", para a busca passar pelo mesmo efeito (e pela mesma proteção
+  // contra resposta que chega depois de sair da página).
+  const [tentativa, setTentativa] = useState(0)
+
   useEffect(() => {
     let ativo = true
     buscarEstado(token).then((novo) => {
@@ -148,11 +152,11 @@ export function TarefaPublica() {
     return () => {
       ativo = false
     }
-  }, [token])
+  }, [token, tentativa])
 
   function tentarDeNovo() {
     setEstado({ tipo: 'carregando' })
-    buscarEstado(token).then(setEstado)
+    setTentativa((t) => t + 1)
   }
 
   let conteudo: ReactNode
