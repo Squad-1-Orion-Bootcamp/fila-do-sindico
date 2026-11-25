@@ -80,7 +80,7 @@ aponta para o morador que relatou ao gestor.
 
 ### Cadastro (`supabase.auth.signUp`, campo `options.data`)
 
-| Campo | Gestor | Morador (e funcionário, por enquanto) |
+| Campo | Gestor | Morador |
 | --- | --- | --- |
 | `nome` | obrigatório | obrigatório |
 | `tipo_cadastro` | `'gestor'` | `'morador'` |
