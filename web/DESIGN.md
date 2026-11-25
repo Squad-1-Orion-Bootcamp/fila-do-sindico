@@ -26,6 +26,7 @@ variável de `tokens.css`. Precisa de um valor novo? Adicione o token e combine 
 | Ação (botão principal) | `--cor-acao` | `#0F766E` azul-petróleo |
 | Fundo da página | `--cor-fundo` | `#F6F7F9` |
 | Cartões, campos, topo | `--cor-superficie` | `#FFFFFF` |
+| Atrás de uma janela aberta | `--cor-fundo-janela` | `#111827` com 40% de opacidade |
 | Texto principal | `--cor-texto` | `#111827` |
 | Texto secundário | `--cor-texto-secundario` | `#4B5563` |
 | Bordas | `--cor-borda` | `#E5E7EB` |
@@ -66,7 +67,7 @@ fundo do cartão inteiro.
 - Cantos de **8 px** em cartões, botões e campos (`--raio`).
 - Borda fina de **1 px** cinza (`--borda`).
 - **Sem sombra** em listas e cartões. Sombra leve (`--sombra-flutuante`) só no que flutua:
-  menus, avisos.
+  menus, avisos, janelas.
 - Espaços em múltiplos de 4 (`--espaco-1` a `--espaco-12`).
 - **Alvos de toque com pelo menos 44 px** (`--altura-controle`) e foco visível de 2 px em tudo
   que é clicável (já global, via `:focus-visible`).
