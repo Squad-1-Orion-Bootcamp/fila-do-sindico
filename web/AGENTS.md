@@ -34,6 +34,7 @@ npm run build     # checagem de tipos + build
 | `/login` | Público | Login |
 | `/quadro` | `gestor` | Quadro de ocorrências e aprovação/recusa de cadastros pendentes |
 | `/condominios` | `gestor` | Cadastro (`rpc('cadastrar_condominio')`) e lista dos condomínios do gestor |
+| `/funcionarios` | `gestor` | Cadastro (`rpc('cadastrar_funcionario')`), lista e desativação (`rpc('desativar_funcionario')`) dos funcionários dos condomínios do gestor |
 | `/minhas-ocorrencias` | `morador` | Ocorrências do morador |
 | `/sem-acesso` | Logado sem perfil | Acesso ainda não liberado |
 
