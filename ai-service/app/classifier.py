@@ -9,7 +9,6 @@
 """
 
 import logging
-import re
 from collections.abc import Callable
 
 from app.config import settings
@@ -23,7 +22,7 @@ from app.schemas import (
     ResultadoClassificacao,
     Urgencia,
 )
-from app.trava import aplicar_trava, normalizar_texto
+from app.trava import aplicar_trava, normalizar_texto, padrao_de_termo
 
 logger = logging.getLogger(__name__)
 
@@ -33,41 +32,28 @@ Decisor = Callable[[str, str | None], Decisao]
 # (descricao, local, urgencia) -> frase do motivo. Interface do System 2 (SQUAD1-85).
 Justificador = Callable[[str, str | None, Urgencia], str]
 
-# Reserva: regras por palavra-chave, usadas quando o Decision 1 não responde.
-# A primeira regra que bate decide, então as mais graves vêm antes.
+# Reserva: regras por palavra-chave, usadas quando o Decision 1 não responde. Vão até "alta":
+# quem marca "urgente" é a trava (app/trava.py), que olha só a descrição.
 _REGRAS: list[tuple[tuple[str, ...], Categoria, Urgencia]] = [
-    (("gás", "fogo", "incêndio", "fumaça"), "seguranca", "urgente"),
-    (("preso no elevador", "presa no elevador"), "elevador", "urgente"),
+    (("gás", "gas", "gases", "fogo", "incêndio", "fumaça"), "seguranca", "alta"),
     (("vazamento", "vazando", "alagado", "infiltração"), "hidraulica", "alta"),
-    (("elevador",), "elevador", "alta"),
+    (("elevador", "elevadores", "preso"), "elevador", "alta"),
     (("barulho", "som alto", "festa"), "convivencia", "baixa"),
-    (("lâmpada", "luz"), "eletrica", "normal"),
+    (("lâmpada", "lampada", "luz", "luzes"), "eletrica", "normal"),
 ]
 
-
-def _padrao(termo: str) -> re.Pattern[str]:
-    # Palavra inteira, sem acento e sem diferenciar maiúsculas, como na trava: "gas" não casa
-    # com "vagas" nem com "desgaste". O "s?" aceita o plural simples ("vazamentos").
-    partes = [re.escape(parte) for parte in normalizar_texto(termo).split()]
-    return re.compile(rf"\b{r'\s+'.join(partes)}s?\b")
-
-
+# Mesma comparação por palavra da trava: "gas" não casa com "gasto", "vagas" nem "desgaste".
+# O plural em "-es" ("gases", "elevadores", "luzes") não vem do "s" opcional: fica na lista.
 _REGRAS_COMPILADAS = [
-    (tuple((termo, _padrao(termo)) for termo in termos), categoria, urgencia)
+    (tuple((termo, padrao_de_termo(termo)) for termo in termos), categoria, urgencia)
     for termos, categoria, urgencia in _REGRAS
 ]
 
 
 def classificar_por_regras(ocorrencia: OcorrenciaEntrada) -> Classificacao:
-    """Classifica a ocorrência usando apenas as regras provisórias por palavra-chave.
-
-    As regras de "urgente" olham só a descrição, como a trava: o local sozinho ("Abrigo de
-    gás") não torna a ocorrência urgente. As outras olham a descrição e o local.
-    """
-    descricao = normalizar_texto(ocorrencia.descricao)
-    descricao_e_local = normalizar_texto(f"{ocorrencia.descricao} {ocorrencia.local or ''}")
+    """Classifica a ocorrência usando apenas as regras provisórias por palavra-chave."""
+    texto = normalizar_texto(f"{ocorrencia.descricao} {ocorrencia.local or ''}")
     for termos, categoria, urgencia in _REGRAS_COMPILADAS:
-        texto = descricao if urgencia == "urgente" else descricao_e_local
         encontrada = next((termo for termo, padrao in termos if padrao.search(texto)), None)
         if encontrada:
             return Classificacao(

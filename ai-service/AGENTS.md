@@ -23,7 +23,8 @@ uv add <pacote>          # nunca pip install
 - `app/contrato.py` — urgências e categorias com as descrições (fonte única do contrato)
 - `app/classifier.py` — orquestração: trava → Decision 1 → regras de reserva → justificativa
 - `app/decisao.py` — System 1: Gemini Decision 1 (Decisions API, `v1beta`)
-- `app/trava.py` — trava de palavras de risco
+- `app/trava.py` — trava de palavras de risco (força `urgente`) e a comparação por palavra usada
+  também pelas regras
 - `app/config.py` — variáveis de ambiente via `pydantic-settings`
 - `tests/` — pytest com `TestClient`
 

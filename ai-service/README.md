@@ -71,7 +71,8 @@ O `classificar()` (`app/classifier.py`) segue a proposta "System 1 + System 2" d
    uma estão em `app/contrato.py`, e essas descrições fazem o papel do prompt. Devolve também
    a confiança (0 a 1), que por enquanto só vai para o log.
 3. **Reserva, regras por palavra-chave:** se o Decision 1 der erro, demorar mais que cerca de 3 s ou
-   a `LLM_API_KEY` estiver vazia (aí nem tenta chamar), as regras decidem.
+   a `LLM_API_KEY` estiver vazia (aí nem tenta chamar), as regras decidem. Elas vão até `alta`:
+   quem marca `urgente` é só a trava.
 4. **Justificativa:** por enquanto, um motivo padrão ("Classificada como Alta pela IA.", ou o
    termo da trava, ou a palavra da regra). A frase gerada pela Gemini (System 2) entra na
    SQUAD1-85.
@@ -102,3 +103,18 @@ usam um cliente dublê.
 - `app/decisao.py`: System 1, a chamada ao Gemini Decision 1
 - `app/trava.py`: trava de palavras de risco (força urgência `urgente`)
 - `app/config.py`: variáveis de ambiente
+
+## Trava de palavras de risco
+
+Antes de qualquer classificação, `app/trava.py` procura na **descrição** (nunca no local)
+termos de risco. Se achar, a urgência vira `urgente`, a categoria continua a da classificação e
+a justificativa cita o termo ("Trava de risco: a descrição menciona 'gás'.").
+
+- Termos: gás (e "gases"), choque, elétrica, fumaça, vazamento grave, rachadura, fogo e incêndio.
+- Pessoa presa no elevador: "preso", "presa", "presos" ou "presas" **e** "elevador" na mesma
+  descrição, em qualquer ordem.
+- Sem diferenciar maiúsculas e acentos, com plural ("rachaduras", "choques") e só palavra
+  inteira ("gasto", "vagas" e "desgaste" não disparam).
+
+As regras provisórias (`app/classifier.py`) usam a mesma comparação por palavra. Decisões em
+`docs/decisoes.md` (25/11/2026).

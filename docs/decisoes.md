@@ -3,6 +3,25 @@
 Registro curto das decisões, com o motivo. Decisão nova entra no topo da sua seção. Quando uma
 decisão for trocada, mova a antiga para "Substituídas", dizendo o que a substituiu.
 
+## 25/11/2026 — Trava de palavras de risco (SQUAD1-58)
+
+Decidido pelo time, sem product builder no momento.
+
+### Produto e acesso
+
+| Decisão | Motivo |
+| --- | --- |
+| A trava força `urgente` com: gás (e "gases"), choque, elétrica, fumaça, vazamento grave, rachadura, fogo e incêndio. Sem diferenciar maiúsculas e acentos ("incendio" vale) e aceitando plural ("rachaduras", "choques", "vazamentos graves") | A lista do card (SQUAD1-58) mais fogo e incêndio, que são risco de vida. O plural é um jeito comum de escrever, e a trava existe para não deixar passar risco |
+| Pessoa presa no elevador também força `urgente`: a descrição precisa ter "preso", "presa", "presos" ou "presas" **e** "elevador", em qualquer ordem | "Preso" sozinho daria falso urgente ("portão preso", "carro preso na garagem") |
+| A trava olha só a descrição, nunca o local | Um local como "Sala elétrica" ou "Abrigo de gás" deixaria urgente toda ocorrência registrada ali |
+| Quando a trava dispara, a justificativa cita o termo encontrado ("Trava de risco: a descrição menciona 'gás'.") | O gestor vê por que a ocorrência ficou urgente |
+
+### Técnica
+
+| Decisão | Motivo |
+| --- | --- |
+| A trava e as regras provisórias usam a mesma comparação por palavra inteira (`padrao_de_termo` em `app/trava.py`) | "gas" não casa com "gasto", "vagas" nem "desgaste", nem na trava nem nas regras |
+
 ## 24/11/2026 — Classificação pelo Gemini Decision 1 (SQUAD1-84)
 
 ### Produto e acesso
@@ -20,7 +39,6 @@ decisão for trocada, mova a antiga para "Substituídas", dizendo o que a substi
 | `modelo_versao` é `gemini-decision-1` quando o Decision 1 decidiu e `regras-provisorias` quando as regras decidiram | Saber qual modelo classificou cada ocorrência |
 | A confiança do Decision 1 vai só para o log; gravar no banco e sinalizar "revisar a prioridade" ficam para a Sprint 3 | Precisa de coluna nova (migração), fora do escopo da Sprint 2 |
 | As urgências e as categorias, com a descrição de cada uma, ficam em `ai-service/app/contrato.py`; a lista ainda é proposta | O Pedro revisa na SQUAD1-56; no Decision 1, as descrições fazem o papel do prompt |
-| Nas regras de reserva, as palavras casam inteiras, sem acento, e as regras de `urgente` olham só a descrição, como a trava | "gas" não casa com "vagas" nem "desgaste", e o local sozinho ("Abrigo de gás") não torna a ocorrência urgente |
 
 ## 24/11/2026 — Webhook do ai-service (SQUAD1-63)
 
@@ -28,7 +46,7 @@ decisão for trocada, mova a antiga para "Substituídas", dizendo o que a substi
 
 | Decisão | Motivo |
 | --- | --- |
-| O ai-service usa os valores de urgência do banco (`urgente`, `alta`, `normal`, `baixa`) também no `/classificar`; as regras provisórias marcam gás, fogo e pessoa presa como `urgente` | Contrato da SQUAD1-56; com `media`, o banco recusaria a gravação |
+| O ai-service usa os valores de urgência do banco (`urgente`, `alta`, `normal`, `baixa`) também no `/classificar` | Contrato da SQUAD1-56; com `media`, o banco recusaria a gravação |
 | O `/webhook` usa só o `id` do aviso: a descrição e o local vêm do banco, com a `service_role`, e a ocorrência já classificada é ignorada antes de chamar o classificador | Com o segredo vazado, ninguém muda a prioridade mandando outro texto; e o reenvio do gatilho não gasta a cota da Gemini (sugestões do `revisor-rls` na #24) |
 | Com `WEBHOOK_SECRET` vazio no servidor, o `/webhook` recusa toda chamada (401) | Um servidor sem segredo configurado não pode aceitar qualquer chamada |
 
