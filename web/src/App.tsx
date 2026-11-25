@@ -14,6 +14,9 @@ const CadastroMorador = lazy(() =>
 const Condominios = lazy(() =>
   import('./pages/Condominios').then((m) => ({ default: m.Condominios })),
 )
+const Funcionarios = lazy(() =>
+  import('./pages/Funcionarios').then((m) => ({ default: m.Funcionarios })),
+)
 const MinhasOcorrencias = lazy(() =>
   import('./pages/MinhasOcorrencias').then((m) => ({ default: m.MinhasOcorrencias })),
 )
@@ -50,6 +53,14 @@ export default function App() {
           element={
             <RequireRole role="gestor">
               <Condominios />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/funcionarios"
+          element={
+            <RequireRole role="gestor">
+              <Funcionarios />
             </RequireRole>
           }
         />
