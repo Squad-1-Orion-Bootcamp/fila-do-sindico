@@ -35,9 +35,12 @@ Migrações: `20261116000000_profiles.sql` (perfil), `20261118033000_modelo_de_d
 `20261118050000_ajustes_revisao_rls.sql`, `20261118180436_registrar_ocorrencia.sql`,
 `20261118191442_alterar_status_ocorrencia.sql` (gestor muda o status da ocorrência),
 `20261118210426_ocorrencia_pelo_gestor.sql`, `20261124035604_classificacao_ia.sql` (gatilho que
-avisa o ai-service e gravação da classificação), `20261124041425_morador_sem_prioridade.sql`
-(o morador não lê a prioridade nem a classificação) e `20261124045005_gestor_altera_prioridade.sql`
-(o gestor confirma ou muda a prioridade).
+avisa o ai-service e gravação da classificação), `20261124041425_morador_sem_prioridade.sql` (o
+morador não lê a prioridade nem a classificação), `20261124045005_gestor_altera_prioridade.sql` (o
+gestor confirma ou muda a prioridade), `20261124174433_criar_funcionarios.sql` (funcionários do
+condomínio), `20261124192621_status_delegado.sql` (status `delegado`),
+`20261124200657_criar_delegacoes.sql` (delegação ao funcionário pelo link) e
+`20261124201343_delegar_ocorrencia.sql` (o gestor delega e a troca de status revoga o link).
 
 | Tabela | Para quê |
 | --- | --- |
@@ -50,11 +53,15 @@ avisa o ai-service e gravação da classificação), `20261124041425_morador_sem
 | `solicitacoes_vinculo` | Pré-cadastro do morador (criado pelo cadastro); o gestor do condomínio aprova ou recusa |
 | `documentos_comprobatorios` | Comprovantes no bucket privado `documentos`, caminho `<uid>/<arquivo>` |
 | `ocorrencias`, `anexos`, `classificacoes_ia`, `decisoes`, `historico_status` | Ocorrências, arquivos, sugestões da IA, decisões e mudanças de status |
+| `funcionarios` | Contatos dos funcionários de cada condomínio, **sem conta nem login**, cadastrados pelo gestor para a delegação: `nome`, `celular` (só dígitos, `55` + DDD + 9 dígitos), `funcao` (texto livre), `ativo`, `criado_por`. Celular único entre os ativos do mesmo condomínio. Não usa `vinculos` |
+| `delegacoes` | Ocorrências delegadas a funcionários (US 3): `ocorrencia_id`, `condominio_id`, `funcionario_id` (do mesmo condomínio, garantido por chave composta), `situacao` (`ativa`, `concluida`, `revogada`), `comentario` do funcionário (até 800, só na conclusão), `criado_por` e as datas. Guarda só o hash do token (`token_hash`, SHA-256); o token puro nunca é gravado. Só uma delegação ativa por ocorrência |
 
 Ainda não existem: `conversas` e `mensagens` (chat) e a escrita de anexos (entram com as
 histórias que usam). A ocorrência é criada só pelas funções `registrar_ocorrencia` (morador) e
 `registrar_ocorrencia_gestor` (descrição de até 800 caracteres), e o status muda só por
-`alterar_status_ocorrencia`. `ocorrencias.origem` diz o canal (`aplicativo` para a do morador;
+`alterar_status_ocorrencia`. O status é `novo`, `em_andamento`, `delegado` ou `concluido`;
+`delegado` só vem da delegação para um funcionário (US 3), nunca da troca manual.
+`ocorrencias.origem` diz o canal (`aplicativo` para a do morador;
 `whatsapp`, `telefone`, `presencial` ou `vistoria` para a do gestor) e `relatado_por`, opcional,
 aponta para o morador que relatou ao gestor.
 
@@ -69,6 +76,14 @@ aponta para o morador que relatou ao gestor.
   ocorrência registrada por morador.
 - A lista pública de condomínios (`anon`) mostra só `id` e `nome`, e só de condomínios com gestor
   ativo: o front precisa usar `.select('id, nome')`.
+- `funcionarios` só é lida pelo gestor ativo do condomínio (morador, visitante e admin não leem) e
+  só é escrita por `cadastrar_funcionario` e `desativar_funcionario`. Desativado continua na lista
+  (`ativo = false`) e some da delegação; desativar não mexe em tarefas já delegadas. Edição e
+  reativação ficam fora da Sprint 2: para "reativar", cadastre de novo.
+- `delegacoes` só é lida pelo gestor ativo do condomínio, e nunca a coluna `token_hash`
+  (morador, visitante e admin não leem). Não tem `insert`, `update` nem `delete` livres: a escrita
+  é pelas funções do gestor (SQUAD1-74) e do link público (SQUAD1-75). Visitante não lê a tabela
+  de jeito nenhum; a página do link usa só as funções.
 - O morador não vê a prioridade nem o motivo da IA, só o status. `urgencia_atual` e
   `categoria_atual` ficam fora da leitura direta de `ocorrencias` para todo usuário logado
   (permissão por coluna vale para o papel inteiro), e `classificacoes_ia` e `decisoes` só são
@@ -100,9 +115,12 @@ solicitação de vínculo pendente. Campo faltando = o cadastro falha com a mens
 | `aprovar_solicitacao_vinculo(p_solicitacao_id)` | gestor ativo do condomínio |
 | `recusar_solicitacao_vinculo(p_solicitacao_id, p_motivo)` | gestor ativo do condomínio |
 | `registrar_ocorrencia(p_descricao, p_local, p_condominio_id)` | morador (ou funcionário) com vínculo ativo. Grava em nome de quem chama, com status `novo`. `p_local` é opcional; `p_condominio_id` só é exigido de quem tem vínculo ativo em mais de um condomínio |
-| `registrar_ocorrencia_gestor(p_condominio_id, p_descricao, p_origem, p_local, p_relatado_por)` | gestor ativo do condomínio. Grava em nome de quem chama, com status `novo`. `p_origem`: `whatsapp`, `telefone`, `presencial` ou `vistoria`. `p_relatado_por` é opcional e precisa ser morador ou funcionário ativo do mesmo condomínio |
+| `registrar_ocorrencia_gestor(p_condominio_id, p_descricao, p_origem, p_local, p_relatado_por)` | gestor ativo do condomínio. Grava em nome de quem chama, com status `novo`. `p_origem`: `whatsapp`, `telefone`, `presencial` ou `vistoria`. `p_relatado_por` é opcional e precisa ser morador ou funcionário ativo do mesmo condomínio (vínculo do tipo `funcionario`, não a tabela `funcionarios`) |
 | `encerrar_vinculo(p_vinculo_id, p_motivo)` | vínculo de gestor: admin; de morador ou funcionário: gestor do condomínio ou admin |
-| `alterar_status_ocorrencia(p_ocorrencia_id, p_status)` | gestor ativo do condomínio. Muda só o status (`novo`, `em_andamento`, `concluido`), preenche ou limpa `concluido_em` e grava em `historico_status` |
+| `alterar_status_ocorrencia(p_ocorrencia_id, p_status)` | gestor ativo do condomínio. Muda só o status (`novo`, `em_andamento`, `concluido`; não aceita `delegado`, mas tira a ocorrência de `delegado`), preenche ou limpa `concluido_em`, grava em `historico_status` e **revoga a delegação ativa** ("assumir de volta") |
+| `delegar_ocorrencia(p_ocorrencia_id, p_funcionario_id)` | gestor ativo do condomínio. O funcionário precisa estar ativo e ser do mesmo condomínio; a ocorrência não pode estar concluída. Revoga a delegação anterior (trocar o responsável é delegar de novo), cria a nova, muda o status para `delegado` (com histórico) e **devolve o token do link uma vez** (43 caracteres, base64url); o banco guarda só o hash |
+| `cadastrar_funcionario(p_condominio_id, p_nome, p_celular, p_funcao)` | gestor ativo do condomínio. Devolve o `id`. `p_celular` só com dígitos (`5511999998888`; o front converte a máscara); nome até 120 e função até 60 caracteres (a função tira os espaços das pontas). Recusa celular já usado por um funcionário ativo do mesmo condomínio |
+| `desativar_funcionario(p_funcionario_id)` | gestor ativo do condomínio do funcionário. Marca `ativo = false`; repetir não muda nada |
 | `definir_prioridade_ocorrencia(p_ocorrencia_id, p_urgencia, p_justificativa)` | gestor ativo do condomínio. Confirma ou muda a prioridade (`urgente`, `alta`, `normal` ou `baixa`); `p_justificativa` é opcional. Grava em `decisoes` (`acao = 'definir_prioridade'`) e atualiza `urgencia_atual`. Depois disso, a IA não muda mais a urgência. Não vale para ocorrência concluída |
 | `listar_ocorrencias_gestor()` | qualquer usuário logado; devolve só as ocorrências dos condomínios em que quem chama é gestor ativo (para os outros, lista vazia), das mais novas para as mais antigas: `id`, `condominio_id`, `condominio_nome`, `local`, `descricao`, `status`, `urgencia_atual`, `categoria_atual`, `created_at`, `registrado_por_nome` |
 

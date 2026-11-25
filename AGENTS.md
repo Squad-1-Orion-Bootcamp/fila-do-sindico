@@ -61,9 +61,14 @@ Detalhes, regras de acesso e funções em `supabase/AGENTS.md`.
   (`inicio_vigencia`, `fim_vigencia`), `aprovado_por`, `encerrado_por`, `motivo_encerramento`;
   as unidades do morador ficam em `vinculos_imovel`
 - `ocorrencias`: `condominio_id`, `registrado_por`, `local`, `descricao`, `status` (`novo`,
-  `em_andamento`, `concluido`), `origem` (`aplicativo` para a do morador; `whatsapp`, `telefone`,
+  `em_andamento`, `delegado` (só pela delegação, US 3), `concluido`), `origem` (`aplicativo` para a do morador; `whatsapp`, `telefone`,
   `presencial` ou `vistoria` para a do gestor), `relatado_por` (opcional), e `urgencia_atual`, `categoria_atual` (preenchidas pela IA a
   partir da Sprint 2, com o histórico em `classificacoes_ia`)
+- `funcionarios`: contatos dos funcionários de cada condomínio, sem conta (`nome`, `celular`,
+  `funcao`, `ativo`), cadastrados pelo gestor para a delegação; não usam `vinculos`
+- `delegacoes`: ocorrência delegada a um funcionário pelo link do WhatsApp (US 3): `situacao`
+  (`ativa`, `concluida`, `revogada`) e `comentario` do funcionário. Guarda só o hash do token;
+  escrita só por funções
 
 Acesso a um condomínio = vínculo `ativo` e vigente (nas políticas, use
 `public.eh_gestor_aprovado(condominio_id)`). Uma conta tem um tipo só. Gestor vê os
