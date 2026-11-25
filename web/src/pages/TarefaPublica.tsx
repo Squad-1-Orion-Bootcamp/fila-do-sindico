@@ -84,8 +84,14 @@ function FormularioTarefa({ token, tarefa, aoMudarEstado }: FormularioProps) {
     // concluiu). Consulta de novo para mostrar o aviso certo.
     const novo = await buscarEstado(token)
     setEnviando(false)
-    if (novo.tipo !== 'ativa') {
+    // Só troca de tela se a situação mudou de verdade. Se a consulta também falhou (internet
+    // fraca de quem está em campo), fica no formulário para não perder o comentário digitado.
+    if (novo.tipo !== 'ativa' && novo.tipo !== 'erro') {
       aoMudarEstado(novo)
+      return
+    }
+    if (novo.tipo === 'erro') {
+      setErro('Não foi possível concluir a tarefa. Confira a internet e tente de novo.')
       return
     }
     setErro(
