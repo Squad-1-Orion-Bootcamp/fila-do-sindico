@@ -270,7 +270,7 @@ o começo à mão.
 - **Uma issue por PR**, de preferência com menos de 400 linhas alteradas.
 - **Para evitar conflito:** decisão nova é um arquivo novo em `docs/decisoes/`;
   linha nova em tabela de funções entra em ordem alfabética;
-  no máximo um nível de dependência entre PRs;
+  a PR que é base de outra tem prioridade na revisão e no merge;
   e PR aberta por mais de um dia traz a `develop` todo dia.
   Detalhes em `docs/decisoes/2026-11-25-squad1-87-menos-conflitos-na-documentacao.md`.
 - Ainda não está pronta? Abra como **rascunho (draft)**.

@@ -26,6 +26,6 @@ Todos os outros foram em documentação, sempre nos mesmos pontos:
 | O `supabase/AGENTS.md` não lista mais as migrações: a lista é a pasta `supabase/migrations/`, e cada migração começa com um comentário dizendo o que faz e a issue | Toda PR com migração mexia no mesmo parágrafo. Os comentários já existiam em todas as migrações |
 | Tabelas de funções e listas de arquivos ficam em ordem alfabética, e a linha nova entra no lugar dela | Cada PR acrescenta num ponto diferente, em vez de todas no fim |
 | No Markdown, uma frase por linha (ou quebra em vírgula), e nunca refazer as quebras de um parágrafo que você não mudou | Mudar uma frase muda uma linha. Refazer as quebras transforma uma mudança pequena num conflito grande |
-| No máximo um nível de dependência entre PRs. A PR que é base de outra tem prioridade na revisão e no merge | Cada nível a mais multiplica os merges: mudar a base obriga a trazer de novo em toda a cadeia |
+| A PR que é base de outra tem prioridade na revisão e no merge | Quanto antes a base entra, menos vezes as PRs de baixo precisam trazer a base de novo |
 | PR aberta por mais de um dia traz a `develop` todo dia (`git merge origin/develop`) | Conflito pequeno e frequente é mais fácil que um grande no fim |
 | Não usar `merge=union` no `.gitattributes` | Junta as duas versões sem avisar, pode duplicar ou embaralhar linhas de tabela, e o GitHub ignora isso ao dizer se a PR tem conflito |

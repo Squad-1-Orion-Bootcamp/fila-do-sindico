@@ -93,7 +93,7 @@ condomínio é opcional, nunca a visão padrão.
   - decisão nova é um arquivo novo em `docs/decisoes/`, nunca uma seção num arquivo de outra issue;
   - tabelas de funções e listas de arquivos ficam em ordem alfabética: a linha nova entra no lugar dela, não no fim;
   - no Markdown, uma frase por linha, e nunca refaça as quebras de um parágrafo que você não mudou;
-  - no máximo um nível de dependência entre PRs, e a PR que é base de outra tem prioridade na revisão;
+  - a PR que é base de outra tem prioridade na revisão e no merge;
   - PR aberta por mais de um dia traz a `develop` todo dia (`git merge origin/develop`).
 - **Título de PR**: `tipo: descrição (SQUAD1-123)`, ex.: `feat: cadastro do gestor (SQUAD1-12)`.
   Vira a mensagem do merge commit na `develop` (merge comum, nunca squash: os commits da branch
