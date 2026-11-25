@@ -1,14 +1,21 @@
 import { Clock, MessageSquareText, Repeat, Send, User, UserCheck } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { useAuth } from '../auth/AuthProvider'
 import { supabase } from '../lib/supabase'
 import { dataCompleta, tempoRelativo } from '../lib/tempo'
 import { DelegarOcorrencia } from './DelegarOcorrencia'
+import {
+  EtiquetaPrioridade,
+  MotivoPrioridade,
+  SeletorPrioridade,
+  type DecisaoPrioridade,
+  type Urgencia,
+} from './PrioridadeNoCard'
 import './OcorrenciasDoGestor.css'
 
 // Bloco do painel do gestor: ocorrências de todos os seus condomínios (SQUAD1-29).
 
 type Status = 'novo' | 'em_andamento' | 'delegado' | 'concluido'
-type Urgencia = 'urgente' | 'alta' | 'normal' | 'baixa'
 
 type Ocorrencia = {
   id: string
@@ -116,13 +123,6 @@ function ordemNaColuna(a: Ocorrencia, b: Ocorrencia): number {
 // "Delegado" só vem pela delegação (botão Delegar), nunca pela troca de status.
 const STATUS_ESCOLHIVEIS: Status[] = ['novo', 'em_andamento', 'concluido']
 
-const ROTULO_URGENCIA: Record<Urgencia, string> = {
-  urgente: 'Urgente',
-  alta: 'Alta',
-  normal: 'Normal',
-  baixa: 'Baixa',
-}
-
 // A função do banco devolve só as ocorrências dos condomínios em que o gestor tem vínculo
 // ativo, já das mais novas para as mais antigas. A urgência não vem de .from('ocorrencias'):
 // essa coluna é fechada para o morador, e permissão por coluna vale para todo usuário logado.
@@ -133,13 +133,57 @@ function buscarOcorrencias() {
 // Valor do filtro que mostra todos os condomínios (a visão padrão do painel).
 const TODOS = 'todos'
 
-// A urgência vem da IA a partir da Sprint 2; até lá a etiqueta mostra "Aguardando triagem".
-function EtiquetaPrioridade({ urgencia }: { urgencia: Urgencia | null }) {
-  if (!urgencia) return <span className="etiqueta etiqueta-triagem">Aguardando triagem</span>
-  return <span className={`etiqueta etiqueta-${urgencia}`}>{ROTULO_URGENCIA[urgencia]}</span>
+// Motivo da prioridade (SQUAD1-64): a frase da IA (classificacoes_ia) e a última decisão do
+// gestor (decisoes). O RLS deixa só o gestor ativo do condomínio e o admin lerem as duas.
+type Classificacao = { ocorrencia_id: string; justificativa: string | null; created_at: string }
+type Decisao = {
+  ocorrencia_id: string
+  autor_id: string
+  justificativa: string | null
+  created_at: string
+}
+
+function buscarMotivos() {
+  return Promise.all([
+    supabase
+      .from('classificacoes_ia')
+      .select('ocorrencia_id, justificativa, created_at')
+      .eq('status_processamento', 'sucesso')
+      .returns<Classificacao[]>(),
+    supabase
+      .from('decisoes')
+      .select('ocorrencia_id, autor_id, justificativa, created_at')
+      .eq('acao', 'definir_prioridade')
+      .returns<Decisao[]>(),
+  ])
+}
+
+// Fica a mais recente de cada ocorrência.
+function maisRecentes<T extends { ocorrencia_id: string; created_at: string }>(
+  lista: T[],
+): Record<string, T> {
+  const mapa: Record<string, T> = {}
+  for (const item of lista) {
+    const atual = mapa[item.ocorrencia_id]
+    if (!atual || item.created_at > atual.created_at) mapa[item.ocorrencia_id] = item
+  }
+  return mapa
+}
+
+// Mensagens que a própria função definir_prioridade_ocorrencia escreve para o usuário.
+function mensagemDaPrioridade(error: { code?: string; message: string }): string {
+  if (
+    (error.code === '22023' || error.code === '42501') &&
+    !error.message.startsWith('permission denied')
+  ) {
+    return error.message
+  }
+  return 'Não foi possível salvar a prioridade. Tente de novo.'
 }
 
 export function OcorrenciasDoGestor() {
+  const { session } = useAuth()
+  const meuId = session?.user.id
   const [itens, setItens] = useState<Ocorrencia[]>([])
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState<string | null>(null)
@@ -151,6 +195,9 @@ export function OcorrenciasDoGestor() {
   const [erroDelegacoes, setErroDelegacoes] = useState(false)
   // Sobe a cada delegação ou troca de status, para recarregar responsáveis e comentários.
   const [versaoDelegacoes, setVersaoDelegacoes] = useState(0)
+  const [motivosIA, setMotivosIA] = useState<Record<string, string | null>>({})
+  const [decisoes, setDecisoes] = useState<Record<string, DecisaoPrioridade>>({})
+  const [erroMotivos, setErroMotivos] = useState(false)
   // No celular o quadro mostra uma coluna por vez (DESIGN.md), escolhida nas abas.
   const [colunaAberta, setColunaAberta] = useState<Status>('novo')
 
@@ -185,6 +232,57 @@ export function OcorrenciasDoGestor() {
       ativo = false
     }
   }, [versaoDelegacoes])
+
+  // Sem tempo real (decisão da Riane): o motivo da IA chega ao recarregar a página.
+  useEffect(() => {
+    let ativo = true
+    buscarMotivos().then(([classificacoes, decisoesLidas]) => {
+      if (!ativo) return
+      const error = classificacoes.error ?? decisoesLidas.error
+      if (error) {
+        console.error('Erro ao carregar os motivos da prioridade', error)
+        setErroMotivos(true)
+        return
+      }
+      setErroMotivos(false)
+      const ia = maisRecentes(classificacoes.data ?? [])
+      setMotivosIA(Object.fromEntries(Object.entries(ia).map(([id, c]) => [id, c.justificativa])))
+      const gestor = maisRecentes(decisoesLidas.data ?? [])
+      setDecisoes(
+        Object.fromEntries(
+          Object.entries(gestor).map(([id, d]) => [
+            id,
+            { autorId: d.autor_id, justificativa: d.justificativa },
+          ]),
+        ),
+      )
+    })
+    return () => {
+      ativo = false
+    }
+  }, [])
+
+  async function definirPrioridade(
+    id: string,
+    urgencia: Urgencia,
+    justificativa: string | null,
+  ): Promise<string | null> {
+    const { error } = await supabase.rpc('definir_prioridade_ocorrencia', {
+      p_ocorrencia_id: id,
+      p_urgencia: urgencia,
+      p_justificativa: justificativa,
+    })
+    if (error) {
+      console.error('Erro ao definir a prioridade', error)
+      return mensagemDaPrioridade(error)
+    }
+    // A escolha do gestor fica no lugar da sugestão da IA, e o card muda de lugar na coluna.
+    setItens((atuais) => atuais.map((o) => (o.id === id ? { ...o, urgencia_atual: urgencia } : o)))
+    if (meuId) {
+      setDecisoes((atuais) => ({ ...atuais, [id]: { autorId: meuId, justificativa } }))
+    }
+    return null
+  }
 
   async function alterarStatus(id: string, status: Status) {
     setErroStatus(null)
@@ -228,7 +326,10 @@ export function OcorrenciasDoGestor() {
     const concluida = delegacoes[o.id]?.concluida
     return (
       <li key={o.id} className={o.status === 'concluido' ? 'cartao cartao-apagado' : 'cartao'}>
-        <EtiquetaPrioridade urgencia={o.urgencia_atual} />
+        {/* A concluída que a IA não classificou fica sem etiqueta (decisão da Riane) */}
+        {!(o.status === 'concluido' && !o.urgencia_atual) && (
+          <EtiquetaPrioridade urgencia={o.urgencia_atual} />
+        )}
         <p className="cartao-meta quadro-onde">
           {o.condominio_nome ?? 'Condomínio'}
           {o.local && ` · ${o.local}`}
@@ -249,6 +350,19 @@ export function OcorrenciasDoGestor() {
             </time>
           </span>
         </p>
+        <MotivoPrioridade
+          urgencia={o.urgencia_atual}
+          motivoIA={motivosIA[o.id] ?? null}
+          decisao={decisoes[o.id]}
+          meuId={meuId}
+        />
+        <SeletorPrioridade
+          ocorrenciaId={o.id}
+          concluida={o.status === 'concluido'}
+          urgencia={o.urgencia_atual}
+          decisao={decisoes[o.id]}
+          aoDefinir={(urgencia, justificativa) => definirPrioridade(o.id, urgencia, justificativa)}
+        />
         <label className="quadro-status">
           <span className="cartao-meta">Status</span>
           <select
@@ -356,6 +470,11 @@ export function OcorrenciasDoGestor() {
                 ))}
               </select>
             </label>
+          )}
+          {erroMotivos && (
+            <p role="alert" className="aviso aviso-erro quadro-resumo">
+              Não foi possível carregar os motivos das prioridades.
+            </p>
           )}
           {erroDelegacoes && (
             <p role="alert" className="aviso aviso-erro quadro-resumo">
