@@ -17,6 +17,8 @@ uv add <pacote>          # nunca pip install
 - `app/main.py` — rotas (`GET /health`, `POST /classificar`)
 - `app/schemas.py` — contratos Pydantic de entrada e saída
 - `app/classifier.py` — lógica de classificação (regras provisórias na Sprint 1; LLM na Sprint 2)
+- `app/trava.py` — trava de palavras de risco (força `urgente`) e a comparação por palavra usada
+  também pelas regras
 - `app/config.py` — variáveis de ambiente via `pydantic-settings`
 - `tests/` — pytest com `TestClient`
 
