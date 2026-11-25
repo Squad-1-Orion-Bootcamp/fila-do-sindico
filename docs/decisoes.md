@@ -3,6 +3,16 @@
 Registro curto das decisões, com o motivo. Decisão nova entra no topo da sua seção. Quando uma
 decisão for trocada, mova a antiga para "Substituídas", dizendo o que a substituiu.
 
+## 24/11/2026 — Quadro em colunas (SQUAD1-61)
+
+### Produto e acesso
+
+| Decisão | Motivo |
+| --- | --- |
+| No painel do gestor, colunas e seletor de status usam os nomes da US 1: Novo, Em andamento, Delegado e Concluído. A página do morador continua com Pendente, Em análise e Resolvido (SQUAD1-5) | Decisão da Riane: os nomes da issue e do protótipo, iguais na coluna e no card |
+| Em cada coluna, primeiro a urgência (urgente, alta, normal, baixa), depois a mais antiga. A ocorrência que a IA ainda não classificou vem depois das classificadas | A issue pede "os mais urgentes e mais antigos primeiro"; sem classificação, ainda não se sabe a urgência |
+| No celular, uma coluna por vez, escolhida em abas com a contagem; no tablet, duas colunas; no computador, quatro | Segue o `DESIGN.md` ("uma coluna por vez, com abas de contagem") |
+
 ## 24/11/2026 — Funções da delegação (SQUAD1-74)
 
 ### Produto e acesso

@@ -22,12 +22,27 @@ type Ocorrencia = {
   registrado_por_nome: string | null
 }
 
-// Mesmos rótulos da história SQUAD1-5 e da página do morador.
+// Nomes das colunas da US 1 (SQUAD1-61), também no seletor do card. O morador continua vendo
+// os da SQUAD1-5 (Pendente, Em análise, Resolvido) na página dele.
 const ROTULO_STATUS: Record<Status, string> = {
-  novo: 'Pendente',
-  em_andamento: 'Em análise',
+  novo: 'Novo',
+  em_andamento: 'Em andamento',
   delegado: 'Delegado',
-  concluido: 'Resolvido',
+  concluido: 'Concluído',
+}
+
+// Ordem das colunas no quadro.
+const COLUNAS: Status[] = ['novo', 'em_andamento', 'delegado', 'concluido']
+
+// Mais urgentes primeiro; a ocorrência que a IA ainda não classificou vem depois das
+// classificadas. Empate: a mais antiga primeiro.
+const PESO_URGENCIA: Record<Urgencia, number> = { urgente: 0, alta: 1, normal: 2, baixa: 3 }
+
+function ordemNaColuna(a: Ocorrencia, b: Ocorrencia): number {
+  const pa = a.urgencia_atual ? PESO_URGENCIA[a.urgencia_atual] : 4
+  const pb = b.urgencia_atual ? PESO_URGENCIA[b.urgencia_atual] : 4
+  if (pa !== pb) return pa - pb
+  return a.created_at.localeCompare(b.created_at)
 }
 
 // "Delegado" só vem pela delegação (botão Delegar), nunca pela troca de status.
@@ -64,6 +79,8 @@ export function OcorrenciasDoGestor() {
   const [erroStatus, setErroStatus] = useState<{ id: string; mensagem: string } | null>(null)
   const [filtroCondominio, setFiltroCondominio] = useState(TODOS)
   const [delegando, setDelegando] = useState<Ocorrencia | null>(null)
+  // No celular o quadro mostra uma coluna por vez (DESIGN.md), escolhida nas abas.
+  const [colunaAberta, setColunaAberta] = useState<Status>('novo')
 
   useEffect(() => {
     buscarOcorrencias().then(({ data, error }) => {
@@ -105,6 +122,74 @@ export function OcorrenciasDoGestor() {
 
   const totalCondominios = new Set(visiveis.map((o) => o.condominio_id)).size
 
+  const porColuna = Object.fromEntries(
+    COLUNAS.map((s) => [s, visiveis.filter((o) => o.status === s).sort(ordemNaColuna)]),
+  ) as Record<Status, Ocorrencia[]>
+
+  function cartao(o: Ocorrencia) {
+    return (
+      <li key={o.id} className={o.status === 'concluido' ? 'cartao cartao-apagado' : 'cartao'}>
+        <EtiquetaPrioridade urgencia={o.urgencia_atual} />
+        <p className="cartao-meta quadro-onde">
+          {o.condominio_nome ?? 'Condomínio'}
+          {o.local && ` · ${o.local}`}
+        </p>
+        <p id={`descricao-${o.id}`} className="cartao-titulo quadro-descricao">
+          {o.descricao}
+        </p>
+        <p className="cartao-meta quadro-rodape">
+          <span className="quadro-info">
+            <User size={14} aria-hidden />
+            {o.registrado_por_nome ?? 'Pessoa não identificada'}
+          </span>
+          <span aria-hidden>·</span>
+          <span className="quadro-info">
+            <Clock size={14} aria-hidden />
+            <time dateTime={o.created_at} title={dataCompleta(o.created_at)}>
+              {tempoRelativo(o.created_at)}
+            </time>
+          </span>
+        </p>
+        <label className="quadro-status">
+          <span className="cartao-meta">Status</span>
+          <select
+            value={o.status}
+            aria-describedby={`descricao-${o.id}`}
+            disabled={salvandoId === o.id}
+            onChange={(e) => alterarStatus(o.id, e.target.value as Status)}
+          >
+            {/* Delegado aparece só na ocorrência já delegada, e não dá para escolher */}
+            {o.status === 'delegado' && (
+              <option value="delegado" disabled>
+                {ROTULO_STATUS.delegado}
+              </option>
+            )}
+            {STATUS_ESCOLHIVEIS.map((s) => (
+              <option key={s} value={s}>
+                {ROTULO_STATUS[s]}
+              </option>
+            ))}
+          </select>
+        </label>
+        {(o.status === 'novo' || o.status === 'em_andamento') && (
+          <button
+            type="button"
+            className="botao quadro-delegar"
+            aria-describedby={`descricao-${o.id}`}
+            onClick={() => setDelegando(o)}
+          >
+            <Send size={16} aria-hidden /> Delegar
+          </button>
+        )}
+        {erroStatus?.id === o.id && (
+          <p role="alert" className="campo-erro">
+            {erroStatus.mensagem}
+          </p>
+        )}
+      </li>
+    )
+  }
+
   return (
     <section aria-labelledby="titulo-ocorrencias">
       <h2 id="titulo-ocorrencias">Ocorrências</h2>
@@ -145,72 +230,41 @@ export function OcorrenciasDoGestor() {
               </select>
             </label>
           )}
-          <ul className="quadro-lista">
-            {visiveis.map((o) => (
-              <li
-                key={o.id}
-                className={o.status === 'concluido' ? 'cartao cartao-apagado' : 'cartao'}
+          {/* Abas de contagem: só aparecem no celular, onde cabe uma coluna por vez */}
+          <div className="opcoes quadro-abas" aria-label="Coluna do quadro">
+            {COLUNAS.map((s) => (
+              <button
+                key={s}
+                type="button"
+                className="botao"
+                aria-pressed={colunaAberta === s}
+                onClick={() => setColunaAberta(s)}
               >
-                <EtiquetaPrioridade urgencia={o.urgencia_atual} />
-                <p className="cartao-meta quadro-onde">
-                  {o.condominio_nome ?? 'Condomínio'}
-                  {o.local && ` · ${o.local}`}
-                </p>
-                <p id={`descricao-${o.id}`} className="cartao-titulo quadro-descricao">
-                  {o.descricao}
-                </p>
-                <p className="cartao-meta quadro-rodape">
-                  <span className="quadro-info">
-                    <User size={14} aria-hidden />
-                    {o.registrado_por_nome ?? 'Pessoa não identificada'}
-                  </span>
-                  <span aria-hidden>·</span>
-                  <span className="quadro-info">
-                    <Clock size={14} aria-hidden />
-                    <time dateTime={o.created_at} title={dataCompleta(o.created_at)}>
-                      {tempoRelativo(o.created_at)}
-                    </time>
-                  </span>
-                </p>
-                <label className="quadro-status">
-                  <span className="cartao-meta">Status</span>
-                  <select
-                    value={o.status}
-                    aria-describedby={`descricao-${o.id}`}
-                    disabled={salvandoId === o.id}
-                    onChange={(e) => alterarStatus(o.id, e.target.value as Status)}
-                  >
-                    {/* Delegado aparece só na ocorrência já delegada, e não dá para escolher */}
-                    {o.status === 'delegado' && (
-                      <option value="delegado" disabled>
-                        {ROTULO_STATUS.delegado}
-                      </option>
-                    )}
-                    {STATUS_ESCOLHIVEIS.map((s) => (
-                      <option key={s} value={s}>
-                        {ROTULO_STATUS[s]}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                {(o.status === 'novo' || o.status === 'em_andamento') && (
-                  <button
-                    type="button"
-                    className="botao quadro-delegar"
-                    aria-describedby={`descricao-${o.id}`}
-                    onClick={() => setDelegando(o)}
-                  >
-                    <Send size={16} aria-hidden /> Delegar
-                  </button>
-                )}
-                {erroStatus?.id === o.id && (
-                  <p role="alert" className="campo-erro">
-                    {erroStatus.mensagem}
-                  </p>
-                )}
-              </li>
+                {ROTULO_STATUS[s]} <span className="contador">{porColuna[s].length}</span>
+              </button>
             ))}
-          </ul>
+          </div>
+          <div className="quadro-colunas">
+            {COLUNAS.map((s) => (
+              <section
+                key={s}
+                aria-labelledby={`coluna-${s}`}
+                className={
+                  colunaAberta === s ? 'quadro-coluna quadro-coluna-aberta' : 'quadro-coluna'
+                }
+              >
+                <h3 id={`coluna-${s}`} className="quadro-coluna-titulo">
+                  <span className={`quadro-ponto quadro-ponto-${s}`} aria-hidden />
+                  {ROTULO_STATUS[s]} <span className="contador">{porColuna[s].length}</span>
+                </h3>
+                {porColuna[s].length === 0 ? (
+                  <p className="estado-vazio">Nenhuma ocorrência aqui.</p>
+                ) : (
+                  <ul className="quadro-lista">{porColuna[s].map(cartao)}</ul>
+                )}
+              </section>
+            ))}
+          </div>
         </>
       )}
 
