@@ -3,6 +3,67 @@
 Registro curto das decisões, com o motivo. Decisão nova entra no topo da sua seção. Quando uma
 decisão for trocada, mova a antiga para "Substituídas", dizendo o que a substituiu.
 
+## 24/11/2026 — Gestor altera a prioridade (SQUAD1-60)
+
+### Produto e acesso
+
+| Decisão | Motivo |
+| --- | --- |
+| O motivo do gestor ao confirmar ou mudar a prioridade é opcional | Corrigir um falso urgente com um clique (SQUAD1-64); quando o gestor escreve, o motivo fica salvo |
+| Confirmar a prioridade sugerida também conta como escolha do gestor: a IA não muda mais a urgência depois | A escolha do gestor sempre vence a IA e a trava (SQUAD1-56); a US 1 fala em "confirmar ou alterar" |
+| A prioridade de uma ocorrência concluída não muda mais | Ela já saiu da fila; mudar não teria efeito |
+
+### Técnica
+
+| Decisão | Motivo |
+| --- | --- |
+| A escolha do gestor fica em `decisoes` com a ação nova `definir_prioridade`, e a IA confere essa tabela antes de mudar `urgencia_atual` | Usa a tabela de decisões que já existia, com autor, data e a sugestão da IA que foi confirmada ou corrigida, sem coluna nova em `ocorrencias` |
+
+## 24/11/2026 — Classificação pela IA no banco (SQUAD1-59)
+
+### Produto e acesso
+
+| Decisão | Motivo |
+| --- | --- |
+| O morador não vê a prioridade nem o motivo da IA da própria ocorrência, só o status. Vale no banco, não só na tela: ele não lê `urgencia_atual`, `categoria_atual` nem `classificacoes_ia` pela API | Decisão do Lucas (SQUAD1-56); com a SQUAD1-59 esses dados passam a ser preenchidos |
+| As decisões do gestor (`decisoes`: prioridade escolhida, justificativa, notas, destinatário) também são só do gestor ativo e do admin. Responde a SQUAD1-49 | Mesma regra: o morador vê só o status (SQUAD1-56 e US 3, em que o comentário do funcionário fica só para o síndico) |
+
+### Técnica
+
+| Decisão | Motivo |
+| --- | --- |
+| O banco avisa o ai-service por um gatilho com `pg_net` criado em migração, e não pelos "Database Webhooks" do painel | A regra 3 do `AGENTS.md`: toda mudança no banco é migração; o gatilho vai igual para local, stage e prod |
+| O endereço do ai-service e o segredo do webhook ficam no Vault de cada banco, cadastrados à mão uma vez por ambiente | Cada ambiente tem o próprio ai-service, e a regra 6 proíbe segredo no código |
+| O gatilho espera até 90 s pela resposta do ai-service (`timeout_milliseconds := 90000`) | No plano grátis, o Render dorme depois de 15 minutos sem uso e leva de 13 a 18 s para acordar; com 5 s, a primeira ocorrência depois de uma pausa nunca seria classificada. O `pg_net` é assíncrono, então o morador não espera (proposta e teste do Danilo na revisão da #24) |
+| O gatilho nunca impede o registro da ocorrência: sem o Vault configurado ou com erro no `pg_net`, a ocorrência fica sem prioridade | Registrar a ocorrência é mais importante que classificá-la na hora; o "classificar pendentes" (SQUAD1-80) pega depois |
+| `gravar_classificacao` só pode ser chamada pela `service_role`, e chamar de novo para a mesma ocorrência não muda nada | Só o ai-service grava a classificação; o `pg_net` e o "classificar pendentes" podem mandar a mesma ocorrência duas vezes |
+| Cada classificação guarda a origem: `ia`, `regra`, `ia+trava` ou `regra+trava` | Mostra quantas vezes a IA respondeu e quantas vezes as regras assumiram (proposta da IA de 23/11) |
+| O painel do gestor lê as ocorrências pela função `listar_ocorrencias_gestor()`, e não por `.from('ocorrencias')` | Gestor e morador usam o mesmo papel no banco, e permissão por coluna vale para o papel inteiro: para fechar `urgencia_atual` para o morador, a coluna sai da leitura direta de todos |
+
+## 23/11/2026 — Link de delegação (US 3)
+
+### Produto e acesso
+
+Aprovadas pelo Lucas em 23/11 (SQUAD1-72).
+
+| Decisão | Motivo |
+| --- | --- |
+| Desativar um funcionário **não** mexe no link de uma tarefa já delegada a ele | A tarefa já foi combinada com ele; desativar só tira o funcionário da lista na hora de delegar de novo |
+| Qualquer troca de status pelo gestor (Novo, Em andamento ou Concluído) **revoga** o link ativo. "Assumir de volta" é isso, sem botão próprio | O gestor retoma a ocorrência pelo que já existe no painel, e o link antigo para de valer |
+| O link **não expira** com o tempo: só deixa de valer quando a tarefa é concluída, quando o responsável é trocado ou quando o gestor muda o status | Tarefas de rotina podem levar dias; um prazo fixo derrubaria links ainda em uso |
+| O comentário do funcionário ao concluir é visto **só pelo gestor**. O morador continua vendo apenas o status | Mesma regra da SQUAD1-56: o morador vê só o status |
+
+## 23/11/2026 — Publicação do ai-service
+
+### Técnica
+
+| Decisão | Motivo |
+| --- | --- |
+| ai-service publicado no Render, plano grátis (SQUAD1-65) | Custo zero. O risco de o serviço dormir depois de 15 minutos sem uso é coberto pelo endpoint "classificar pendentes" (cartão a criar) |
+| Dois serviços no Render, como na Vercel: um acompanha a `stage` (Supabase de stage), outro a `prod` (Supabase de produção). A `develop` não tem serviço: roda local | No Render, cada serviço acompanha uma branch só. Com o serviço na mesma branch do banco do ambiente, o código e o esquema sempre combinam. As 750 horas grátis são do workspace e serviço dormindo não gasta hora |
+| Um `WEBHOOK_SECRET` diferente em cada ambiente | Se um vazar, o outro continua protegido |
+| Sem `render.yaml`: a configuração do Render fica documentada no README | A documentação do Render não garante que um Blueprint assuma os serviços criados pelo painel sem criar outros |
+
 ## 19/11/2026 — Branches e ambientes
 
 ### Técnica
