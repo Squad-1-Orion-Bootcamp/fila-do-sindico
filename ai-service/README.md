@@ -1,8 +1,8 @@
 # ai-service
 
 Serviço de IA da Fila do Síndico (Python + FastAPI). Classifica cada ocorrência nova com o
-Gemini Decision 1, e as regras por palavra-chave ficam de reserva (veja
-[Classificação](#classificação)).
+Gemini Decision 1 e explica a urgência com o Gemini 2.5 Flash. As regras por palavra-chave
+ficam de reserva (veja [Classificação](#classificação)).
 
 ## Rodar
 
@@ -72,9 +72,13 @@ O `classificar()` (`app/classifier.py`) segue a proposta "System 1 + System 2" d
    a confiança (0 a 1), que por enquanto só vai para o log.
 3. **Reserva, regras por palavra-chave:** se o Decision 1 der erro, demorar mais que cerca de 3 s ou
    a `LLM_API_KEY` estiver vazia (aí nem tenta chamar), as regras decidem.
-4. **Justificativa:** por enquanto, um motivo padrão ("Classificada como Alta pela IA.", ou o
-   termo da trava, ou a palavra da regra). A frase gerada pela Gemini (System 2) entra na
-   SQUAD1-85.
+4. **System 2, justificativa** (`app/justificativa.py`): o Gemini 2.5 Flash, pelo Pydantic AI,
+   escreve uma frase de até 200 caracteres explicando a urgência final para o gestor. Ele não
+   decide nada: recebe a urgência já escolhida. Vão para a Gemini só a descrição e o local.
+   Só é chamado quando o Decision 1 respondeu: se ele falhou, a Gemini provavelmente está
+   fora, e fica a frase da regra ou da trava. Resposta vazia ou longa demais: pede de novo uma
+   vez. Com erro ou demora de mais de cerca de 8 s, fica o motivo padrão ("Classificada como
+   Alta pela IA.").
 
 O que vai para o banco:
 
@@ -85,11 +89,34 @@ O que vai para o banco:
 
 **Sem `LLM_API_KEY`** (no local, na CI e nos testes), o serviço funciona do mesmo jeito, só
 com as regras. A chave sai do [Google AI Studio](https://aistudio.google.com) e fica só no
-`.env` ou no painel do Render. Opcionais: `LLM_MODELO_DECISAO` (padrão `gemini-decision-1`) e
-`LLM_TIMEOUT_SEGUNDOS` (padrão `3`).
+`.env` ou no painel do Render. Opcionais: `LLM_MODELO_DECISAO` (padrão `gemini-decision-1`),
+`LLM_TIMEOUT_SEGUNDOS` (padrão `3`), `LLM_MODELO_JUSTIFICATIVA` (padrão `gemini-2.5-flash`) e
+`LLM_TIMEOUT_JUSTIFICATIVA_SEGUNDOS` (padrão `8`).
 
-Nenhum teste chama a Gemini: o `tests/conftest.py` esvazia a chave, e os testes do Decision 1
-usam um cliente dublê.
+Nenhum teste chama a Gemini: o `tests/conftest.py` esvazia a chave e liga
+`ALLOW_MODEL_REQUESTS = False` do Pydantic AI. Os testes do Decision 1 usam um cliente dublê, e
+os da justificativa usam `TestModel` e `FunctionModel`.
+
+### Testar com a Gemini de verdade
+
+1. Crie a chave em <https://aistudio.google.com/apikey> e ponha em `ai-service/.env`
+   (`LLM_API_KEY=...`). O `.env` não vai para o Git.
+2. Só a justificativa (mostra o erro, se houver):
+
+   ```bash
+   uv run python -c "from app.justificativa import justificar; print(justificar('Infiltração no teto do banheiro, pingando no quarto', 'Bloco B, 302', 'alta'))"
+   ```
+
+3. A classificação inteira: suba o serviço (`uv run uvicorn app.main:app --reload --port 8000`)
+   e chame
+
+   ```bash
+   curl -s localhost:8000/classificar -H 'Content-Type: application/json' \
+     -d '{"descricao": "Cheiro forte de gás no corredor", "local": "Bloco A, 3º andar"}'
+   ```
+
+   O campo `justificativa` traz a frase da Gemini. Se vier o motivo padrão, o log do uvicorn
+   mostra "Justificativa falhou (...)".
 
 ## Estrutura
 
@@ -100,5 +127,6 @@ usam um cliente dublê.
 - `app/schemas.py`: contratos de entrada e saída (urgência, categoria, justificativa, origem)
 - `app/classifier.py`: orquestração da classificação e as regras de reserva
 - `app/decisao.py`: System 1, a chamada ao Gemini Decision 1
+- `app/justificativa.py`: System 2, a frase da justificativa (Pydantic AI + Gemini 2.5 Flash)
 - `app/trava.py`: trava de palavras de risco (força urgência `urgente`)
 - `app/config.py`: variáveis de ambiente
