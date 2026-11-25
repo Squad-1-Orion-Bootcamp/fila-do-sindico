@@ -40,6 +40,18 @@ decisão for trocada, mova a antiga para "Substituídas", dizendo o que a substi
 | Cada classificação guarda a origem: `ia`, `regra`, `ia+trava` ou `regra+trava` | Mostra quantas vezes a IA respondeu e quantas vezes as regras assumiram (proposta da IA de 23/11) |
 | O painel do gestor lê as ocorrências pela função `listar_ocorrencias_gestor()`, e não por `.from('ocorrencias')` | Gestor e morador usam o mesmo papel no banco, e permissão por coluna vale para o papel inteiro: para fechar `urgencia_atual` para o morador, a coluna sai da leitura direta de todos |
 
+## 23/11/2026 — Funcionário (US 2)
+
+### Produto e acesso
+
+Decididas pelo Lucas em 23/11 (SQUAD1-67).
+
+| Decisão | Motivo |
+| --- | --- |
+| O funcionário da delegação é um **contato cadastrado pelo gestor, sem conta nem login**, na tabela `funcionarios` (SQUAD1-69). Ele não usa `vinculos`, e o tipo `funcionario` de `vinculos` fica sem uso por enquanto | Decisão do Lucas: o funcionário só recebe a tarefa pelo link do WhatsApp e a conclui por ele (US 3), sem precisar de conta. Substitui a decisão de 16/11 de que o funcionário é um morador com vínculo do tipo `funcionario` |
+| Os funcionários ficam numa aba própria, "Funcionários", com filtro por condomínio, no mesmo padrão visual do painel | Decisão do Lucas (SQUAD1-70) |
+| O celular do funcionário tem DDD + 9 dígitos e é único por condomínio entre os funcionários ativos. O mesmo celular pode estar em outro condomínio (o zelador de dois prédios), e quem foi desativado pode ser cadastrado de novo. O banco guarda só os dígitos, no formato do WhatsApp (`5511999998888`) | Decisão do Lucas; o formato é o que o link `wa.me` usa (SQUAD1-68 e SQUAD1-69) |
+
 ## 23/11/2026 — Link de delegação (US 3)
 
 ### Produto e acesso
@@ -107,7 +119,6 @@ Aprovadas pelo Lucas em 23/11 (SQUAD1-72).
 | A ocorrência guarda o canal em `origem`: `aplicativo` (registrada pelo morador, o padrão), `whatsapp`, `telefone`, `presencial` ou `vistoria` (registrada pelo gestor) | Toda ocorrência tem origem, e dá para comparar os canais depois (SQUAD1-30) |
 | Quem relatou ao gestor (`relatado_por`) é opcional e precisa ser morador ou funcionário ativo do condomínio; quem não tem conta fica em branco | Decisão do time (SQUAD1-30) |
 | Quem sai do condomínio: o ex-morador continua vendo as ocorrências que registrou pelo app (histórico); o ex-gestor perde o acesso também às que ele registrou | Decisão do time; vínculo encerrado perde o acesso aos dados do condomínio (SQUAD1-30) |
-| Funcionário se cadastra como morador, por enquanto sem enviar documentação | O cadastro de funcionário ficou para depois |
 | Chat (`conversas` e `mensagens`) fica para o futuro | Fora do escopo das primeiras sprints |
 
 ### Técnica
@@ -132,7 +143,7 @@ Aprovadas pelo Lucas em 23/11 (SQUAD1-72).
 
 | Decisão | Motivo |
 | --- | --- |
-| Perfis: `admin`, `gestor` (síndico ou administradora) e `morador`; o funcionário é um morador com vínculo do tipo `funcionario` | Funcionário com o mesmo acesso do morador evita trabalho extra agora |
+| Perfis: `admin`, `gestor` (síndico ou administradora) e `morador` | Os três papéis da plataforma |
 | Uma conta tem um tipo só; quem é gestor e morador usa dois e-mails | Simplifica as permissões nesta versão |
 | O papel fica em `profiles.role`, gravado pelo banco, nunca em `user_metadata` | O usuário consegue alterar `user_metadata` pelo navegador |
 | Acesso a condomínios pela tabela `vinculos` (usuário, condomínio, tipo, status) | Um gestor tem vários condomínios; uma pessoa pode ter vários imóveis |
@@ -181,3 +192,5 @@ Aprovadas pelo Lucas em 23/11 (SQUAD1-72).
 | Quem abriu a PR faz o merge | Quem aprova a PR faz o merge (18/11) |
 | Gitflow com `develop` como branch base; `main` só recebe releases (uma por sprint) e hotfixes | Branches `develop` → `stage` → `prod`, sem `main` nem `release/` (19/11) |
 | `vinculos` com `unidade` e `status` `pendente`/`aprovado`/`recusado` | Pedido em `solicitacoes_vinculo`, vínculo `ativo`/`encerrado` com vigência e unidade em `imoveis` (18/11) |
+| O funcionário é um morador com vínculo do tipo `funcionario`, com o mesmo acesso do morador (16/11) | Funcionário é um contato cadastrado pelo gestor, sem conta nem login, na tabela `funcionarios` (23/11) |
+| Funcionário se cadastra como morador, por enquanto sem enviar documentação (18/11) | Funcionário é cadastrado pelo gestor na aba Funcionários, sem conta (23/11) |
