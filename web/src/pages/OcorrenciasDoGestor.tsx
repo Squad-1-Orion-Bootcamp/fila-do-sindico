@@ -112,7 +112,12 @@ export function OcorrenciasDoGestor() {
       console.error('Erro ao alterar o status', error)
       setErroStatus({ id, mensagem: 'Não foi possível alterar o status. Tente de novo.' })
     } else {
-      setItens((atuais) => atuais.map((o) => (o.id === id ? { ...o, status } : o)))
+      // concluido_em acompanha o banco: preenchido ao concluir, limpo ao reabrir. A hora local
+      // basta para pôr o card no topo de Concluído; ao recarregar, vale a do banco.
+      const concluidoEm = status === 'concluido' ? new Date().toISOString() : null
+      setItens((atuais) =>
+        atuais.map((o) => (o.id === id ? { ...o, status, concluido_em: concluidoEm } : o)),
+      )
     }
     setSalvandoId(null)
   }
