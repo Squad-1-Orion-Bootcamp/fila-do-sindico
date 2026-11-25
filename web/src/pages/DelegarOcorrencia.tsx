@@ -25,7 +25,9 @@ type Funcionario = {
 
 type Props = {
   ocorrencia: OcorrenciaParaDelegar
-  // Na troca de responsável (SQUAD1-78), quem está com a tarefa agora.
+  // Troca de responsável (SQUAD1-78): a ocorrência já está delegada. O responsável atual pode
+  // faltar se a lista de delegações não carregou; a janela continua sendo a de troca.
+  trocando?: boolean
   responsavelAtualId?: string
   aoDelegar: (ocorrenciaId: string) => void
   aoFechar: () => void
@@ -44,11 +46,11 @@ function mensagemDeErro(error: { code?: string; message: string }): string {
 
 export function DelegarOcorrencia({
   ocorrencia,
+  trocando = false,
   responsavelAtualId,
   aoDelegar,
   aoFechar,
 }: Props) {
-  const trocando = Boolean(responsavelAtualId)
   const janela = useRef<HTMLDialogElement>(null)
   const [funcionarios, setFuncionarios] = useState<Funcionario[]>([])
   const [carregando, setCarregando] = useState(true)

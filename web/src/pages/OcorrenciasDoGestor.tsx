@@ -38,6 +38,8 @@ type InfoDelegacao = {
   concluida?: { nome: string; comentario: string | null; concluidaEm: string }
 }
 
+type Conclusao = { ocorrencia_id: string; created_at: string }
+
 function buscarDelegacoes() {
   return supabase
     .from('delegacoes')
@@ -46,16 +48,36 @@ function buscarDelegacoes() {
     .returns<Delegacao[]>()
 }
 
-// Uma ocorrência tem no máximo uma delegação ativa. Se ela foi reaberta e concluída de novo,
-// vale a conclusão mais recente.
-function porOcorrencia(lista: Delegacao[]): Record<string, InfoDelegacao> {
+// Quando cada ocorrência foi concluída, pelo histórico de status. Serve para não mostrar o
+// comentário de uma conclusão antiga, se a ocorrência foi reaberta e o gestor concluiu de novo.
+function buscarConclusoes() {
+  return supabase
+    .from('historico_status')
+    .select('ocorrencia_id, created_at')
+    .eq('status_novo', 'concluido')
+    .returns<Conclusao[]>()
+}
+
+// Uma ocorrência tem no máximo uma delegação ativa. O comentário só vale se a conclusão mais
+// recente da ocorrência foi a do funcionário pelo link: concluir_tarefa grava a delegação e o
+// histórico na mesma transação, com o mesmo horário.
+function porOcorrencia(lista: Delegacao[], conclusoes: Conclusao[]): Record<string, InfoDelegacao> {
+  const ultimaConclusao: Record<string, number> = {}
+  for (const c of conclusoes) {
+    const t = Date.parse(c.created_at)
+    if (!(t <= ultimaConclusao[c.ocorrencia_id])) ultimaConclusao[c.ocorrencia_id] = t
+  }
   const mapa: Record<string, InfoDelegacao> = {}
   for (const d of lista) {
     const info = (mapa[d.ocorrencia_id] ??= {})
     const nome = d.funcionarios?.nome ?? 'Funcionário'
     if (d.situacao === 'ativa') {
       info.ativa = { funcionarioId: d.funcionario_id, nome }
-    } else if (d.concluida_em && (!info.concluida || d.concluida_em > info.concluida.concluidaEm)) {
+    } else if (
+      d.concluida_em &&
+      Date.parse(d.concluida_em) >= (ultimaConclusao[d.ocorrencia_id] ?? 0) &&
+      (!info.concluida || d.concluida_em > info.concluida.concluidaEm)
+    ) {
       info.concluida = { nome, comentario: d.comentario, concluidaEm: d.concluida_em }
     }
   }
@@ -140,15 +162,22 @@ export function OcorrenciasDoGestor() {
   }, [])
 
   useEffect(() => {
-    buscarDelegacoes().then(({ data, error }) => {
+    // Ignora a resposta de uma busca antiga, se outra troca já pediu uma nova.
+    let ativo = true
+    Promise.all([buscarDelegacoes(), buscarConclusoes()]).then(([delegacoesLidas, conclusoes]) => {
+      if (!ativo) return
+      const error = delegacoesLidas.error ?? conclusoes.error
       if (error) {
         console.error('Erro ao carregar as delegações', error)
         setErroDelegacoes(true)
       } else {
         setErroDelegacoes(false)
-        setDelegacoes(porOcorrencia(data))
+        setDelegacoes(porOcorrencia(delegacoesLidas.data ?? [], conclusoes.data ?? []))
       }
     })
+    return () => {
+      ativo = false
+    }
   }, [versaoDelegacoes])
 
   async function alterarStatus(id: string, status: Status) {
@@ -234,7 +263,8 @@ export function OcorrenciasDoGestor() {
           <>
             <p className="cartao-meta quadro-info quadro-responsavel">
               <UserCheck size={14} aria-hidden />
-              Responsável: {delegacoes[o.id]?.ativa?.nome ?? '…'}
+              Responsável:{' '}
+              {delegacoes[o.id]?.ativa?.nome ?? (erroDelegacoes ? 'não carregado' : '…')}
             </p>
             <button
               type="button"
@@ -362,6 +392,7 @@ export function OcorrenciasDoGestor() {
       {delegando && (
         <DelegarOcorrencia
           ocorrencia={delegando}
+          trocando={delegando.status === 'delegado'}
           responsavelAtualId={delegacoes[delegando.id]?.ativa?.funcionarioId}
           aoDelegar={(id) => {
             setItens((atuais) =>
