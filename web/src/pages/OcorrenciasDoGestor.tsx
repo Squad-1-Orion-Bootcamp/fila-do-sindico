@@ -322,7 +322,7 @@ export function OcorrenciasDoGestor() {
             </p>
           )}
           {/* Abas de contagem: só aparecem no celular, onde cabe uma coluna por vez */}
-          <div className="opcoes quadro-abas" aria-label="Coluna do quadro">
+          <div className="opcoes quadro-abas" role="group" aria-label="Coluna do quadro">
             {COLUNAS.map((s) => (
               <button
                 key={s}

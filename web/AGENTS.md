@@ -23,6 +23,7 @@ npm run build     # checagem de tipos + build
 - `src/App.tsx` — todas as rotas.
 - `src/lib/cnpj.ts` — máscara e limpeza de CNPJ.
 - `src/lib/tempo.ts` — tempo relativo e data completa para listas.
+- `src/lib/whatsapp.ts` — mensagem e links do WhatsApp e da tarefa, na delegação.
 
 ## Rotas
 
