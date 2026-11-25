@@ -15,8 +15,15 @@ uv add <pacote>          # nunca pip install
 ## Estrutura
 
 - `app/main.py` — rotas (`GET /health`, `POST /classificar`)
+- `app/webhook.py` — `POST /webhook`: aviso do gatilho do banco (segredo, 202, classificação em
+  segundo plano)
+- `app/banco.py` — API REST do Supabase com a chave secreta (ler a ocorrência, chamar
+  `gravar_classificacao`)
 - `app/schemas.py` — contratos Pydantic de entrada e saída
-- `app/classifier.py` — lógica de classificação (regras provisórias na Sprint 1; LLM na Sprint 2)
+- `app/contrato.py` — urgências e categorias com as descrições (fonte única do contrato)
+- `app/classifier.py` — orquestração: trava → Decision 1 → regras de reserva → justificativa
+- `app/decisao.py` — System 1: Gemini Decision 1 (Decisions API, `v1beta`)
+- `app/justificativa.py` — System 2: frase da justificativa (Pydantic AI + Gemini 2.5 Flash)
 - `app/trava.py` — trava de palavras de risco (força `urgente`) e a comparação por palavra usada
   também pelas regras
 - `app/config.py` — variáveis de ambiente via `pydantic-settings`
@@ -31,5 +38,8 @@ uv add <pacote>          # nunca pip install
   texto livre.
 - Toda rota nova tem teste. Mudou o prompt? Rode a avaliação com o conjunto de exemplos antes
   de abrir a PR (a partir da Sprint 2).
-- Chaves (`LLM_API_KEY`, `WEBHOOK_SECRET`) só em `.env`; atualize o `.env.example`.
+- Chaves (`LLM_API_KEY`, `WEBHOOK_SECRET`, `SUPABASE_SECRET_KEY`) só em `.env`; atualize o
+  `.env.example`. A chave secreta do Supabase (papel `service_role`) existe só aqui no servidor,
+  nunca no front. A chave nova (`sb_secret_...`) vai só no cabeçalho `apikey`.
+- Urgência só com os valores do banco: `urgente`, `alta`, `normal`, `baixa` (SQUAD1-56).
 - Type hints em tudo; formatação pelo ruff.
