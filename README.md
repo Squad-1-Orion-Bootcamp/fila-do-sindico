@@ -46,6 +46,7 @@ Comandos úteis:
 docker compose exec ai-service pytest          # testes do serviço de IA
 docker compose exec ai-service ruff check .    # lint do serviço de IA
 docker compose exec web npm run lint           # lint do front
+docker compose exec web npm test               # testes do front
 docker compose logs -f ai-service              # logs
 docker compose down                            # derruba front e IA
 npx supabase stop                              # derruba o Supabase
