@@ -1,0 +1,161 @@
+/* Aba Funcionários. Só tokens de src/styles/tokens.css. */
+
+.funcionarios {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-8);
+}
+
+.funcionarios-titulo-bloco {
+  margin-bottom: var(--espaco-4);
+}
+
+.funcionarios-cadastro {
+  max-width: var(--largura-formulario);
+}
+
+.funcionarios-sem-condominio {
+  border: var(--borda);
+  background: var(--cor-superficie-apagada);
+}
+
+.funcionarios-sem-condominio a {
+  color: var(--cor-acao);
+  font-weight: var(--peso-forte);
+}
+
+.funcionarios-filtro {
+  max-width: var(--largura-cartao);
+  margin-bottom: var(--espaco-4);
+}
+
+/* Texto só para leitor de tela (cabeçalho da coluna de ações). */
+.funcionarios-oculto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.funcionarios-tabela {
+  width: 100%;
+  border: var(--borda);
+  border-radius: var(--raio);
+  border-collapse: separate;
+  border-spacing: 0;
+  /* Largura fixa por coluna: abrir a confirmação não empurra as outras colunas. */
+  table-layout: fixed;
+  background: var(--cor-superficie);
+  font-size: var(--texto-sm);
+}
+
+.funcionarios-tabela th,
+.funcionarios-tabela td {
+  padding: var(--espaco-3) var(--espaco-4);
+  border-bottom: var(--borda);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.funcionarios-tabela thead th {
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-forte);
+  color: var(--cor-texto-secundario);
+}
+
+.funcionarios-tabela tbody tr:last-child > * {
+  border-bottom: none;
+}
+
+.funcionarios-tabela tbody th {
+  font-weight: var(--peso-forte);
+}
+
+.funcionarios-desativado {
+  background: var(--cor-superficie-apagada);
+  color: var(--cor-texto-sutil);
+}
+
+.funcionarios-acoes {
+  text-align: right;
+}
+
+.funcionarios-confirmar {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--espaco-2);
+  text-align: right;
+}
+
+.funcionarios-confirmar-botoes {
+  display: flex;
+  gap: var(--espaco-2);
+}
+
+/* Celular: cada linha vira um cartão, com o nome do campo antes do valor. */
+@media (max-width: 640px) {
+  .funcionarios-tabela,
+  .funcionarios-tabela tbody,
+  .funcionarios-tabela tr,
+  .funcionarios-tabela th,
+  .funcionarios-tabela td {
+    display: block;
+  }
+
+  .funcionarios-tabela {
+    border: none;
+    background: none;
+  }
+
+  .funcionarios-tabela thead {
+    display: none;
+  }
+
+  .funcionarios-tabela tbody {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espaco-3);
+  }
+
+  .funcionarios-tabela tbody tr {
+    padding: var(--espaco-4);
+    border: var(--borda);
+    border-radius: var(--raio);
+    background: var(--cor-superficie);
+  }
+
+  .funcionarios-tabela tbody tr.funcionarios-desativado {
+    background: var(--cor-superficie-apagada);
+  }
+
+  .funcionarios-tabela tbody th,
+  .funcionarios-tabela tbody td {
+    padding: var(--espaco-1) 0;
+    border-bottom: none;
+  }
+
+  .funcionarios-tabela tbody th {
+    font-size: var(--texto-md);
+  }
+
+  .funcionarios-tabela td[data-rotulo]::before {
+    content: attr(data-rotulo) ': ';
+    color: var(--cor-texto-secundario);
+  }
+
+  .funcionarios-acoes,
+  .funcionarios-confirmar {
+    align-items: stretch;
+    margin-top: var(--espaco-2);
+    text-align: left;
+  }
+
+  .funcionarios-acoes .botao,
+  .funcionarios-confirmar-botoes .botao {
+    flex: 1;
+    width: 100%;
+  }
+}
