@@ -1,14 +1,16 @@
-from app.schemas import Classificacao, OcorrenciaEntrada
+from app.schemas import Classificacao, OcorrenciaEntrada, Urgencia
 
 # PROVISÓRIO: regras por palavra-chave, como no protótipo.
 # Na Sprint 2 este módulo passa a chamar o LLM com saída estruturada,
 # mantendo a mesma assinatura para o resto do sistema não mudar.
-_REGRAS: list[tuple[tuple[str, ...], str, str]] = [
-    (("gás", "gas", "fogo", "incêndio", "fumaça"), "seguranca", "alta"),
+# A primeira regra que bate decide, então as mais graves vêm antes.
+_REGRAS: list[tuple[tuple[str, ...], str, Urgencia]] = [
+    (("gás", "gas", "fogo", "incêndio", "fumaça"), "seguranca", "urgente"),
+    (("preso", "presa"), "elevador", "urgente"),
     (("vazamento", "vazando", "alagado", "infiltração"), "hidraulica", "alta"),
-    (("elevador", "preso"), "elevador", "alta"),
+    (("elevador",), "elevador", "alta"),
     (("barulho", "som alto", "festa"), "convivencia", "baixa"),
-    (("lâmpada", "lampada", "luz"), "eletrica", "media"),
+    (("lâmpada", "lampada", "luz"), "eletrica", "normal"),
 ]
 
 
@@ -23,7 +25,7 @@ def classificar(ocorrencia: OcorrenciaEntrada) -> Classificacao:
                 justificativa=f"Regra provisória: a descrição menciona '{encontrada}'.",
             )
     return Classificacao(
-        urgencia="media",
+        urgencia="normal",
         categoria="outros",
         justificativa="Regra provisória: nenhuma palavra-chave reconhecida.",
     )

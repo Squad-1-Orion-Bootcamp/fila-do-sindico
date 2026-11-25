@@ -71,7 +71,11 @@ select vault.create_secret('<o WEBHOOK_SECRET do ai-service/.env>', 'ai_webhook_
 ```
 
 Sem esses dois valores, a ocorrência é registrada normalmente e fica em "Aguardando triagem".
-Para conferir as chamadas: `select * from net._http_response order by id desc;`.
+Para conferir as chamadas: `select * from net._http_response order by id desc;` (202 é sucesso,
+401 é segredo diferente do `ai-service/.env`).
+
+Para o ai-service gravar a classificação, o `ai-service/.env` também precisa da
+`SUPABASE_SECRET_KEY` local (a "Secret key", `sb_secret_...`, que o `npx supabase status` mostra).
 
 ## Deploy
 
@@ -153,7 +157,9 @@ Na `develop` não há serviço no Render: o ai-service roda local, com o Supabas
   | Variável | Para quê |
   | --- | --- |
   | `PORT` | `8000`, a porta em que o uvicorn escuta. Diz ao Render para onde mandar as requisições |
-  | `WEBHOOK_SECRET` | Segredo compartilhado com o gatilho do Supabase: o mesmo valor fica no Vault do projeto do Supabase do mesmo ambiente. Um segredo diferente em cada ambiente. Nunca no repositório |
+  | `WEBHOOK_SECRET` | Segredo compartilhado com o gatilho do Supabase: o mesmo valor fica no Vault do projeto do Supabase do mesmo ambiente. Um segredo diferente em cada ambiente. Nunca no repositório. Vazio, o `/webhook` recusa tudo |
+  | `SUPABASE_URL` | URL do projeto do Supabase do mesmo ambiente (stage no serviço de stage, produção no de prod) |
+  | `SUPABASE_SECRET_KEY` | Chave secreta (`sb_secret_...`) desse mesmo projeto, em *Project Settings → API Keys*: o webhook lê a ocorrência e grava a classificação com ela. Só no Render, nunca no front nem no repositório |
   | `LLM_API_KEY` | Chave da Gemini. Vazia até o serviço passar a usar o LLM |
 
 - **No Vault de cada projeto do Supabase**, `ai_service_url` aponta para o serviço do mesmo
