@@ -1,4 +1,4 @@
-import { Clock, Send, User } from 'lucide-react'
+import { Clock, MessageSquareText, Repeat, Send, User, UserCheck } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { dataCompleta, tempoRelativo } from '../lib/tempo'
@@ -20,6 +20,46 @@ type Ocorrencia = {
   created_at: string
   condominio_nome: string | null
   registrado_por_nome: string | null
+}
+
+// Delegação de cada ocorrência (SQUAD1-78): quem é o responsável agora e, depois da
+// conclusão pelo link, o comentário do funcionário. Só o gestor lê delegacoes (RLS).
+type Delegacao = {
+  ocorrencia_id: string
+  funcionario_id: string
+  situacao: 'ativa' | 'concluida'
+  comentario: string | null
+  concluida_em: string | null
+  funcionarios: { nome: string } | null
+}
+
+type InfoDelegacao = {
+  ativa?: { funcionarioId: string; nome: string }
+  concluida?: { nome: string; comentario: string | null; concluidaEm: string }
+}
+
+function buscarDelegacoes() {
+  return supabase
+    .from('delegacoes')
+    .select('ocorrencia_id, funcionario_id, situacao, comentario, concluida_em, funcionarios(nome)')
+    .in('situacao', ['ativa', 'concluida'])
+    .returns<Delegacao[]>()
+}
+
+// Uma ocorrência tem no máximo uma delegação ativa. Se ela foi reaberta e concluída de novo,
+// vale a conclusão mais recente.
+function porOcorrencia(lista: Delegacao[]): Record<string, InfoDelegacao> {
+  const mapa: Record<string, InfoDelegacao> = {}
+  for (const d of lista) {
+    const info = (mapa[d.ocorrencia_id] ??= {})
+    const nome = d.funcionarios?.nome ?? 'Funcionário'
+    if (d.situacao === 'ativa') {
+      info.ativa = { funcionarioId: d.funcionario_id, nome }
+    } else if (d.concluida_em && (!info.concluida || d.concluida_em > info.concluida.concluidaEm)) {
+      info.concluida = { nome, comentario: d.comentario, concluidaEm: d.concluida_em }
+    }
+  }
+  return mapa
 }
 
 // Nomes das colunas da US 1 (SQUAD1-61), também no seletor do card. O morador continua vendo
@@ -79,6 +119,10 @@ export function OcorrenciasDoGestor() {
   const [erroStatus, setErroStatus] = useState<{ id: string; mensagem: string } | null>(null)
   const [filtroCondominio, setFiltroCondominio] = useState(TODOS)
   const [delegando, setDelegando] = useState<Ocorrencia | null>(null)
+  const [delegacoes, setDelegacoes] = useState<Record<string, InfoDelegacao>>({})
+  const [erroDelegacoes, setErroDelegacoes] = useState(false)
+  // Sobe a cada delegação ou troca de status, para recarregar responsáveis e comentários.
+  const [versaoDelegacoes, setVersaoDelegacoes] = useState(0)
   // No celular o quadro mostra uma coluna por vez (DESIGN.md), escolhida nas abas.
   const [colunaAberta, setColunaAberta] = useState<Status>('novo')
 
@@ -95,6 +139,18 @@ export function OcorrenciasDoGestor() {
     })
   }, [])
 
+  useEffect(() => {
+    buscarDelegacoes().then(({ data, error }) => {
+      if (error) {
+        console.error('Erro ao carregar as delegações', error)
+        setErroDelegacoes(true)
+      } else {
+        setErroDelegacoes(false)
+        setDelegacoes(porOcorrencia(data))
+      }
+    })
+  }, [versaoDelegacoes])
+
   async function alterarStatus(id: string, status: Status) {
     setErroStatus(null)
     setSalvandoId(id)
@@ -107,6 +163,8 @@ export function OcorrenciasDoGestor() {
       setErroStatus({ id, mensagem: 'Não foi possível alterar o status. Tente de novo.' })
     } else {
       setItens((atuais) => atuais.map((o) => (o.id === id ? { ...o, status } : o)))
+      // Trocar o status revoga o link ativo ("assumir de volta").
+      setVersaoDelegacoes((v) => v + 1)
     }
     setSalvandoId(null)
   }
@@ -127,6 +185,7 @@ export function OcorrenciasDoGestor() {
   ) as Record<Status, Ocorrencia[]>
 
   function cartao(o: Ocorrencia) {
+    const concluida = delegacoes[o.id]?.concluida
     return (
       <li key={o.id} className={o.status === 'concluido' ? 'cartao cartao-apagado' : 'cartao'}>
         <EtiquetaPrioridade urgencia={o.urgencia_atual} />
@@ -171,6 +230,33 @@ export function OcorrenciasDoGestor() {
             ))}
           </select>
         </label>
+        {o.status === 'delegado' && (
+          <>
+            <p className="cartao-meta quadro-info quadro-responsavel">
+              <UserCheck size={14} aria-hidden />
+              Responsável: {delegacoes[o.id]?.ativa?.nome ?? '…'}
+            </p>
+            <button
+              type="button"
+              className="botao quadro-delegar"
+              aria-describedby={`descricao-${o.id}`}
+              onClick={() => setDelegando(o)}
+            >
+              <Repeat size={16} aria-hidden /> Trocar responsável
+            </button>
+          </>
+        )}
+        {o.status === 'concluido' && concluida && (
+          <div className="quadro-comentario">
+            <p className="cartao-meta quadro-info">
+              <MessageSquareText size={14} aria-hidden />
+              Concluída por {concluida.nome}
+            </p>
+            <p className="quadro-comentario-texto" title={concluida.comentario ?? undefined}>
+              {concluida.comentario ?? 'Sem comentário.'}
+            </p>
+          </div>
+        )}
         {(o.status === 'novo' || o.status === 'em_andamento') && (
           <button
             type="button"
@@ -230,6 +316,11 @@ export function OcorrenciasDoGestor() {
               </select>
             </label>
           )}
+          {erroDelegacoes && (
+            <p role="alert" className="aviso aviso-erro quadro-resumo">
+              Não foi possível carregar os responsáveis das tarefas delegadas.
+            </p>
+          )}
           {/* Abas de contagem: só aparecem no celular, onde cabe uma coluna por vez */}
           <div className="opcoes quadro-abas" aria-label="Coluna do quadro">
             {COLUNAS.map((s) => (
@@ -271,11 +362,13 @@ export function OcorrenciasDoGestor() {
       {delegando && (
         <DelegarOcorrencia
           ocorrencia={delegando}
-          aoDelegar={(id) =>
+          responsavelAtualId={delegacoes[delegando.id]?.ativa?.funcionarioId}
+          aoDelegar={(id) => {
             setItens((atuais) =>
               atuais.map((o) => (o.id === id ? { ...o, status: 'delegado' } : o)),
             )
-          }
+            setVersaoDelegacoes((v) => v + 1)
+          }}
           aoFechar={() => setDelegando(null)}
         />
       )}

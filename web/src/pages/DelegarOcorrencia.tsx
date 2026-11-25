@@ -25,6 +25,8 @@ type Funcionario = {
 
 type Props = {
   ocorrencia: OcorrenciaParaDelegar
+  // Na troca de responsável (SQUAD1-78), quem está com a tarefa agora.
+  responsavelAtualId?: string
   aoDelegar: (ocorrenciaId: string) => void
   aoFechar: () => void
 }
@@ -40,7 +42,13 @@ function mensagemDeErro(error: { code?: string; message: string }): string {
   return 'Não foi possível delegar a ocorrência. Tente de novo.'
 }
 
-export function DelegarOcorrencia({ ocorrencia, aoDelegar, aoFechar }: Props) {
+export function DelegarOcorrencia({
+  ocorrencia,
+  responsavelAtualId,
+  aoDelegar,
+  aoFechar,
+}: Props) {
+  const trocando = Boolean(responsavelAtualId)
   const janela = useRef<HTMLDialogElement>(null)
   const [funcionarios, setFuncionarios] = useState<Funcionario[]>([])
   const [carregando, setCarregando] = useState(true)
@@ -115,7 +123,7 @@ export function DelegarOcorrencia({ ocorrencia, aoDelegar, aoFechar }: Props) {
       aria-labelledby="delegar-titulo"
       onClose={aoFechar}
     >
-      <h2 id="delegar-titulo">{delegado ? 'Ocorrência delegada' : 'Delegar ocorrência'}</h2>
+      <h2 id="delegar-titulo">{delegado ? 'Ocorrência delegada' : trocando ? 'Trocar responsável' : 'Delegar ocorrência'}</h2>
       <p className="cartao-meta janela-ocorrencia">
         {ocorrencia.condominio_nome ?? 'Condomínio'}
         {ocorrencia.local && ` · ${ocorrencia.local}`}
@@ -166,11 +174,21 @@ export function DelegarOcorrencia({ ocorrencia, aoDelegar, aoFechar }: Props) {
                   />
                   <span>
                     <span className="janela-opcao-nome">{f.nome}</span>
-                    <span className="cartao-meta">{f.funcao}</span>
+                    <span className="cartao-meta">
+                      {f.funcao}
+                      {f.id === responsavelAtualId && ' · responsável atual'}
+                    </span>
                   </span>
                 </label>
               ))}
             </fieldset>
+          )}
+
+          {trocando && funcionarios.length > 0 && (
+            <p className="campo-ajuda">
+              O link de quem está com a tarefa deixa de funcionar. Escolher a mesma pessoa gera um
+              link novo para mandar de novo.
+            </p>
           )}
 
           {erro && (
@@ -185,7 +203,7 @@ export function DelegarOcorrencia({ ocorrencia, aoDelegar, aoFechar }: Props) {
             </button>
             {funcionarios.length > 0 && (
               <button type="submit" className="botao botao-principal" disabled={enviando}>
-                <Send size={16} aria-hidden /> {enviando ? 'Delegando…' : 'Delegar'}
+                <Send size={16} aria-hidden /> {enviando ? 'Delegando…' : trocando ? 'Trocar' : 'Delegar'}
               </button>
             )}
           </div>

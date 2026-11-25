@@ -154,3 +154,27 @@
 .quadro-delegar {
   margin-top: var(--espaco-3);
 }
+
+/* Responsável e comentário do funcionário no card (SQUAD1-78). */
+.quadro-responsavel {
+  margin-top: var(--espaco-3);
+}
+
+.quadro-comentario {
+  margin-top: var(--espaco-3);
+  padding-top: var(--espaco-3);
+  border-top: var(--borda);
+}
+
+.quadro-comentario-texto {
+  display: -webkit-box;
+  margin-top: var(--espaco-1);
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-secundario);
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+}
