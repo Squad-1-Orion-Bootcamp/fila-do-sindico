@@ -5,14 +5,15 @@ from app.trava import aplicar_trava, normalizar_texto, padrao_de_termo
 # Na Sprint 2 este módulo passa a chamar o LLM com saída estruturada,
 # mantendo a mesma assinatura para o resto do sistema não mudar.
 _REGRAS: list[tuple[tuple[str, ...], str, Urgencia]] = [
-    (("gás", "gas", "fogo", "incêndio", "fumaça"), "seguranca", "alta"),
+    (("gás", "gas", "gases", "fogo", "incêndio", "fumaça"), "seguranca", "alta"),
     (("vazamento", "vazando", "alagado", "infiltração"), "hidraulica", "alta"),
-    (("elevador", "preso"), "elevador", "alta"),
+    (("elevador", "elevadores", "preso"), "elevador", "alta"),
     (("barulho", "som alto", "festa"), "convivencia", "baixa"),
-    (("lâmpada", "lampada", "luz"), "eletrica", "normal"),
+    (("lâmpada", "lampada", "luz", "luzes"), "eletrica", "normal"),
 ]
 
 # Mesma comparação por palavra da trava: "gas" não casa com "gasto", "vagas" nem "desgaste".
+# O plural em "-es" ("gases", "elevadores", "luzes") não vem do "s" opcional: fica na lista.
 _REGRAS_COMPILADAS = [
     (tuple((termo, padrao_de_termo(termo)) for termo in termos), categoria, urgencia)
     for termos, categoria, urgencia in _REGRAS

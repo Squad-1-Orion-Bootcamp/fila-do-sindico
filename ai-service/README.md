@@ -50,6 +50,7 @@ A configuração completa está no README da raiz, seção Deploy.
 - `app/schemas.py`: contratos de entrada e saída (urgência, categoria, justificativa)
 - `app/classifier.py`: lógica de classificação (provisória)
 - `app/trava.py`: trava de palavras de risco (força urgência `urgente`)
+- `app/config.py`: variáveis de ambiente
 
 ## Trava de palavras de risco
 
@@ -65,4 +66,3 @@ a justificativa cita o termo ("Trava de risco: a descrição menciona 'gás'.").
 
 As regras provisórias (`app/classifier.py`) usam a mesma comparação por palavra. Decisões em
 `docs/decisoes.md` (25/11/2026).
-- `app/config.py`: variáveis de ambiente

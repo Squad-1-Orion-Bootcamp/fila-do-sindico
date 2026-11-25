@@ -158,3 +158,19 @@ def test_trava_tem_precedencia_sobre_classificacao_baixa() -> None:
     assert resultado.urgencia == "urgente"
     assert resultado.categoria == "convivencia"
     assert resultado.justificativa == "Trava de risco: a descrição menciona 'choque'."
+
+
+@pytest.mark.parametrize(
+    ("descricao", "urgencia_esperada", "categoria_esperada"),
+    [
+        ("Elevadores parados", "alta", "elevador"),
+        ("Luzes apagadas no corredor", "normal", "eletrica"),
+        ("Vazamento de gases na cozinha", "urgente", "seguranca"),
+    ],
+)
+def test_regras_reconhecem_plural_em_es(
+    descricao: str, urgencia_esperada: str, categoria_esperada: str
+) -> None:
+    resultado = classificar(OcorrenciaEntrada(descricao=descricao))
+    assert resultado.urgencia == urgencia_esperada
+    assert resultado.categoria == categoria_esperada
