@@ -1,6 +1,7 @@
 """System 2 (justificar) e a ligação com o classificar(), sem rede: TestModel e FunctionModel."""
 
 import asyncio
+from typing import Any, NoReturn
 
 import pytest
 from pydantic_ai import UnexpectedModelBehavior
@@ -10,16 +11,16 @@ from pydantic_ai.models.function import AgentInfo, FunctionModel
 from pydantic_ai.models.test import TestModel
 
 from app import justificativa
-from app.classifier import classificar
+from app.classifier import Justificador, classificar
 from app.config import settings
 from app.decisao import Decisao
 from app.justificativa import LIMITE_CARACTERES, justificar
-from app.schemas import OcorrenciaEntrada
+from app.schemas import OcorrenciaEntrada, Urgencia
 
 FRASE = "Infiltração no teto do banheiro pode piorar e danificar o apartamento de baixo."
 
 
-def responde(*frases: str):
+def responde(*frases: str) -> FunctionModel:
     """FunctionModel que devolve uma frase por chamada e guarda as mensagens recebidas."""
     recebidas: list[list[ModelMessage]] = []
 
@@ -106,7 +107,7 @@ def test_modelo_padrao_e_o_flash_2_5():
 
 
 @pytest.fixture
-def com_chave(monkeypatch):
+def com_chave(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(settings, "llm_api_key", "chave-falsa-de-teste")
 
 
@@ -128,7 +129,7 @@ def test_classificar_usa_a_frase_da_gemini(com_chave, monkeypatch):
 
 
 def test_classificar_sem_chave_nem_chama_a_gemini(monkeypatch):
-    def nao_chamar():
+    def nao_chamar() -> NoReturn:
         raise AssertionError("não devia criar o modelo sem LLM_API_KEY")
 
     monkeypatch.setattr(justificativa, "criar_modelo", nao_chamar)
@@ -153,11 +154,11 @@ def decisor_fora_do_ar(descricao: str, local: str | None) -> Decisao:
     raise RuntimeError("Decision 1 fora do ar")
 
 
-def justificar_espiao():
+def justificar_espiao() -> Justificador:
     """Registra as chamadas. Exceção não serviria: o classificar() a engole e usa o motivo."""
     chamadas: list[str] = []
 
-    def justificar(descricao: str, local: str | None, urgencia: str) -> str:
+    def justificar(descricao: str, local: str | None, urgencia: Urgencia) -> str:
         chamadas.append(descricao)
         return FRASE
 
@@ -202,7 +203,7 @@ def test_modelo_usa_a_api_v1beta(monkeypatch):
     criado = []
     cliente_real = justificativa.genai.Client
 
-    def cliente_espiao(**kwargs):
+    def cliente_espiao(**kwargs: Any) -> Any:
         criado.append(kwargs)
         return cliente_real(**kwargs)
 
