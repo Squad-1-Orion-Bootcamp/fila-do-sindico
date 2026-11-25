@@ -194,9 +194,10 @@ Studio local do Supabase: http://127.0.0.1:54323
 
 O `supabase/seed.sql` cria gestores, condomínios, moradores e ocorrências de teste, todos com a
 senha `senha123`. A lista de contas está no topo do arquivo. Para a demo, entre como
-`gestora.helena@teste.local`: ela tem 3 condomínios, ocorrências urgentes e simples e um
-cadastro pendente em cada condomínio. Também dá para criar contas pelo próprio app: cadastro
-de gestor e pré-cadastro de morador.
+`gestora.helena@teste.local`: ela tem 3 condomínios, ocorrências urgentes e simples, um
+cadastro pendente e dois ou três funcionários em cada condomínio, para a delegação. Os
+celulares dos funcionários são fictícios: abra o link do WhatsApp, mas não envie a mensagem.
+Também dá para criar contas pelo próprio app: cadastro de gestor e pré-cadastro de morador.
 
 ## Banco de dados
 
