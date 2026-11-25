@@ -1,8 +1,13 @@
 import pytest
 
-from app.classifier import classificar
-from app.schemas import OcorrenciaEntrada
+from app.classifier import classificar as _classificar
+from app.schemas import Classificacao, OcorrenciaEntrada
 from app.trava import PALAVRAS_DE_RISCO, TERMO_ELEVADOR, aplicar_trava
+
+
+# Estes testes olham só a classificação; a origem e o modelo ficam em test_classificacao.py.
+def classificar(ocorrencia: OcorrenciaEntrada) -> Classificacao:
+    return _classificar(ocorrencia).classificacao
 
 
 @pytest.mark.parametrize(

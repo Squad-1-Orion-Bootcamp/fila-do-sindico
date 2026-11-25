@@ -25,6 +25,9 @@ export function Topo() {
           <NavLink className="botao" to="/condominios">
             Condomínios
           </NavLink>
+          <NavLink className="botao" to="/funcionarios">
+            Funcionários
+          </NavLink>
         </nav>
       )}
       <button className="botao" onClick={signOut}>
