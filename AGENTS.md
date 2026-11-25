@@ -61,7 +61,7 @@ Detalhes, regras de acesso e funções em `supabase/AGENTS.md`.
   (`inicio_vigencia`, `fim_vigencia`), `aprovado_por`, `encerrado_por`, `motivo_encerramento`;
   as unidades do morador ficam em `vinculos_imovel`
 - `ocorrencias`: `condominio_id`, `registrado_por`, `local`, `descricao`, `status` (`novo`,
-  `em_andamento`, `concluido`), `origem` (`aplicativo` para a do morador; `whatsapp`, `telefone`,
+  `em_andamento`, `delegado` (só pela delegação, US 3), `concluido`), `origem` (`aplicativo` para a do morador; `whatsapp`, `telefone`,
   `presencial` ou `vistoria` para a do gestor), `relatado_por` (opcional), e `urgencia_atual`, `categoria_atual` (preenchidas pela IA a
   partir da Sprint 2, com o histórico em `classificacoes_ia`)
 - `funcionarios`: contatos dos funcionários de cada condomínio, sem conta (`nome`, `celular`,
