@@ -206,6 +206,19 @@
   flex-wrap: wrap;
   gap: var(--espaco-1) var(--espaco-4);
   margin-top: var(--espaco-2);
+/* Comentário aberto por inteiro ("Ver tudo") e aviso no status do card delegado. */
+.quadro-comentario-aberto {
+  display: block;
+  -webkit-line-clamp: none;
+  line-clamp: none;
+}
+
+.quadro-comentario .quadro-acao-texto {
+  margin-top: var(--espaco-1);
+}
+
+.quadro-aviso-status {
+  margin-top: var(--espaco-1);
 }
 
 .quadro-acao-texto {
