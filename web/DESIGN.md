@@ -95,6 +95,7 @@ fundo do cartão inteiro.
 | Contagem | `.contador` | Ao lado do nome da coluna |
 | Avisos | `.aviso .aviso-erro` / `.aviso-sucesso` | Mensagens de formulário |
 | Lista vazia | `.estado-vazio` | Sempre uma frase, nunca espaço em branco |
+| Janela (modal) | `<dialog class="janela">` com `showModal()` | Flutua com `--sombra-flutuante` sobre `--cor-fundo-janela`. Esc fecha. Ex.: "Delegar" no painel |
 | Login e cadastro | `.tela-centralizada` > `.caixa` | Caixa branca centralizada na vertical e na horizontal |
 | Marca na caixa | `.topo-marca .caixa-marca` | Logo no alto da `.caixa` |
 | Links da caixa | `<nav class="caixa-links">` | Pé da `.caixa` ("Criar conta", "Já tenho conta"); texto secundário |

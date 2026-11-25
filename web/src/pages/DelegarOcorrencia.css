@@ -1,0 +1,69 @@
+/* Janela "Delegar" do painel. Só tokens de src/styles/tokens.css. */
+
+.janela {
+  width: min(100% - 2 * var(--espaco-4), 440px);
+  padding: var(--espaco-6);
+  border: var(--borda);
+  border-radius: var(--raio);
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+  box-shadow: var(--sombra-flutuante);
+}
+
+.janela::backdrop {
+  background: var(--cor-fundo-janela);
+}
+
+.janela-ocorrencia {
+  margin: var(--espaco-1) 0 var(--espaco-6);
+}
+
+.janela-funcionarios {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.janela-funcionarios legend {
+  margin-bottom: var(--espaco-2);
+}
+
+.janela-opcao {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-3);
+  min-height: var(--altura-controle);
+  padding: var(--espaco-2) var(--espaco-3);
+  border: var(--borda);
+  border-radius: var(--raio);
+  cursor: pointer;
+}
+
+.janela-opcao:has(input:checked) {
+  border-color: var(--cor-acao);
+  background: var(--cor-acao-suave);
+}
+
+.janela-opcao > span {
+  display: flex;
+  flex-direction: column;
+}
+
+.janela-opcao-nome {
+  font-weight: var(--peso-forte);
+}
+
+.janela-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--espaco-2);
+}
+
+/* "Abrir WhatsApp" é um link com cara de botão. */
+.janela a.botao {
+  text-decoration: none;
+}

@@ -77,3 +77,8 @@
   opacity: 0.6;
   cursor: progress;
 }
+
+/* Botão Delegar do card (SQUAD1-76). */
+.quadro-delegar {
+  margin-top: var(--espaco-3);
+}

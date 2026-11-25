@@ -66,6 +66,7 @@
   --borda: 1px solid var(--cor-borda);
   --foco: 0 0 0 2px var(--cor-superficie), 0 0 0 4px var(--cor-acao);
   --sombra-flutuante: 0 8px 24px rgb(17 24 39 / 0.12);
+  --cor-fundo-janela: rgb(17 24 39 / 0.4); /* atrás de uma janela (dialog) aberta */
 
   /* Medidas */
   --altura-controle: 44px;
