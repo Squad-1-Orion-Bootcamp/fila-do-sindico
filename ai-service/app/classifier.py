@@ -4,8 +4,8 @@
 2. System 1: o Gemini Decision 1 decide a urgência e a categoria (app/decisao.py).
    Sem LLM_API_KEY, com erro ou demora, as regras provisórias abaixo decidem.
 3. Com a trava ativa, a urgência vira "urgente" e a origem ganha "+trava".
-4. Justificativa: por enquanto um motivo padrão; a frase gerada pela Gemini (System 2) entra
-   na SQUAD1-85 pelo parâmetro justificar.
+4. System 2: a Gemini explica a urgência final em uma frase (app/justificativa.py), só quando
+   o Decision 1 respondeu. Sem ele, com erro ou demora, fica o motivo padrão.
 """
 
 import logging
@@ -14,6 +14,7 @@ from collections.abc import Callable
 from app.config import settings
 from app.contrato import ROTULOS_URGENCIA
 from app.decisao import Decisao, decidir
+from app.justificativa import justificar as justificar_com_gemini
 from app.schemas import (
     Categoria,
     Classificacao,
@@ -82,7 +83,7 @@ def classificar(
     ocorrencia: OcorrenciaEntrada,
     *,
     decisor: Decisor = decidir,
-    justificar: Justificador | None = None,
+    justificar: Justificador = justificar_com_gemini,
 ) -> ResultadoClassificacao:
     """Classifica a ocorrência. Nunca levanta exceção por falha da IA: as regras assumem."""
     termo_risco = aplicar_trava(ocorrencia.descricao)
@@ -111,7 +112,9 @@ def classificar(
         origem = "ia+trava" if origem == "ia" else "regra+trava"
 
     justificativa = ""
-    if justificar is not None:
+    # Só com o Decision 1 respondendo: se ele falhou, a Gemini provavelmente está fora, e a
+    # frase da regra ou da trava já diz o que decidiu.
+    if decisao is not None:
         try:
             justificativa = justificar(ocorrencia.descricao, ocorrencia.local, urgencia).strip()
         except Exception as erro:
