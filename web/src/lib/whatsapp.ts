@@ -14,11 +14,14 @@ type DadosDaMensagem = {
 
 function resumir(descricao: string): string {
   const texto = descricao.trim().replace(/\s+/g, ' ')
-  if (texto.length <= LIMITE_DESCRICAO_NA_MENSAGEM) {
+  // Conta por caractere, e não por unidade UTF-16: um emoji cortado ao meio faria o
+  // encodeURIComponent do link do WhatsApp falhar (URIError).
+  const caracteres = Array.from(texto)
+  if (caracteres.length <= LIMITE_DESCRICAO_NA_MENSAGEM) {
     // O texto do Lucas já põe o ponto depois da descrição.
     return `${texto.replace(/[.!?]+$/, '')}.`
   }
-  return `${texto.slice(0, LIMITE_DESCRICAO_NA_MENSAGEM).trimEnd()}…`
+  return `${caracteres.slice(0, LIMITE_DESCRICAO_NA_MENSAGEM).join('').trimEnd()}…`
 }
 
 // Texto definido pelo Lucas na SQUAD1-76.
