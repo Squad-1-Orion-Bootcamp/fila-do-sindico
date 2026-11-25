@@ -68,10 +68,17 @@ declare
   v_token_hash bytea;
   v_ocorrencia_id uuid;
   v_delegacao_id uuid;
-  v_comentario text := nullif(pg_catalog.btrim(p_comentario), '');
+  v_comentario text;
   v_encerrada boolean;
 begin
+  -- Recusa logo um texto enorme, antes de qualquer processamento: 800 caracteres têm no
+  -- máximo 3200 bytes, e a folga cobre espaços nas pontas.
+  if p_comentario is not null and pg_catalog.octet_length(p_comentario) > 8000 then
+    raise exception using errcode = '22023', message = 'O comentário deve ter até 800 caracteres.';
+  end if;
+
   -- Comentário só com espaços conta como sem comentário.
+  v_comentario := nullif(pg_catalog.btrim(p_comentario), '');
   if v_comentario is not null and pg_catalog.char_length(v_comentario) > 800 then
     raise exception using errcode = '22023', message = 'O comentário deve ter até 800 caracteres.';
   end if;
