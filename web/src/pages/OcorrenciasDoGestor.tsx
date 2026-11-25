@@ -20,6 +20,7 @@ type Ocorrencia = {
   created_at: string
   condominio_nome: string | null
   registrado_por_nome: string | null
+  concluido_em: string | null
 }
 
 // Delegação de cada ocorrência (SQUAD1-78): quem é o responsável agora e, depois da
@@ -96,11 +97,16 @@ const ROTULO_STATUS: Record<Status, string> = {
 // Ordem das colunas no quadro.
 const COLUNAS: Status[] = ['novo', 'em_andamento', 'delegado', 'concluido']
 
-// Mais urgentes primeiro; a ocorrência que a IA ainda não classificou vem depois das
-// classificadas. Empate: a mais antiga primeiro.
+// Novo, Em andamento e Delegado: mais urgentes primeiro; a ocorrência que a IA ainda não
+// classificou vem depois das classificadas. Empate: a mais antiga primeiro.
+// Concluído: as concluídas mais recentemente primeiro (decisão da Riane, docs/decisoes.md).
 const PESO_URGENCIA: Record<Urgencia, number> = { urgente: 0, alta: 1, normal: 2, baixa: 3 }
 
 function ordemNaColuna(a: Ocorrencia, b: Ocorrencia): number {
+  if (a.status === 'concluido') {
+    // concluido_em sempre vem preenchido numa concluída; o '' é só para o tipo.
+    return (b.concluido_em ?? '').localeCompare(a.concluido_em ?? '')
+  }
   const pa = a.urgencia_atual ? PESO_URGENCIA[a.urgencia_atual] : 4
   const pb = b.urgencia_atual ? PESO_URGENCIA[b.urgencia_atual] : 4
   if (pa !== pb) return pa - pb
@@ -191,7 +197,12 @@ export function OcorrenciasDoGestor() {
       console.error('Erro ao alterar o status', error)
       setErroStatus({ id, mensagem: 'Não foi possível alterar o status. Tente de novo.' })
     } else {
-      setItens((atuais) => atuais.map((o) => (o.id === id ? { ...o, status } : o)))
+      // concluido_em acompanha o banco: preenchido ao concluir, limpo ao reabrir. A hora local
+      // basta para pôr o card no topo de Concluído; ao recarregar, vale a do banco.
+      const concluidoEm = status === 'concluido' ? new Date().toISOString() : null
+      setItens((atuais) =>
+        atuais.map((o) => (o.id === id ? { ...o, status, concluido_em: concluidoEm } : o)),
+      )
       // Trocar o status revoga o link ativo ("assumir de volta").
       setVersaoDelegacoes((v) => v + 1)
     }
