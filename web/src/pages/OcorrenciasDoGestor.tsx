@@ -20,6 +20,7 @@ type Ocorrencia = {
   created_at: string
   condominio_nome: string | null
   registrado_por_nome: string | null
+  concluido_em: string | null
 }
 
 // Nomes das colunas da US 1 (SQUAD1-61), também no seletor do card. O morador continua vendo
@@ -34,11 +35,16 @@ const ROTULO_STATUS: Record<Status, string> = {
 // Ordem das colunas no quadro.
 const COLUNAS: Status[] = ['novo', 'em_andamento', 'delegado', 'concluido']
 
-// Mais urgentes primeiro; a ocorrência que a IA ainda não classificou vem depois das
-// classificadas. Empate: a mais antiga primeiro.
+// Novo, Em andamento e Delegado: mais urgentes primeiro; a ocorrência que a IA ainda não
+// classificou vem depois das classificadas. Empate: a mais antiga primeiro.
+// Concluído: as concluídas mais recentemente primeiro (decisão da Riane, docs/decisoes.md).
 const PESO_URGENCIA: Record<Urgencia, number> = { urgente: 0, alta: 1, normal: 2, baixa: 3 }
 
 function ordemNaColuna(a: Ocorrencia, b: Ocorrencia): number {
+  if (a.status === 'concluido') {
+    // concluido_em sempre vem preenchido numa concluída; o '' é só para o tipo.
+    return (b.concluido_em ?? '').localeCompare(a.concluido_em ?? '')
+  }
   const pa = a.urgencia_atual ? PESO_URGENCIA[a.urgencia_atual] : 4
   const pb = b.urgencia_atual ? PESO_URGENCIA[b.urgencia_atual] : 4
   if (pa !== pb) return pa - pb
