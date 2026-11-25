@@ -2,6 +2,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
+# Os mesmos valores do banco (ocorrencias.urgencia_atual), como no contrato da SQUAD1-56.
 Urgencia = Literal["urgente", "alta", "normal", "baixa"]
 
 
