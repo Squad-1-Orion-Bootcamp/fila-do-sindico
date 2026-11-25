@@ -45,6 +45,15 @@ Decidido pelo time, sem product builder no momento.
 | --- | --- |
 | A trava e as regras provisórias usam a mesma comparação por palavra inteira (`padrao_de_termo` em `app/trava.py`) | "gas" não casa com "gasto", "vagas" nem "desgaste", nem na trava nem nas regras |
 
+## 24/11/2026 — Status Delegado (SQUAD1-57)
+
+### Produto e acesso
+
+| Decisão | Motivo |
+| --- | --- |
+| A ocorrência tem quatro status: `novo`, `em_andamento`, `delegado` e `concluido`. `delegado` só vem da delegação para um funcionário (US 3); a troca manual do gestor continua entre os outros três | A US 1 pede as quatro colunas, e a US 3 diz que o status muda para Delegado ao delegar |
+| O gestor pode tirar uma ocorrência de `delegado` trocando o status manualmente | A US 3 prevê que o síndico "assuma de volta" ou conclua; o link antigo deixa de valer (SQUAD1-74) |
+
 ## 24/11/2026 — Classificação pelo Gemini Decision 1 (SQUAD1-84)
 
 ### Produto e acesso
