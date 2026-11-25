@@ -1,6 +1,10 @@
 import pytest
+from pydantic_ai import models
 
 from app.config import settings
+
+# Rede de segurança: nenhum agente do Pydantic AI chama um modelo de verdade nos testes.
+models.ALLOW_MODEL_REQUESTS = False
 
 
 @pytest.fixture(autouse=True)

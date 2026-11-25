@@ -14,6 +14,29 @@ decisão for trocada, mova a antiga para "Substituídas", dizendo o que a substi
 | No máximo um pedido por minuto, somando todos os gestores. A conferência de pendentes é global, não só dos condomínios de quem chama | O ai-service classifica as pendentes de todos os condomínios. Sem o limite, um gestor em loop geraria um pedido HTTP com o segredo por chamada (achado M1 do `revisor-rls`) |
 | No ai-service, uma rodada por vez: se outra já está em andamento, a nova não começa | Dois gestores abrindo o painel juntos não classificam a mesma ocorrência duas vezes |
 
+## 25/11/2026 — Justificativa pelo Gemini 2.5 Flash (SQUAD1-85)
+
+### Técnica
+
+| Decisão | Motivo |
+| --- | --- |
+| O System 2 (`ai-service/app/justificativa.py`) usa o Gemini 2.5 Flash pelo Pydantic AI, com saída estruturada (`frase`, de 1 a 200 caracteres) | Escolha do Pedro. A saída validada pelo schema evita parse de texto livre |
+| O System 2 só explica a urgência final (depois da trava); não decide nem muda nada | Quem decide é o Decision 1, as regras ou a trava. A explicação nunca contradiz a etiqueta |
+| O System 2 só é chamado quando o Decision 1 respondeu. Se ele falhou (ou a `LLM_API_KEY` está vazia), fica a frase da regra ou da trava | Com o Decision 1 fora, a Gemini provavelmente também está, e a chamada só gastaria até 8 s e cota. A frase da regra já diz qual palavra decidiu (decisão do Pedro) |
+| Resposta inválida: pede de novo uma vez. Erro ou demora de mais de 8 s (contando a nova tentativa): fica o motivo padrão | A classificação nunca falha por causa da frase. O webhook roda em segundo plano, então 8 s não atrasam o gatilho |
+| Sem "thinking" no 2.5 Flash (`thinking_budget = 0`) e temperatura 0,2 | O "thinking" vem ligado por padrão e só atrasa uma frase curta. Temperatura baixa deixa a frase presa aos fatos |
+
+### Privacidade
+
+| Decisão | Motivo |
+| --- | --- |
+| Vão para a Gemini só a descrição e o local da ocorrência. Nome, e-mail, unidade e condomínio nunca vão | Termos da Gemini API (em vigor desde 23/03/2026, <https://aistudio.google.com/docs/terms>): no plano grátis, o Google usa o que é enviado e as respostas "para melhorar e desenvolver" os produtos dele, e "revisores humanos podem ler" esse conteúdo. Os termos pedem para não enviar informação sensível, confidencial ou pessoal. No plano pago, o Google não usa os dados para melhorar produtos e só guarda registros por tempo limitado, contra abuso |
+
+**Em aberto:** a descrição é texto livre do morador e pode conter dados pessoais (um nome, um
+telefone). Vale também para o Decision 1 (SQUAD1-84), que manda o mesmo texto. Antes de usar
+com moradores reais, o time decide entre o plano pago (projeto do Google Cloud com
+faturamento) ou um aviso no formulário de ocorrência.
+
 ## 25/11/2026 — Trava de palavras de risco (SQUAD1-58)
 
 Decidido pelo time, sem product builder no momento.
@@ -98,6 +121,18 @@ Decidido pelo time, sem product builder no momento.
 | Cada classificação guarda a origem: `ia`, `regra`, `ia+trava` ou `regra+trava` | Mostra quantas vezes a IA respondeu e quantas vezes as regras assumiram (proposta da IA de 23/11) |
 | O painel do gestor lê as ocorrências pela função `listar_ocorrencias_gestor()`, e não por `.from('ocorrencias')` | Gestor e morador usam o mesmo papel no banco, e permissão por coluna vale para o papel inteiro: para fechar `urgencia_atual` para o morador, a coluna sai da leitura direta de todos |
 
+## 23/11/2026 — Funcionário (US 2)
+
+### Produto e acesso
+
+Decididas pelo Lucas em 23/11 (SQUAD1-67).
+
+| Decisão | Motivo |
+| --- | --- |
+| O funcionário da delegação é um **contato cadastrado pelo gestor, sem conta nem login**, na tabela `funcionarios` (SQUAD1-69). Ele não usa `vinculos`, e o tipo `funcionario` de `vinculos` fica sem uso por enquanto | Decisão do Lucas: o funcionário só recebe a tarefa pelo link do WhatsApp e a conclui por ele (US 3), sem precisar de conta. Substitui a decisão de 16/11 de que o funcionário é um morador com vínculo do tipo `funcionario` |
+| Os funcionários ficam numa aba própria, "Funcionários", com filtro por condomínio, no mesmo padrão visual do painel | Decisão do Lucas (SQUAD1-70) |
+| O celular do funcionário tem DDD + 9 dígitos e é único por condomínio | Decisão do Lucas. Os detalhes vêm da implementação (SQUAD1-69): a unicidade vale entre os funcionários ativos, então o mesmo celular pode estar em outro condomínio (o zelador de dois prédios) e quem foi desativado pode ser cadastrado de novo; o banco guarda só os dígitos, no formato do WhatsApp (`5511999998888`), que é o que o link `wa.me` usa (SQUAD1-68) |
+
 ## 23/11/2026 — Link de delegação (US 3)
 
 ### Produto e acesso
@@ -165,7 +200,6 @@ Aprovadas pelo Lucas em 23/11 (SQUAD1-72).
 | A ocorrência guarda o canal em `origem`: `aplicativo` (registrada pelo morador, o padrão), `whatsapp`, `telefone`, `presencial` ou `vistoria` (registrada pelo gestor) | Toda ocorrência tem origem, e dá para comparar os canais depois (SQUAD1-30) |
 | Quem relatou ao gestor (`relatado_por`) é opcional e precisa ser morador ou funcionário ativo do condomínio; quem não tem conta fica em branco | Decisão do time (SQUAD1-30) |
 | Quem sai do condomínio: o ex-morador continua vendo as ocorrências que registrou pelo app (histórico); o ex-gestor perde o acesso também às que ele registrou | Decisão do time; vínculo encerrado perde o acesso aos dados do condomínio (SQUAD1-30) |
-| Funcionário se cadastra como morador, por enquanto sem enviar documentação | O cadastro de funcionário ficou para depois |
 | Chat (`conversas` e `mensagens`) fica para o futuro | Fora do escopo das primeiras sprints |
 
 ### Técnica
@@ -190,7 +224,7 @@ Aprovadas pelo Lucas em 23/11 (SQUAD1-72).
 
 | Decisão | Motivo |
 | --- | --- |
-| Perfis: `admin`, `gestor` (síndico ou administradora) e `morador`; o funcionário é um morador com vínculo do tipo `funcionario` | Funcionário com o mesmo acesso do morador evita trabalho extra agora |
+| Perfis: `admin`, `gestor` (síndico ou administradora) e `morador` | Os três papéis da plataforma |
 | Uma conta tem um tipo só; quem é gestor e morador usa dois e-mails | Simplifica as permissões nesta versão |
 | O papel fica em `profiles.role`, gravado pelo banco, nunca em `user_metadata` | O usuário consegue alterar `user_metadata` pelo navegador |
 | Acesso a condomínios pela tabela `vinculos` (usuário, condomínio, tipo, status) | Um gestor tem vários condomínios; uma pessoa pode ter vários imóveis |
@@ -239,3 +273,5 @@ Aprovadas pelo Lucas em 23/11 (SQUAD1-72).
 | Quem abriu a PR faz o merge | Quem aprova a PR faz o merge (18/11) |
 | Gitflow com `develop` como branch base; `main` só recebe releases (uma por sprint) e hotfixes | Branches `develop` → `stage` → `prod`, sem `main` nem `release/` (19/11) |
 | `vinculos` com `unidade` e `status` `pendente`/`aprovado`/`recusado` | Pedido em `solicitacoes_vinculo`, vínculo `ativo`/`encerrado` com vigência e unidade em `imoveis` (18/11) |
+| O funcionário é um morador com vínculo do tipo `funcionario`, com o mesmo acesso do morador (16/11) | Funcionário é um contato cadastrado pelo gestor, sem conta nem login, na tabela `funcionarios` (23/11) |
+| Funcionário se cadastra como morador, por enquanto sem enviar documentação (18/11) | Funcionário é cadastrado pelo gestor na aba Funcionários, sem conta (23/11) |

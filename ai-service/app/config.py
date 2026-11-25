@@ -23,6 +23,10 @@ class Settings(BaseSettings):
     # Modelo do System 1 (Decisions API, v1beta) e o tempo limite da chamada.
     llm_modelo_decisao: str = "gemini-decision-1"
     llm_timeout_segundos: float = 3.0
+    # Modelo do System 2 (a frase da justificativa) e o tempo limite da execução inteira,
+    # contando a nova tentativa quando a resposta vem inválida.
+    llm_modelo_justificativa: str = "gemini-2.5-flash"
+    llm_timeout_justificativa_segundos: float = 8.0
 
 
 settings = Settings()
