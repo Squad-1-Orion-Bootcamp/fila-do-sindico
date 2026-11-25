@@ -3,6 +3,17 @@
 Registro curto das decisões, com o motivo. Decisão nova entra no topo da sua seção. Quando uma
 decisão for trocada, mova a antiga para "Substituídas", dizendo o que a substituiu.
 
+## 25/11/2026 — Prioridade no card (SQUAD1-64)
+
+### Produto e acesso
+
+| Decisão | Motivo |
+| --- | --- |
+| O painel do gestor atualiza ao recarregar a página, sem Realtime nesta sprint. A ocorrência nova aparece como "Aguardando triagem" até recarregar | Decisão da Riane (a issue deixava para a planning): mais simples e sem mudar o banco |
+| Depois que o gestor confirma ou muda a prioridade, o card mostra "Definida por você" (ou "Definida pelo gestor", se foi outro gestor do condomínio) e a justificativa dele, se escreveu. O motivo da IA sai do card | Decisão da Riane: a escolha do gestor fica no lugar da sugestão da IA, como pede o "pronto quando" da issue |
+| A prioridade muda por um seletor no card, que salva ao escolher. "Confirmar" (só enquanto a prioridade é da IA) e "Adicionar motivo", que abre um campo opcional, ficam logo abaixo | Decisão da Riane: corrigir um falso urgente com um clique; o motivo continua opcional |
+| A ocorrência concluída sem classificação da IA fica sem etiqueta de prioridade, e nenhuma concluída tem seletor | Decisão da Riane: "Aguardando triagem" numa concluída não diz nada; o banco não deixa mudar a prioridade de ocorrência concluída |
+
 ## 24/11/2026 — Quadro em colunas (SQUAD1-61)
 
 ### Produto e acesso
