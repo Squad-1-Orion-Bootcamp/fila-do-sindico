@@ -33,6 +33,7 @@ npm run build     # checagem de tipos + build
 | `/condominios` | `gestor` | Cadastro (`rpc('cadastrar_condominio')`) e lista dos condomínios do gestor |
 | `/minhas-ocorrencias` | `morador` | Ocorrências do morador |
 | `/sem-acesso` | Logado sem perfil | Acesso ainda não liberado |
+| `/tarefa/:token` | Público (quem tem o link) | Tarefa delegada ao funcionário: ver e concluir (`rpc('ver_tarefa')`, `rpc('concluir_tarefa')`). O `vercel.json` manda `Referrer-Policy: no-referrer` nessa rota, para o token não vazar |
 
 ## Design
 

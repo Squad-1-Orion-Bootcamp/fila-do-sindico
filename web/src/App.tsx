@@ -23,6 +23,9 @@ const QuadroOcorrencias = lazy(() =>
 const SemAcesso = lazy(() =>
   import('./pages/Placeholders').then((m) => ({ default: m.SemAcesso })),
 )
+const TarefaPublica = lazy(() =>
+  import('./pages/TarefaPublica').then((m) => ({ default: m.TarefaPublica })),
+)
 
 export default function App() {
   return (
@@ -32,6 +35,8 @@ export default function App() {
         <Route path="/cadastro-gestor" element={<CadastroGestor />} />
         <Route path="/cadastro" element={<CadastroMorador />} />
         <Route path="/sem-acesso" element={<SemAcesso />} />
+        {/* Link do WhatsApp para o funcionário (SQUAD1-77): sem login, o acesso vem do token */}
+        <Route path="/tarefa/:token" element={<TarefaPublica />} />
         <Route
           path="/quadro"
           element={
