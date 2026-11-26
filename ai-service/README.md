@@ -60,6 +60,18 @@ O gatilho do banco chama `POST /webhook` a cada ocorrência nova (contrato na SQ
 
 Falhas ficam no log, e a ocorrência continua em "Aguardando triagem".
 
+### Classificar pendentes
+
+Rede de segurança para quando o aviso se perde (ai-service fora do ar, reinício no meio da
+classificação, Vault sem configuração). Ao abrir o painel, o front chama a função do banco
+`classificar_pendentes()`, que chama `POST /classificar-pendentes` pelo `pg_net`:
+
+1. Mesmo `X-Webhook-Secret` do webhook. Sem ele: **401**.
+2. Responde **202** sem corpo, na hora.
+3. Em segundo plano: lista até **20** ocorrências com `urgencia_atual` vazia, das mais antigas
+   para as mais novas (as que o gestor classificou à mão já ficam de fora), e passa cada uma
+   pelo mesmo caminho do webhook. Se uma rodada já está em andamento, a nova não começa.
+
 ## Classificação
 
 O `classificar()` (`app/classifier.py`) segue a proposta "System 1 + System 2" da Sprint 2:
@@ -123,7 +135,8 @@ os da justificativa usam `TestModel` e `FunctionModel`.
 
 - `app/main.py`: rotas (`GET /health`, `POST /classificar`)
 - `app/webhook.py`: `POST /webhook`, o aviso do banco
-- `app/banco.py`: leitura da ocorrência e gravação da classificação pela API do Supabase
+- `app/pendentes.py`: `POST /classificar-pendentes`, a rede de segurança do webhook
+- `app/banco.py`: leitura e listagem das ocorrências e gravação da classificação pela API do Supabase
 - `app/contrato.py`: urgências e categorias, com a descrição de cada uma (fonte única)
 - `app/schemas.py`: contratos de entrada e saída (urgência, categoria, justificativa, origem)
 - `app/classifier.py`: orquestração da classificação e as regras de reserva
@@ -131,6 +144,8 @@ os da justificativa usam `TestModel` e `FunctionModel`.
 - `app/justificativa.py`: System 2, a frase da justificativa (Pydantic AI + Gemini 2.5 Flash)
 - `app/trava.py`: trava de palavras de risco (força urgência `urgente`)
 - `app/config.py`: variáveis de ambiente
+- `scripts/`: avaliação da classificação contra o gabarito (`avaliar_gabarito.py` e `metricas.py`)
+- `tests/gabarito/`: o gabarito de relatos rotulados e os resultados das rodadas (veja o README de lá)
 
 ## Trava de palavras de risco
 

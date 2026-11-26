@@ -1,7 +1,7 @@
 """Acesso ao banco pela API REST do Supabase, com a chave secreta (papel service_role).
 
-Só o que o webhook precisa: ler a ocorrência e gravar a classificação pela função
-gravar_classificacao (migração 20261124035604_classificacao_ia.sql).
+Só o que o webhook e o "classificar pendentes" precisam: ler e listar as ocorrências e gravar
+a classificação pela função gravar_classificacao (migração 20261124035604_classificacao_ia.sql).
 """
 
 from dataclasses import dataclass
@@ -94,3 +94,22 @@ def gravar_classificacao(
             },
         )
         resposta.raise_for_status()
+
+
+def listar_pendentes(limite: int) -> list[UUID]:
+    """Ocorrências sem prioridade, das mais antigas para as mais novas.
+
+    urgencia_atual nula já pula as que o gestor classificou à mão (SQUAD1-80).
+    """
+    with _cliente() as cliente:
+        resposta = cliente.get(
+            "/ocorrencias",
+            params={
+                "select": "id",
+                "urgencia_atual": "is.null",
+                "order": "created_at.asc",
+                "limit": limite,
+            },
+        )
+        resposta.raise_for_status()
+        return [UUID(linha["id"]) for linha in resposta.json()]
