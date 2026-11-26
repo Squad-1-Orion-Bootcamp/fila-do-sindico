@@ -220,6 +220,12 @@ export function OcorrenciasDoGestor() {
   }
 
   useEffect(() => {
+    // Rede de segurança do gatilho: pede a classificação das ocorrências que ficaram sem
+    // prioridade. Não espera: a prioridade aparece no próximo carregamento.
+    supabase.rpc('classificar_pendentes').then(({ error }) => {
+      if (error) console.error('Erro ao pedir a classificação das pendentes', error)
+    })
+
     buscarOcorrencias().then(({ data, error }) => {
       if (error) {
         console.error('Erro ao carregar as ocorrências', error)
