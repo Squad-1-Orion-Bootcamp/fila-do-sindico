@@ -33,6 +33,20 @@
 -- | morador.juliana@teste.local  | morador | pendente no Edifício Jacarandá, bloco B, 403      |
 -- | morador.thiago@teste.local   | morador | pendente no Residencial Ipê Amarelo, unidade 22   |
 -- | morador.renata@teste.local   | morador | pendente no Vila das Palmeiras, casa 21           |
+--
+-- Funcionários da Helena (SQUAD1-71), para a delegação da US 3. Não têm conta. Os celulares são
+-- fictícios (55 11 90000-01xx): não mande mensagem para eles. O Josué trabalha nos dois prédios,
+-- com o mesmo celular.
+--
+-- | Funcionário       | Função              | Condomínio                                      |
+-- | ----------------- | ------------------- | ----------------------------------------------- |
+-- | Sebastião Moura   | Zelador             | Edifício Jacarandá                              |
+-- | Cláudia Reis      | Porteiro            | Edifício Jacarandá                              |
+-- | Josué Almeida     | Eletricista         | Edifício Jacarandá e Residencial Ipê Amarelo    |
+-- | Márcia Lopes      | Auxiliar de limpeza | Residencial Ipê Amarelo                         |
+-- | Renan Duarte      | Porteiro            | Residencial Ipê Amarelo                         |
+-- | Antônio Silveira  | Jardineiro          | Vila das Palmeiras                              |
+-- | Vera Campos       | Zelador             | Vila das Palmeiras                              |
 
 -- ---------------------------------------------------------------------------
 -- Contas (auth.users + auth.identities). O trigger handle_new_user cria os perfis.
@@ -139,6 +153,20 @@ begin
   perform set_config('request.jwt.claims',
     jsonb_build_object('sub', p_gestor, 'role', 'authenticated')::text, true);
   perform public.aprovar_solicitacao_vinculo(v_solicitacao);
+end;
+$$;
+
+-- Cadastra um funcionário em nome da gestora, pela função de verdade (cadastrar_funcionario).
+create or replace function pg_temp.cadastrar_funcionario(
+  p_gestor uuid, p_condominio uuid, p_nome text, p_celular text, p_funcao text)
+returns void
+language plpgsql
+as $$
+begin
+  -- auth.uid() passa a ser a gestora até o fim da transação.
+  perform set_config('request.jwt.claims',
+    jsonb_build_object('sub', p_gestor, 'role', 'authenticated')::text, true);
+  perform public.cadastrar_funcionario(p_condominio, p_nome, p_celular, p_funcao);
 end;
 $$;
 
@@ -268,6 +296,28 @@ select pg_temp.criar_ocorrencia('00000000-0000-0000-0000-00000000a119', 'Entrada
   'Lâmpada do poste da entrada queimada.', 'em_andamento', interval '1 day 6 hours');
 select pg_temp.criar_ocorrencia('00000000-0000-0000-0000-00000000a118', 'Rua interna, perto da casa 15',
   'Buraco no asfalto da rua interna.', 'concluido', interval '10 days');
+
+-- Funcionários da Helena (SQUAD1-71): dois ou três por condomínio, com funções variadas. O Josué
+-- trabalha nos dois prédios com o mesmo celular, como a regra permite (único só dentro de cada
+-- condomínio). Celulares fictícios.
+select pg_temp.cadastrar_funcionario('00000000-0000-0000-0000-00000000a101', '00000000-0000-0000-0000-00000000c101',
+  'Sebastião Moura', '5511900000101', 'Zelador');
+select pg_temp.cadastrar_funcionario('00000000-0000-0000-0000-00000000a101', '00000000-0000-0000-0000-00000000c101',
+  'Cláudia Reis', '5511900000102', 'Porteiro');
+select pg_temp.cadastrar_funcionario('00000000-0000-0000-0000-00000000a101', '00000000-0000-0000-0000-00000000c101',
+  'Josué Almeida', '5511900000103', 'Eletricista');
+
+select pg_temp.cadastrar_funcionario('00000000-0000-0000-0000-00000000a101', '00000000-0000-0000-0000-00000000c102',
+  'Márcia Lopes', '5511900000104', 'Auxiliar de limpeza');
+select pg_temp.cadastrar_funcionario('00000000-0000-0000-0000-00000000a101', '00000000-0000-0000-0000-00000000c102',
+  'Renan Duarte', '5511900000105', 'Porteiro');
+select pg_temp.cadastrar_funcionario('00000000-0000-0000-0000-00000000a101', '00000000-0000-0000-0000-00000000c102',
+  'Josué Almeida', '5511900000103', 'Eletricista');
+
+select pg_temp.cadastrar_funcionario('00000000-0000-0000-0000-00000000a101', '00000000-0000-0000-0000-00000000c103',
+  'Antônio Silveira', '5511900000106', 'Jardineiro');
+select pg_temp.cadastrar_funcionario('00000000-0000-0000-0000-00000000a101', '00000000-0000-0000-0000-00000000c103',
+  'Vera Campos', '5511900000107', 'Zelador');
 
 -- ---------------------------------------------------------------------------
 -- Ocorrências (urgência e categoria vazias: "Aguardando triagem").

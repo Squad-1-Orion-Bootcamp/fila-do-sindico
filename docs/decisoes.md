@@ -14,16 +14,47 @@ decisão for trocada, mova a antiga para "Substituídas", dizendo o que a substi
 | A prioridade muda por um seletor no card, que salva ao escolher. "Confirmar" (só enquanto a prioridade é da IA) e "Adicionar motivo", que abre um campo opcional, ficam logo abaixo | Decisão da Riane: corrigir um falso urgente com um clique; o motivo continua opcional |
 | A ocorrência concluída sem classificação da IA fica sem etiqueta de prioridade, e nenhuma concluída tem seletor | Decisão da Riane: "Aguardando triagem" numa concluída não diz nada; o banco não deixa mudar a prioridade de ocorrência concluída |
 
-## 24/11/2026 — Quadro em colunas (SQUAD1-61)
+## 25/11/2026 — Justificativa pelo Gemini 2.5 Flash (SQUAD1-85)
+
+### Técnica
+
+| Decisão | Motivo |
+| --- | --- |
+| O System 2 (`ai-service/app/justificativa.py`) usa o Gemini 2.5 Flash pelo Pydantic AI, com saída estruturada (`frase`, de 1 a 200 caracteres) | Escolha do Pedro. A saída validada pelo schema evita parse de texto livre |
+| O System 2 só explica a urgência final (depois da trava); não decide nem muda nada | Quem decide é o Decision 1, as regras ou a trava. A explicação nunca contradiz a etiqueta |
+| O System 2 só é chamado quando o Decision 1 respondeu. Se ele falhou (ou a `LLM_API_KEY` está vazia), fica a frase da regra ou da trava | Com o Decision 1 fora, a Gemini provavelmente também está, e a chamada só gastaria até 8 s e cota. A frase da regra já diz qual palavra decidiu (decisão do Pedro) |
+| Resposta inválida: pede de novo uma vez. Erro ou demora de mais de 8 s (contando a nova tentativa): fica o motivo padrão | A classificação nunca falha por causa da frase. O webhook roda em segundo plano, então 8 s não atrasam o gatilho |
+| Sem "thinking" no 2.5 Flash (`thinking_budget = 0`) e temperatura 0,2 | O "thinking" vem ligado por padrão e só atrasa uma frase curta. Temperatura baixa deixa a frase presa aos fatos |
+
+### Privacidade
+
+| Decisão | Motivo |
+| --- | --- |
+| Vão para a Gemini só a descrição e o local da ocorrência. Nome, e-mail, unidade e condomínio nunca vão | Termos da Gemini API (em vigor desde 23/03/2026, <https://aistudio.google.com/docs/terms>): no plano grátis, o Google usa o que é enviado e as respostas "para melhorar e desenvolver" os produtos dele, e "revisores humanos podem ler" esse conteúdo. Os termos pedem para não enviar informação sensível, confidencial ou pessoal. No plano pago, o Google não usa os dados para melhorar produtos e só guarda registros por tempo limitado, contra abuso |
+
+**Em aberto:** a descrição é texto livre do morador e pode conter dados pessoais (um nome, um
+telefone). Vale também para o Decision 1 (SQUAD1-84), que manda o mesmo texto. Antes de usar
+com moradores reais, o time decide entre o plano pago (projeto do Google Cloud com
+faturamento) ou um aviso no formulário de ocorrência.
+
+## 25/11/2026 — Trava de palavras de risco (SQUAD1-58)
+
+Decidido pelo time, sem product builder no momento.
 
 ### Produto e acesso
 
 | Decisão | Motivo |
 | --- | --- |
-| No painel do gestor, colunas e seletor de status usam os nomes da US 1: Novo, Em andamento, Delegado e Concluído. A página do morador continua com Pendente, Em análise e Resolvido (SQUAD1-5) | Decisão da Riane: os nomes da issue e do protótipo, iguais na coluna e no card |
-| Em Novo, Em andamento e Delegado, primeiro a urgência (urgente, alta, normal, baixa), depois a mais antiga. A ocorrência que a IA ainda não classificou vem depois das classificadas | A issue pede "os mais urgentes e mais antigos primeiro"; sem classificação, ainda não se sabe a urgência |
-| Em Concluído, as concluídas mais recentemente primeiro, pela data da conclusão (`concluido_em`), e não pela de registro. `listar_ocorrencias_gestor` passa a devolver essa data | Decisão da Riane: depois de concluída, a urgência não decide mais nada; o gestor abre a coluna para ver o que acabou de ser feito, e a coluna só cresce. Segue o protótipo |
-| No celular, uma coluna por vez, escolhida em abas com a contagem; no tablet, duas colunas; no computador, quatro | Segue o `DESIGN.md` ("uma coluna por vez, com abas de contagem") |
+| A trava força `urgente` com: gás (e "gases"), choque, elétrica, fumaça, vazamento grave, rachadura, fogo e incêndio. Sem diferenciar maiúsculas e acentos ("incendio" vale) e aceitando plural ("rachaduras", "choques", "vazamentos graves") | A lista do card (SQUAD1-58) mais fogo e incêndio, que são risco de vida. O plural é um jeito comum de escrever, e a trava existe para não deixar passar risco |
+| Pessoa presa no elevador também força `urgente`: a descrição precisa ter "preso", "presa", "presos" ou "presas" **e** "elevador", em qualquer ordem | "Preso" sozinho daria falso urgente ("portão preso", "carro preso na garagem") |
+| A trava olha só a descrição, nunca o local | Um local como "Sala elétrica" ou "Abrigo de gás" deixaria urgente toda ocorrência registrada ali |
+| Quando a trava dispara, a justificativa cita o termo encontrado ("Trava de risco: a descrição menciona 'gás'.") | O gestor vê por que a ocorrência ficou urgente |
+
+### Técnica
+
+| Decisão | Motivo |
+| --- | --- |
+| A trava e as regras provisórias usam a mesma comparação por palavra inteira (`padrao_de_termo` em `app/trava.py`) | "gas" não casa com "gasto", "vagas" nem "desgaste", nem na trava nem nas regras |
 
 ## 24/11/2026 — Funções da delegação (SQUAD1-74)
 
@@ -40,6 +71,17 @@ decisão for trocada, mova a antiga para "Substituídas", dizendo o que a substi
 | --- | --- |
 | O token do link tem 32 bytes aleatórios em base64url (43 caracteres) | Impossível de adivinhar e curto o bastante para a mensagem do WhatsApp |
 | A `alterar_status_ocorrencia` ganhou uma nova versão que revoga a delegação ativa | Decisão do Lucas: qualquer troca de status pelo gestor revoga o link (SQUAD1-72) |
+
+## 24/11/2026 — Quadro em colunas (SQUAD1-61)
+
+### Produto e acesso
+
+| Decisão | Motivo |
+| --- | --- |
+| No painel do gestor, colunas e seletor de status usam os nomes da US 1: Novo, Em andamento, Delegado e Concluído. A página do morador continua com Pendente, Em análise e Resolvido (SQUAD1-5) | Decisão da Riane: os nomes da issue e do protótipo, iguais na coluna e no card |
+| Em Novo, Em andamento e Delegado, primeiro a urgência (urgente, alta, normal, baixa), depois a mais antiga. A ocorrência que a IA ainda não classificou vem depois das classificadas | A issue pede "os mais urgentes e mais antigos primeiro"; sem classificação, ainda não se sabe a urgência |
+| Em Concluído, as concluídas mais recentemente primeiro, pela data da conclusão (`concluido_em`), e não pela de registro. `listar_ocorrencias_gestor` passa a devolver essa data | Decisão da Riane: depois de concluída, a urgência não decide mais nada; o gestor abre a coluna para ver o que acabou de ser feito, e a coluna só cresce. Segue o protótipo |
+| No celular, uma coluna por vez, escolhida em abas com a contagem; no tablet, duas colunas; no computador, quatro | Segue o `DESIGN.md` ("uma coluna por vez, com abas de contagem") |
 
 ## 24/11/2026 — Tabela de delegações (SQUAD1-73)
 
@@ -59,6 +101,34 @@ decisão for trocada, mova a antiga para "Substituídas", dizendo o que a substi
 | --- | --- |
 | A ocorrência tem quatro status: `novo`, `em_andamento`, `delegado` e `concluido`. `delegado` só vem da delegação para um funcionário (US 3); a troca manual do gestor continua entre os outros três | A US 1 pede as quatro colunas, e a US 3 diz que o status muda para Delegado ao delegar |
 | O gestor pode tirar uma ocorrência de `delegado` trocando o status manualmente | A US 3 prevê que o síndico "assuma de volta" ou conclua; o link antigo deixa de valer (SQUAD1-74) |
+
+## 24/11/2026 — Classificação pelo Gemini Decision 1 (SQUAD1-84)
+
+### Produto e acesso
+
+| Decisão | Motivo |
+| --- | --- |
+| Emergência com risco de vida (incêndio, fogo, pessoa presa no elevador) entra na trava e vira sempre `urgente` | Decisão do Lucas: o formulário vai avisar para ligar 193 ou 192 (card de front à parte), mas o morador pode ignorar o aviso, ou ligar e registrar também |
+
+### Técnica
+
+| Decisão | Motivo |
+| --- | --- |
+| O Gemini Decision 1 decide a urgência e a categoria; se ele der erro, demorar ou a `LLM_API_KEY` estiver vazia, as regras por palavra-chave decidem (origem `regra`). A trava vale nos dois casos (`ia+trava` ou `regra+trava`) | A ocorrência nunca fica sem prioridade, e a origem gravada mostra quantas vezes a IA respondeu (proposta da IA de 23/11) |
+| Chamada ao Decision 1 com limite de cerca de 3 s e sem nova tentativa | Por padrão o SDK tenta de novo até 4 vezes, com espera de até 30 s; com o limite estourado, é melhor cair logo nas regras |
+| `modelo_versao` é `gemini-decision-1` quando o Decision 1 decidiu e `regras-provisorias` quando as regras decidiram | Saber qual modelo classificou cada ocorrência |
+| A confiança do Decision 1 vai só para o log; gravar no banco e sinalizar "revisar a prioridade" ficam para a Sprint 3 | Precisa de coluna nova (migração), fora do escopo da Sprint 2 |
+| As urgências e as categorias, com a descrição de cada uma, ficam em `ai-service/app/contrato.py`; a lista ainda é proposta | O Pedro revisa na SQUAD1-56; no Decision 1, as descrições fazem o papel do prompt |
+
+## 24/11/2026 — Webhook do ai-service (SQUAD1-63)
+
+### Técnica
+
+| Decisão | Motivo |
+| --- | --- |
+| O ai-service usa os valores de urgência do banco (`urgente`, `alta`, `normal`, `baixa`) também no `/classificar` | Contrato da SQUAD1-56; com `media`, o banco recusaria a gravação |
+| O `/webhook` usa só o `id` do aviso: a descrição e o local vêm do banco, com a `service_role`, e a ocorrência já classificada é ignorada antes de chamar o classificador | Com o segredo vazado, ninguém muda a prioridade mandando outro texto; e o reenvio do gatilho não gasta a cota da Gemini (sugestões do `revisor-rls` na #24) |
+| Com `WEBHOOK_SECRET` vazio no servidor, o `/webhook` recusa toda chamada (401) | Um servidor sem segredo configurado não pode aceitar qualquer chamada |
 
 ## 24/11/2026 — Gestor altera a prioridade (SQUAD1-60)
 
@@ -96,6 +166,18 @@ decisão for trocada, mova a antiga para "Substituídas", dizendo o que a substi
 | `gravar_classificacao` só pode ser chamada pela `service_role`, e chamar de novo para a mesma ocorrência não muda nada | Só o ai-service grava a classificação; o `pg_net` e o "classificar pendentes" podem mandar a mesma ocorrência duas vezes |
 | Cada classificação guarda a origem: `ia`, `regra`, `ia+trava` ou `regra+trava` | Mostra quantas vezes a IA respondeu e quantas vezes as regras assumiram (proposta da IA de 23/11) |
 | O painel do gestor lê as ocorrências pela função `listar_ocorrencias_gestor()`, e não por `.from('ocorrencias')` | Gestor e morador usam o mesmo papel no banco, e permissão por coluna vale para o papel inteiro: para fechar `urgencia_atual` para o morador, a coluna sai da leitura direta de todos |
+
+## 23/11/2026 — Funcionário (US 2)
+
+### Produto e acesso
+
+Decididas pelo Lucas em 23/11 (SQUAD1-67).
+
+| Decisão | Motivo |
+| --- | --- |
+| O funcionário da delegação é um **contato cadastrado pelo gestor, sem conta nem login**, na tabela `funcionarios` (SQUAD1-69). Ele não usa `vinculos`, e o tipo `funcionario` de `vinculos` fica sem uso por enquanto | Decisão do Lucas: o funcionário só recebe a tarefa pelo link do WhatsApp e a conclui por ele (US 3), sem precisar de conta. Substitui a decisão de 16/11 de que o funcionário é um morador com vínculo do tipo `funcionario` |
+| Os funcionários ficam numa aba própria, "Funcionários", com filtro por condomínio, no mesmo padrão visual do painel | Decisão do Lucas (SQUAD1-70) |
+| O celular do funcionário tem DDD + 9 dígitos e é único por condomínio | Decisão do Lucas. Os detalhes vêm da implementação (SQUAD1-69): a unicidade vale entre os funcionários ativos, então o mesmo celular pode estar em outro condomínio (o zelador de dois prédios) e quem foi desativado pode ser cadastrado de novo; o banco guarda só os dígitos, no formato do WhatsApp (`5511999998888`), que é o que o link `wa.me` usa (SQUAD1-68) |
 
 ## 23/11/2026 — Link de delegação (US 3)
 
@@ -164,7 +246,6 @@ Aprovadas pelo Lucas em 23/11 (SQUAD1-72).
 | A ocorrência guarda o canal em `origem`: `aplicativo` (registrada pelo morador, o padrão), `whatsapp`, `telefone`, `presencial` ou `vistoria` (registrada pelo gestor) | Toda ocorrência tem origem, e dá para comparar os canais depois (SQUAD1-30) |
 | Quem relatou ao gestor (`relatado_por`) é opcional e precisa ser morador ou funcionário ativo do condomínio; quem não tem conta fica em branco | Decisão do time (SQUAD1-30) |
 | Quem sai do condomínio: o ex-morador continua vendo as ocorrências que registrou pelo app (histórico); o ex-gestor perde o acesso também às que ele registrou | Decisão do time; vínculo encerrado perde o acesso aos dados do condomínio (SQUAD1-30) |
-| Funcionário se cadastra como morador, por enquanto sem enviar documentação | O cadastro de funcionário ficou para depois |
 | Chat (`conversas` e `mensagens`) fica para o futuro | Fora do escopo das primeiras sprints |
 
 ### Técnica
@@ -189,7 +270,7 @@ Aprovadas pelo Lucas em 23/11 (SQUAD1-72).
 
 | Decisão | Motivo |
 | --- | --- |
-| Perfis: `admin`, `gestor` (síndico ou administradora) e `morador`; o funcionário é um morador com vínculo do tipo `funcionario` | Funcionário com o mesmo acesso do morador evita trabalho extra agora |
+| Perfis: `admin`, `gestor` (síndico ou administradora) e `morador` | Os três papéis da plataforma |
 | Uma conta tem um tipo só; quem é gestor e morador usa dois e-mails | Simplifica as permissões nesta versão |
 | O papel fica em `profiles.role`, gravado pelo banco, nunca em `user_metadata` | O usuário consegue alterar `user_metadata` pelo navegador |
 | Acesso a condomínios pela tabela `vinculos` (usuário, condomínio, tipo, status) | Um gestor tem vários condomínios; uma pessoa pode ter vários imóveis |
@@ -238,3 +319,5 @@ Aprovadas pelo Lucas em 23/11 (SQUAD1-72).
 | Quem abriu a PR faz o merge | Quem aprova a PR faz o merge (18/11) |
 | Gitflow com `develop` como branch base; `main` só recebe releases (uma por sprint) e hotfixes | Branches `develop` → `stage` → `prod`, sem `main` nem `release/` (19/11) |
 | `vinculos` com `unidade` e `status` `pendente`/`aprovado`/`recusado` | Pedido em `solicitacoes_vinculo`, vínculo `ativo`/`encerrado` com vigência e unidade em `imoveis` (18/11) |
+| O funcionário é um morador com vínculo do tipo `funcionario`, com o mesmo acesso do morador (16/11) | Funcionário é um contato cadastrado pelo gestor, sem conta nem login, na tabela `funcionarios` (23/11) |
+| Funcionário se cadastra como morador, por enquanto sem enviar documentação (18/11) | Funcionário é cadastrado pelo gestor na aba Funcionários, sem conta (23/11) |
