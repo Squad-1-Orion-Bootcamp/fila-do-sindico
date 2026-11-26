@@ -49,19 +49,19 @@ python -c "import json,collections as C;cs=json.load(open('ai-service/tests/gaba
 ```
 
 ```text
-| urgencia | urgente 15 | alta 13 | normal 12 | baixa 10 |
+| urgencia | urgente 16 | alta 12 | normal 12 | baixa 10 |
 | categoria | seguranca 11 | hidraulica 7 | convivencia 7 | elevador 6 | estrutura 6 | eletrica 6 | limpeza 4 | outros 3 |
 | tipo | comum 29 | armadilha 11 | squad03 5 | injecao 3 | local 2 |
 | palavra_de_risco | False 44 | True 6 |
 ```
 
-Dos 15 urgentes, 10 não têm palavra de risco: `c02`, `c10`, `c11`, `c12`, `c13`, `c22`, `c23`, `c24`, `c25` e `c26`.
+Dos 16 urgentes, 10 não têm palavra de risco: `c02`, `c10`, `c11`, `c12`, `c13`, `c22`, `c23`, `c24`, `c25` e `c26`.
 
 ## Casos de fronteira (para a revisão da Júlia)
 
 Quando dois rótulos são defensáveis, o caso fica com um deles e o `motivo` começa com "Fronteira".
 
-- `c03` "rachadura enorme na viga da garagem": alta × urgente (a trava marca urgente por causa de "rachadura").
+- `c03` "rachadura enorme na viga da garagem": urgente × alta (não se sabe se a rachadura é nova ou está crescendo).
 - `c08` extintor de incêndio vencido: normal × alta.
 - `c09` porta corta-fogo emperrada: alta × normal, e seguranca × estrutura.
 - `c22` cano estourado com água chegando no quadro de energia: hidraulica × eletrica.
@@ -74,7 +74,7 @@ Quando dois rótulos são defensáveis, o caso fica com um deles e o `motivo` co
 
 Um script que roda a trava, as regras e o Decision 1 contra o gabarito e mede:
 
-- urgentes detectados (recall de `urgente`): dos 15 urgentes, quantos cada camada marcou;
+- urgentes detectados (recall de `urgente`): dos 16 urgentes, quantos cada camada marcou;
 - urgentes sem palavra de risco: dos 10, quantos o Decision 1 marcou;
 - falsos urgentes da trava: casos que não são urgentes e que a trava marcou;
 - acerto de urgência;

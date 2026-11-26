@@ -23,11 +23,11 @@
     "id": "c03",
     "descricao": "tem uma rachadura enorme na viga da garagem",
     "local": null,
-    "urgencia": "alta",
+    "urgencia": "urgente",
     "categoria": "estrutura",
     "palavra_de_risco": true,
     "tipo": "squad03",
-    "motivo": "Fronteira (alta × urgente): rachadura grande em viga pede vistoria de engenheiro logo, mas o relato não diz se ela é nova, se está aumentando ou se há algo cedendo; a trava marca urgente por causa da palavra \"rachadura\"."
+    "motivo": "Fronteira (urgente × alta): rachadura grande em viga pode ser risco de desabamento e pede engenheiro na hora, mas o relato não diz se a rachadura é nova nem se está crescendo."
   },
   {
     "id": "c04",
