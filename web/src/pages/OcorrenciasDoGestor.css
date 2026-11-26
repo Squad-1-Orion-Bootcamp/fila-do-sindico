@@ -179,6 +179,47 @@
   white-space: pre-line;
 }
 
+/* Prioridade no card (SQUAD1-64): motivo, seletor e ações em texto. */
+.quadro-motivo {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espaco-1);
+  margin-top: var(--espaco-2);
+}
+
+.quadro-motivo > svg {
+  flex-shrink: 0;
+  margin-top: var(--espaco-1);
+}
+
+.quadro-motivo > span {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow-wrap: anywhere;
+}
+
+/* Motivo aberto por inteiro ("Ver tudo"); o botão fica alinhado com o texto, depois do ícone. */
+.quadro-motivo-aberto > span {
+  display: block;
+  -webkit-line-clamp: none;
+  line-clamp: none;
+}
+
+.quadro-motivo-ver {
+  margin-top: var(--espaco-1);
+  margin-left: calc(14px + var(--espaco-1));
+}
+
+.quadro-acoes-texto {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-1) var(--espaco-4);
+  margin-top: var(--espaco-2);
+}
+
 /* Comentário aberto por inteiro ("Ver tudo") e aviso no status do card delegado. */
 .quadro-comentario-aberto {
   display: block;
@@ -203,4 +244,25 @@
   color: var(--cor-acao);
   text-decoration: underline;
   cursor: pointer;
+}
+
+.quadro-acao-texto:disabled {
+  color: var(--cor-texto-sutil);
+  cursor: progress;
+}
+
+.quadro-motivo-form {
+  margin-top: var(--espaco-2);
+}
+
+.quadro-motivo-acoes {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--espaco-2);
+  margin-top: var(--espaco-2);
+}
+
+.quadro-prioridade select:disabled {
+  opacity: 0.6;
+  cursor: progress;
 }
