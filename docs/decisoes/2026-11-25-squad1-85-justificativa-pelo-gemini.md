@@ -2,6 +2,8 @@
 
 Data: 25/11/2026
 
+Substituída em parte em 26/11/2026 por [2026-11-26-squad1-93-modelo-da-justificativa](2026-11-26-squad1-93-modelo-da-justificativa.md): o modelo e o "thinking".
+
 ## Técnica
 
 | Decisão | Motivo |

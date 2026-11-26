@@ -1,7 +1,7 @@
 # ai-service
 
 Serviço de IA da Fila do Síndico (Python + FastAPI). Classifica cada ocorrência nova com o
-Gemini Decision 1 e explica a urgência com o Gemini 2.5 Flash. As regras por palavra-chave
+Gemini Decision 1 e explica a urgência com o Gemini 3.5 Flash Lite. As regras por palavra-chave
 ficam de reserva (veja [Classificação](#classificação)).
 
 ## Rodar
@@ -85,7 +85,7 @@ O `classificar()` (`app/classifier.py`) segue a proposta "System 1 + System 2" d
 3. **Reserva, regras por palavra-chave:** se o Decision 1 der erro, demorar mais que cerca de 3 s ou
    a `LLM_API_KEY` estiver vazia (aí nem tenta chamar), as regras decidem. Elas vão até `alta`:
    quem marca `urgente` é só a trava.
-4. **System 2, justificativa** (`app/justificativa.py`): o Gemini 2.5 Flash, pelo Pydantic AI,
+4. **System 2, justificativa** (`app/justificativa.py`): o Gemini 3.5 Flash Lite, pelo Pydantic AI,
    escreve uma frase de até 200 caracteres explicando a urgência final para o gestor. Ele não
    decide nada: recebe a urgência já escolhida. Vão para a Gemini só a descrição e o local.
    Só é chamado quando o Decision 1 respondeu: se ele falhou, a Gemini provavelmente está
@@ -103,7 +103,7 @@ O que vai para o banco:
 **Sem `LLM_API_KEY`** (no local, na CI e nos testes), o serviço funciona do mesmo jeito, só
 com as regras. A chave sai do [Google AI Studio](https://aistudio.google.com) e fica só no
 `.env` ou no painel do Render. Opcionais: `LLM_MODELO_DECISAO` (padrão `gemini-decision-1`),
-`LLM_TIMEOUT_SEGUNDOS` (padrão `3`), `LLM_MODELO_JUSTIFICATIVA` (padrão `gemini-2.5-flash`) e
+`LLM_TIMEOUT_SEGUNDOS` (padrão `3`), `LLM_MODELO_JUSTIFICATIVA` (padrão `gemini-3.5-flash-lite`) e
 `LLM_TIMEOUT_JUSTIFICATIVA_SEGUNDOS` (padrão `8`).
 
 Nenhum teste chama a Gemini: o `tests/conftest.py` esvazia a chave e liga
@@ -129,7 +129,7 @@ os da justificativa usam `TestModel` e `FunctionModel`.
    ```
 
    O campo `justificativa` traz a frase da Gemini. Se vier o motivo padrão, o log do uvicorn
-   mostra "Justificativa falhou (...)".
+   mostra "Justificativa falhou (...)", com o código HTTP e o status do Google (ex.: `404 NOT_FOUND`).
 
 ## Estrutura
 
@@ -141,7 +141,7 @@ os da justificativa usam `TestModel` e `FunctionModel`.
 - `app/schemas.py`: contratos de entrada e saída (urgência, categoria, justificativa, origem)
 - `app/classifier.py`: orquestração da classificação e as regras de reserva
 - `app/decisao.py`: System 1, a chamada ao Gemini Decision 1
-- `app/justificativa.py`: System 2, a frase da justificativa (Pydantic AI + Gemini 2.5 Flash)
+- `app/justificativa.py`: System 2, a frase da justificativa (Pydantic AI + Gemini 3.5 Flash Lite)
 - `app/trava.py`: trava de palavras de risco (força urgência `urgente`)
 - `app/config.py`: variáveis de ambiente
 - `scripts/`: avaliação da classificação contra o gabarito (`avaliar_gabarito.py` e `metricas.py`)
