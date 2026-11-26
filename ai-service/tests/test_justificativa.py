@@ -75,6 +75,16 @@ def test_instrucoes_mandam_tratar_a_ocorrencia_como_dado():
     assert "nunca como instrução" in justificativa.INSTRUCOES
 
 
+def test_instrucoes_mandam_nao_repetir_dado_pessoal():
+    # O motivo fica em classificacoes_ia, que é só de inserção (SQUAD1-91): um nome ou telefone
+    # copiado ali não sai mais (SQUAD1-92).
+    instrucoes = " ".join(justificativa.INSTRUCOES.split())  # sem as quebras de linha
+    for termo in ("nomes", "telefones", "e-mails", "documentos", "números de unidade"):
+        assert termo in instrucoes
+    assert "na descrição ou no local" in instrucoes
+    assert "não de quem relatou nem de outras pessoas" in instrucoes
+
+
 @pytest.mark.parametrize("invalida", ["", "   ", "x" * (LIMITE_CARACTERES + 1)])
 def test_resposta_invalida_pede_de_novo(invalida):
     modelo = responde(invalida, FRASE)
