@@ -9,6 +9,7 @@ Cada caso tem a urgência e a categoria de que o síndico precisa, nunca o que o
 Se a trava ou as regras erram um caso, o gabarito mostra o certo, e é assim que o erro aparece na avaliação.
 
 Os rótulos usam exatamente os valores e as descrições de `app/contrato.py` (`URGENCIAS` e `CATEGORIAS`).
+
 ## O campo `palavra_de_risco`
 
 `palavra_de_risco` é `true` quando a descrição tem um termo de `PALAVRAS_DE_RISCO` (`app/trava.py`), ou "preso" + "elevador", usado no sentido de risco.
@@ -84,7 +85,7 @@ uv run python -m scripts.avaliar_gabarito --sistema ia --rotulo develop
 - `--sistema regras`, **só regras (IA fora do ar)**: trava + regras de reserva, como o `classificar()` faz quando a IA está fora.
   Não usa a rede.
 - `--sistema ia`, **sistema completo (IA + trava)**: o `classificar()` de verdade, com o Decision 1 e a trava (e o piso de equipamento de incêndio, quando a branch tem a SQUAD1-88).
-  Precisa de `LLM_API_KEY` no `ai-service/.env`, e a chave é a mesma da stage e da prod: cada rodada gasta uma chamada por caso.
+  Precisa de `LLM_API_KEY` no `ai-service/.env`, e cada rodada gasta a cota compartilhada: uma chamada por caso.
   A justificativa (System 2) não é avaliada e não é chamada.
   Há uma pausa de 2 s entre os casos.
 - `--rotulo`: o nome da rodada (ex.: `develop`, `com-88`).
