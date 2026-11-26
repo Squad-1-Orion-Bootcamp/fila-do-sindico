@@ -41,8 +41,9 @@ avisa o ai-service e gravação da classificação), `20261124041425_morador_sem
 `20261124174433_criar_funcionarios.sql` (funcionários do condomínio),
 `20261124192621_status_delegado.sql` (status `delegado`),
 `20261124200657_criar_delegacoes.sql` (delegação ao funcionário pelo link),
-`20261124201343_delegar_ocorrencia.sql` (o gestor delega e a troca de status revoga o link) e
-`20261124205149_funcoes_publicas_delegacao.sql` (consulta e conclusão pelo link público).
+`20261124201343_delegar_ocorrencia.sql` (o gestor delega e a troca de status revoga o link),
+`20261124205149_funcoes_publicas_delegacao.sql` (consulta e conclusão pelo link público) e
+`20261125050030_conclusao_no_painel_do_gestor.sql` (`concluido_em` na lista do painel).
 
 | Tabela | Para quê |
 | --- | --- |
@@ -124,7 +125,7 @@ solicitação de vínculo pendente. Campo faltando = o cadastro falha com a mens
 | `ver_tarefa(p_token)` | quem tem o link (`anon` ou `authenticated`). Devolve a situação: `ativa` com nome do condomínio, local e descrição; `concluida` ou `revogada` sem dados da tarefa. Token inválido ou inexistente resulta em lista vazia |
 | `concluir_tarefa(p_token, p_comentario)` | quem tem o link (`anon` ou `authenticated`). Exige delegação ativa e ocorrência `delegado`, trava a ocorrência antes de revalidar o token, limita comentário a 800 caracteres (só espaços vira nulo), conclui ocorrência e delegação e grava histórico com `autor_id` nulo. Link que não vale mais: "Esta tarefa já foi encerrada." ou "Esta tarefa não está mais atribuída a você." |
 | `definir_prioridade_ocorrencia(p_ocorrencia_id, p_urgencia, p_justificativa)` | gestor ativo do condomínio. Confirma ou muda a prioridade (`urgente`, `alta`, `normal` ou `baixa`); `p_justificativa` é opcional. Grava em `decisoes` (`acao = 'definir_prioridade'`) e atualiza `urgencia_atual`. Depois disso, a IA não muda mais a urgência. Não vale para ocorrência concluída |
-| `listar_ocorrencias_gestor()` | qualquer usuário logado; devolve só as ocorrências dos condomínios em que quem chama é gestor ativo (para os outros, lista vazia), das mais novas para as mais antigas: `id`, `condominio_id`, `condominio_nome`, `local`, `descricao`, `status`, `urgencia_atual`, `categoria_atual`, `created_at`, `registrado_por_nome` |
+| `listar_ocorrencias_gestor()` | qualquer usuário logado; devolve só as ocorrências dos condomínios em que quem chama é gestor ativo (para os outros, lista vazia), das mais novas para as mais antigas: `id`, `condominio_id`, `condominio_nome`, `local`, `descricao`, `status`, `urgencia_atual`, `categoria_atual`, `created_at`, `registrado_por_nome`, `concluido_em` |
 | `cadastrar_funcionario(p_condominio_id, p_nome, p_celular, p_funcao)` | gestor ativo do condomínio. Devolve o `id`. `p_celular` só com dígitos (`5511999998888`; o front converte a máscara); nome até 120 e função até 60 caracteres (a função tira os espaços das pontas). Recusa celular já usado por um funcionário ativo do mesmo condomínio |
 | `desativar_funcionario(p_funcionario_id)` | gestor ativo do condomínio do funcionário. Marca `ativo = false`; repetir não muda nada |
 
