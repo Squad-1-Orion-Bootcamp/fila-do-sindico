@@ -159,5 +159,5 @@ a justificativa cita o termo ("Trava de risco: a descrição menciona 'gás'.").
 - Sem diferenciar maiúsculas e acentos, com plural ("rachaduras", "choques") e só palavra
   inteira ("gasto", "vagas" e "desgaste" não disparam).
 
-As regras provisórias (`app/classifier.py`) usam a mesma comparação por palavra. Decisões em
-`docs/decisoes.md` (25/11/2026).
+As regras provisórias (`app/classifier.py`) usam a mesma comparação por palavra.
+Decisões em `docs/decisoes/2026-11-25-squad1-58-trava-de-palavras-de-risco.md`.

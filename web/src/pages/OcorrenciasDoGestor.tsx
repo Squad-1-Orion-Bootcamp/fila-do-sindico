@@ -113,7 +113,7 @@ const COLUNAS: Status[] = ['novo', 'em_andamento', 'delegado', 'concluido']
 
 // Novo, Em andamento e Delegado: mais urgentes primeiro; a ocorrência que a IA ainda não
 // classificou vem depois das classificadas. Empate: a mais antiga primeiro.
-// Concluído: as concluídas mais recentemente primeiro (decisão da Riane, docs/decisoes.md).
+// Concluído: as concluídas mais recentemente primeiro (decisão da Riane, docs/decisoes/2026-11-24-squad1-61-quadro-em-colunas.md).
 const PESO_URGENCIA: Record<Urgencia, number> = { urgente: 0, alta: 1, normal: 2, baixa: 3 }
 
 function ordemNaColuna(a: Ocorrencia, b: Ocorrencia): number {

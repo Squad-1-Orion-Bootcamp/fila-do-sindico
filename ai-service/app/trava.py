@@ -3,7 +3,8 @@ import unicodedata
 
 # Lista única de termos que forçam urgência "urgente". A comparação não diferencia maiúsculas
 # nem acentos ("incendio" casa com "incêndio") e aceita plural ("rachaduras", "choques").
-# Termos e regras decididos pelo time em 25/11/2026 (docs/decisoes.md).
+# Termos e regras decididos pelo time em 25/11/2026
+# (docs/decisoes/2026-11-25-squad1-58-trava-de-palavras-de-risco.md).
 PALAVRAS_DE_RISCO: tuple[str, ...] = (
     "gás",
     # O plural de "gás" é "gases", que o "s" opcional não cobre.

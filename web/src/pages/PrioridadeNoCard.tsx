@@ -2,7 +2,7 @@ import { Sparkles, UserCheck } from 'lucide-react'
 import { useLayoutEffect, useRef, useState, type FormEvent } from 'react'
 
 // Prioridade no card do painel do gestor (SQUAD1-64): etiqueta, motivo e seletor.
-// Decisões da Riane (docs/decisoes.md): o painel atualiza ao recarregar; depois que o gestor
+// Decisões da Riane (docs/decisoes/2026-11-25-squad1-64-prioridade-no-card.md): o painel atualiza ao recarregar; depois que o gestor
 // define a prioridade, o motivo dele aparece no lugar do da IA; o seletor salva ao escolher e o
 // motivo é opcional; a concluída que a IA não classificou fica sem etiqueta.
 

@@ -45,7 +45,7 @@ Antes de dizer que terminou: rode o lint e os testes da pasta que você alterou.
    morador).
 6. **Nenhuma chave ou senha no código.** Use `.env` / `.env.local` e atualize o `.env.example`.
 7. **Não invente regra de negócio.** Se a história não diz, pergunte. Decisões tomadas ficam em
-   `docs/decisoes.md` — leia antes de mudar comportamento.
+   `docs/decisoes/` (um arquivo por decisão) — leia antes de mudar comportamento.
 
 ## Modelo de dados (resumo)
 
@@ -99,6 +99,12 @@ condomínio é opcional, nunca a visão padrão.
      as PRs apontam para `develop` e os merge commits preservam a ordem do Gitflow.
   Consulte também a seção "PR que depende de outra" no `README.md`.
 - **Conventional Commits** em português: `feat: tela de cadastro do gestor`.
+- **Documentação sem conflito** (detalhes em `docs/decisoes/2026-11-25-squad1-87-menos-conflitos-na-documentacao.md`):
+  - decisão nova é um arquivo novo em `docs/decisoes/`, nunca uma seção num arquivo de outra issue;
+  - tabelas de funções e listas de arquivos ficam em ordem alfabética: a linha nova entra no lugar dela, não no fim;
+  - no Markdown, uma frase por linha, e nunca refaça as quebras de um parágrafo que você não mudou;
+  - a PR que é base de outra tem prioridade na revisão e no merge;
+  - PR aberta por mais de um dia traz a `develop` todo dia (`git merge origin/develop`).
 - **Título de PR**: `tipo: descrição (SQUAD1-123)`, ex.: `feat: cadastro do gestor (SQUAD1-12)`.
   Vira a mensagem do merge commit na `develop` (merge comum, nunca squash: os commits da branch
   entram como estão, então cada um segue Conventional Commits). Preencha o template de PR, com
