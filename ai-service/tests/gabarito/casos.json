@@ -73,11 +73,11 @@
     "id": "c08",
     "descricao": "Extintor de incêndio do 4º andar está com a validade vencida desde agosto.",
     "local": "Hall do 4º andar",
-    "urgencia": "normal",
+    "urgencia": "alta",
     "categoria": "seguranca",
     "palavra_de_risco": false,
     "tipo": "armadilha",
-    "motivo": "Fronteira (normal × alta): não há incêndio e a troca pode esperar alguns dias, mas é equipamento de segurança obrigatório e o síndico responde por ele."
+    "motivo": "Equipamento de incêndio com problema, sem risco imediato: a IA decide e o mínimo é alta (decisão da Júlia, 26/11)."
   },
   {
     "id": "c09",
@@ -87,7 +87,7 @@
     "categoria": "seguranca",
     "palavra_de_risco": false,
     "tipo": "armadilha",
-    "motivo": "Fronteira (alta × normal; seguranca × estrutura): não há fogo, mas a porta corta-fogo aberta deixa a escada sem proteção se houver incêndio; é porta de área comum, mas a função dela é de segurança."
+    "motivo": "Fronteira (seguranca × estrutura): é porta de área comum, mas a função dela é de segurança. A urgência foi decidida pela Júlia em 26/11: equipamento de incêndio com problema é no mínimo alta, sem forçar urgente."
   },
   {
     "id": "c10",
@@ -498,5 +498,45 @@
     "palavra_de_risco": false,
     "tipo": "comum",
     "motivo": "Sugestão de limpeza, sem impacto no uso do prédio."
+  },
+  {
+    "id": "c51",
+    "descricao": "Escada de incêndio do bloco C cheia de entulho da obra do 502, não dá pra passar",
+    "local": "Escada do bloco C",
+    "urgencia": "alta",
+    "categoria": "seguranca",
+    "palavra_de_risco": false,
+    "tipo": "armadilha",
+    "motivo": "Equipamento de incêndio bloqueado, sem risco imediato: a IA decide e o mínimo é alta (decisão da Júlia, 26/11)."
+  },
+  {
+    "id": "c52",
+    "descricao": "Extintor de incêndio do 4º andar vencido e agora tem fumaça saindo do quadro de luz do lado",
+    "local": "Hall do 4º andar",
+    "urgencia": "urgente",
+    "categoria": "seguranca",
+    "palavra_de_risco": true,
+    "tipo": "armadilha",
+    "motivo": "O extintor vencido sozinho seria alta, mas a fumaça na mesma frase é risco real e a trava dispara."
+  },
+  {
+    "id": "c53",
+    "descricao": "porta corta-fogo da escada emperrada aberta e tem fogo no lixo do 2º andar",
+    "local": "Escada do bloco A",
+    "urgencia": "urgente",
+    "categoria": "seguranca",
+    "palavra_de_risco": true,
+    "tipo": "armadilha",
+    "motivo": "A porta corta-fogo sozinha seria alta, mas o fogo na mesma frase é risco real e a trava dispara."
+  },
+  {
+    "id": "c54",
+    "descricao": "Cheiro forte de gás na escada de incêndio do bloco B",
+    "local": "Escada do bloco B",
+    "urgencia": "urgente",
+    "categoria": "seguranca",
+    "palavra_de_risco": true,
+    "tipo": "armadilha",
+    "motivo": "A escada de incêndio não é o problema: o cheiro de gás é risco real e a trava dispara."
   }
 ]
