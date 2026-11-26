@@ -88,6 +88,8 @@ O `classificar()` (`app/classifier.py`) segue a proposta "System 1 + System 2" d
 4. **System 2, justificativa** (`app/justificativa.py`): o Gemini 3.5 Flash Lite, pelo Pydantic AI,
    escreve uma frase de até 200 caracteres explicando a urgência final para o gestor. Ele não
    decide nada: recebe a urgência já escolhida. Vão para a Gemini só a descrição e o local.
+   A frase não repete nomes, telefones, e-mails, documentos nem números de unidade da descrição
+   ou do local, nem fala de quem relatou ou de outras pessoas.
    Só é chamado quando o Decision 1 respondeu: se ele falhou, a Gemini provavelmente está
    fora, e fica a frase da regra ou da trava. Resposta vazia ou longa demais: pede de novo uma
    vez. Com erro ou demora de mais de cerca de 8 s, fica o motivo padrão ("Classificada como
