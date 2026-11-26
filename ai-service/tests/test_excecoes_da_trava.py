@@ -4,6 +4,7 @@ import pytest
 
 from app.classifier import classificar, classificar_por_regras
 from app.config import settings
+from app.contrato import URGENCIAS
 from app.decisao import Decisao
 from app.schemas import OcorrenciaEntrada
 from app.trava import EXCECOES, aplicar_trava, normalizar_texto, remover_excecoes
@@ -96,3 +97,47 @@ def test_decision_1_recebe_o_texto_original_e_pode_marcar_urgente(monkeypatch) -
     assert recebidas == [descricao]
     assert resultado.classificacao.urgencia == "urgente"
     assert resultado.origem == "ia"
+
+
+# Equipamentos de incêndio (decisão da Júlia, 26/11): a trava não força urgente, a IA decide, e
+# as regras de reserva dão no mínimo "alta". Com fumaça ou fogo na frase, a trava dispara igual.
+@pytest.mark.parametrize(
+    ("descricao", "equipamento"),
+    [
+        ("Extintor de incêndio do 4º andar vencido desde agosto", "extintor de incêndio"),
+        ("Os extintores de incendio da garagem estão sem lacre", "extintores de incêndio"),
+        ("porta corta-fogo da escada emperrada, não fecha sozinha", "porta corta-fogo"),
+        ("Porta corta fogo do 3º andar travada aberta com um calço", "porta corta-fogo"),
+        ("Escada de incêndio cheia de entulho do apto 502", "escada de incêndio"),
+    ],
+)
+def test_equipamento_de_incendio_sem_risco_nao_dispara_a_trava_e_regra_da_alta(
+    descricao: str, equipamento: str
+) -> None:
+    assert aplicar_trava(descricao) is None
+
+    regra = classificar_por_regras(OcorrenciaEntrada(descricao=descricao))
+    assert (regra.urgencia, regra.categoria) == ("alta", "seguranca")
+    assert regra.justificativa == f"Regra provisória: a descrição menciona '{equipamento}'."
+
+    resultado = classificar(OcorrenciaEntrada(descricao=descricao)).classificacao
+    assert resultado.urgencia == "alta"
+
+
+@pytest.mark.parametrize(
+    ("descricao", "termo"),
+    [
+        ("Extintor de incêndio do 4º andar vencido e tem fumaça saindo do quadro", "fumaça"),
+        ("porta corta-fogo emperrada e fogo no lixo da escada", "fogo"),
+        ("Escada de incêndio com cheiro de gás forte", "gás"),
+    ],
+)
+def test_equipamento_de_incendio_com_risco_real_continua_urgente(
+    descricao: str, termo: str
+) -> None:
+    assert aplicar_trava(descricao) == termo
+    assert classificar(OcorrenciaEntrada(descricao=descricao)).classificacao.urgencia == "urgente"
+
+
+def test_prompt_pede_no_minimo_alta_para_equipamento_de_incendio() -> None:
+    assert "equipamento de incêndio" in URGENCIAS["alta"]

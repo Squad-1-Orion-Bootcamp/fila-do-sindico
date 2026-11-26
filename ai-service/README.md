@@ -145,6 +145,8 @@ a justificativa cita o termo ("Trava de risco: a descrição menciona 'gás'.").
   inteira ("gasto", "vagas" e "desgaste" não disparam).
 - Exceções (`EXCECOES`): expressões em que a palavra tem outro sentido, como "fumaça de cigarro" e "choque de realidade", não disparam.
   Um risco real na mesma frase continua disparando, e o Decision 1 lê o texto original e pode marcar `urgente`.
+- Equipamentos de incêndio (extintor de incêndio, porta corta-fogo e escada de incêndio) também são exceções: a IA decide, e o mínimo é `alta` (no prompt, em `app/contrato.py`, e nas regras de reserva).
 
 As regras provisórias (`app/classifier.py`) usam a mesma comparação por palavra e as mesmas exceções.
+Equipamento de incêndio nas regras dá `seguranca` / `alta`.
 Decisões em `docs/decisoes/2026-11-25-squad1-58-trava-de-palavras-de-risco.md` e `docs/decisoes/2026-11-26-squad1-88-excecoes-da-trava.md`.

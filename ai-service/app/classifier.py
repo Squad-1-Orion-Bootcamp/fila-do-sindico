@@ -23,7 +23,13 @@ from app.schemas import (
     ResultadoClassificacao,
     Urgencia,
 )
-from app.trava import aplicar_trava, normalizar_texto, padrao_de_termo, remover_excecoes
+from app.trava import (
+    aplicar_trava,
+    equipamento_de_incendio,
+    normalizar_texto,
+    padrao_de_termo,
+    remover_excecoes,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -53,8 +59,18 @@ _REGRAS_COMPILADAS = [
 
 def classificar_por_regras(ocorrencia: OcorrenciaEntrada) -> Classificacao:
     """Classifica a ocorrência usando apenas as regras provisórias por palavra-chave."""
+    texto_normalizado = normalizar_texto(f"{ocorrencia.descricao} {ocorrencia.local or ''}")
+    # Problema em equipamento de incêndio é no mínimo "alta" (decisão da Júlia, SQUAD1-88).
+    # Vem antes das exceções, que tiram essas expressões do texto.
+    equipamento = equipamento_de_incendio(texto_normalizado)
+    if equipamento:
+        return Classificacao(
+            urgencia="alta",
+            categoria="seguranca",
+            justificativa=f"Regra provisória: a descrição menciona '{equipamento}'.",
+        )
     # As mesmas exceções da trava: "fumaça de cigarro" não vira segurança.
-    texto = remover_excecoes(normalizar_texto(f"{ocorrencia.descricao} {ocorrencia.local or ''}"))
+    texto = remover_excecoes(texto_normalizado)
     for termos, categoria, urgencia in _REGRAS_COMPILADAS:
         encontrada = next((termo for termo, padrao in termos if padrao.search(texto)), None)
         if encontrada:

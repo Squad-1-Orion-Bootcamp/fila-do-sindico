@@ -22,8 +22,19 @@ PALAVRAS_DE_RISCO: tuple[str, ...] = (
 # "elevador", em qualquer ordem. Sozinho, "preso" não basta ("portão preso", "carro preso").
 TERMO_ELEVADOR = "pessoa presa no elevador"
 
+# Equipamentos de incêndio: problema neles é sério, mas não é de agir em minutos. A trava não
+# força urgente (a IA decide), e o mínimo é "alta": no prompt (app/contrato.py) e nas regras de
+# reserva (app/classifier.py).
+EQUIPAMENTOS_DE_INCENDIO: tuple[str, ...] = (
+    "extintor de incêndio",
+    # O plural "extintores" não vem do "s" opcional.
+    "extintores de incêndio",
+    "porta corta-fogo",
+    "escada de incêndio",
+)
+
 # Expressões em que a palavra de risco tem outro sentido: saem do texto antes da trava e das
-# regras. A lista é proposta do time e aguarda a confirmação da product builder
+# regras. Lista decidida pela product builder (Júlia, 26/11/2026)
 # (docs/decisoes/2026-11-26-squad1-88-excecoes-da-trava.md).
 # Escreva no singular e com acento: o plural e a falta de acento já são aceitos, e "de", "do" e
 # "da" valem um pelo outro ("fumaça do churrasco" casa com "fumaça de churrasco").
@@ -36,6 +47,7 @@ EXCECOES: tuple[str, ...] = (
     "conta de gás",
     "leitura do gás",
     "bicicleta elétrica",
+    *EQUIPAMENTOS_DE_INCENDIO,
 )
 
 
@@ -82,14 +94,25 @@ def _padrao_de_excecao(expressao: str) -> re.Pattern[str]:
 _PADROES_DE_EXCECAO: tuple[re.Pattern[str], ...] = tuple(
     _padrao_de_excecao(expressao) for expressao in EXCECOES
 )
+_PADROES_DE_EQUIPAMENTO: tuple[tuple[str, re.Pattern[str]], ...] = tuple(
+    (expressao, _padrao_de_excecao(expressao)) for expressao in EQUIPAMENTOS_DE_INCENDIO
+)
+
+
+def equipamento_de_incendio(texto_normalizado: str) -> str | None:
+    """Retorna o equipamento de incêndio citado no texto já normalizado, ou None."""
+    texto = texto_normalizado.replace("-", " ")
+    for expressao, padrao in _PADROES_DE_EQUIPAMENTO:
+        if padrao.search(texto):
+            return expressao
+    return None
 
 
 def remover_excecoes(texto_normalizado: str) -> str:
     """Troca cada expressão de EXCECOES por um espaço. Aplique sobre um texto já normalizado.
 
-    Hífen vira espaço antes da comparação, para uma expressão com hífen (ex.: "porta
-    corta-fogo", se entrar na lista) casar com ou sem ele. A troca é por um
-    espaço, não por vazio, para não juntar as palavras vizinhas.
+    Hífen vira espaço antes da comparação, para "porta corta-fogo" casar com ou sem ele.
+    A troca é por um espaço, não por vazio, para não juntar as palavras vizinhas.
     """
     texto = texto_normalizado.replace("-", " ")
     for padrao in _PADROES_DE_EXCECAO:
