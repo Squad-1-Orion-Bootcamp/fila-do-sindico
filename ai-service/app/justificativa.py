@@ -77,13 +77,31 @@ def criar_modelo() -> Model:
     return GoogleModel(
         settings.llm_modelo_justificativa,
         provider=provider,
-        # Sem "thinking": no 2.5 Flash ele fica ligado por padrão e só atrasa uma frase curta.
-        settings=GoogleModelSettings(
-            temperature=0.2,
-            max_tokens=256,
-            google_thinking_config={"thinking_budget": 0},
-        ),
+        settings=configuracao_do_modelo(settings.llm_modelo_justificativa),
     )
+
+
+def configuracao_do_modelo(nome: str) -> GoogleModelSettings:
+    configuracao = GoogleModelSettings(temperature=0.2, max_tokens=256)
+    # Sem "thinking" só no 2.5: lá ele vem ligado por padrão e atrasa uma frase curta. O
+    # 3.5 Flash Lite recusa o thinking_budget com 400 INVALID_ARGUMENT (SQUAD1-93).
+    if nome.startswith("gemini-2.5"):
+        configuracao["google_thinking_config"] = {"thinking_budget": 0}
+    return configuracao
+
+
+def descrever_erro(erro: Exception) -> str:
+    """Tipo do erro e, quando houver, o código HTTP e o status do Google. Nunca a chave."""
+    partes = [type(erro).__name__]
+    codigo = getattr(erro, "status_code", None)
+    if codigo is not None:
+        partes.append(str(codigo))
+    corpo = getattr(erro, "body", None)
+    if isinstance(corpo, dict) and isinstance(corpo.get("error"), dict):
+        status = corpo["error"].get("status")
+        if status:
+            partes.append(str(status))
+    return " ".join(partes)
 
 
 def justificar(

@@ -99,8 +99,29 @@ def test_demora_levanta_erro(monkeypatch):
         justificar("Infiltração no teto", None, "alta", modelo=FunctionModel(lenta))
 
 
-def test_modelo_padrao_e_o_flash_2_5():
-    assert settings.llm_modelo_justificativa == "gemini-2.5-flash"
+def test_modelo_padrao_e_o_flash_lite_3_5():
+    # O 2.5 Flash não aceita mais contas novas (404) e os Flash 3.x sem "lite" passaram de 8 s
+    # nos testes de 26/11 (SQUAD1-93).
+    assert settings.llm_modelo_justificativa == "gemini-3.5-flash-lite"
+
+
+def test_thinking_budget_so_vai_para_o_2_5():
+    # O 3.5 Flash Lite recusa o thinking_budget com 400 INVALID_ARGUMENT (SQUAD1-93).
+    assert "google_thinking_config" not in justificativa.configuracao_do_modelo(
+        "gemini-3.5-flash-lite"
+    )
+    assert justificativa.configuracao_do_modelo("gemini-2.5-flash")["google_thinking_config"] == {
+        "thinking_budget": 0
+    }
+
+
+def test_descrever_erro_mostra_codigo_e_status_do_google():
+    class ErroDoGoogle(Exception):
+        status_code = 404
+        body = {"error": {"code": 404, "message": "no longer available", "status": "NOT_FOUND"}}
+
+    assert justificativa.descrever_erro(ErroDoGoogle()) == "ErroDoGoogle 404 NOT_FOUND"
+    assert justificativa.descrever_erro(RuntimeError("x")) == "RuntimeError"
 
 
 # --- Ligação com o classificar() ------------------------------------------------

@@ -14,6 +14,7 @@ from collections.abc import Callable
 from app.config import settings
 from app.contrato import ROTULOS_URGENCIA
 from app.decisao import Decisao, decidir
+from app.justificativa import descrever_erro
 from app.justificativa import justificar as justificar_com_gemini
 from app.schemas import (
     Categoria,
@@ -119,7 +120,9 @@ def classificar(
             justificativa = justificar(ocorrencia.descricao, ocorrencia.local, urgencia).strip()
         except Exception as erro:
             logger.warning(
-                "Justificativa falhou (%s): usando o motivo padrão.", type(erro).__name__
+                "Justificativa falhou (%s, modelo %s): usando o motivo padrão.",
+                descrever_erro(erro),
+                settings.llm_modelo_justificativa,
             )
     if not justificativa:
         # Sem trava e pelas regras, a frase da regra já diz qual palavra decidiu.

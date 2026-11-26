@@ -24,8 +24,9 @@ class Settings(BaseSettings):
     llm_modelo_decisao: str = "gemini-decision-1"
     llm_timeout_segundos: float = 3.0
     # Modelo do System 2 (a frase da justificativa) e o tempo limite da execução inteira,
-    # contando a nova tentativa quando a resposta vem inválida.
-    llm_modelo_justificativa: str = "gemini-2.5-flash"
+    # contando a nova tentativa quando a resposta vem inválida. O 2.5 Flash não aceita mais contas
+    # novas (404), e os Flash 3.x sem "lite" passaram de 8 s nos testes de 26/11 (SQUAD1-93).
+    llm_modelo_justificativa: str = "gemini-3.5-flash-lite"
     llm_timeout_justificativa_segundos: float = 8.0
 
 
