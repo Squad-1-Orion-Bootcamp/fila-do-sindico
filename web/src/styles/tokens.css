@@ -15,6 +15,7 @@
   --cor-fundo: #f6f7f9;
   --cor-superficie: #ffffff;
   --cor-superficie-apagada: #f9fafb;
+  --cor-fundo-janela: rgb(17 24 39 / 0.4); /* atrás de uma janela (dialog) aberta */
 
   /* Texto */
   --cor-texto: #111827;
