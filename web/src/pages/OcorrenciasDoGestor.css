@@ -154,3 +154,53 @@
 .quadro-delegar {
   margin-top: var(--espaco-3);
 }
+
+/* Responsável e comentário do funcionário no card (SQUAD1-78). */
+.quadro-responsavel {
+  margin-top: var(--espaco-3);
+}
+
+.quadro-comentario {
+  margin-top: var(--espaco-3);
+  padding-top: var(--espaco-3);
+  border-top: var(--borda);
+}
+
+.quadro-comentario-texto {
+  display: -webkit-box;
+  margin-top: var(--espaco-1);
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-secundario);
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+}
+
+/* Comentário aberto por inteiro ("Ver tudo") e aviso no status do card delegado. */
+.quadro-comentario-aberto {
+  display: block;
+  -webkit-line-clamp: none;
+  line-clamp: none;
+}
+
+.quadro-comentario .quadro-acao-texto {
+  margin-top: var(--espaco-1);
+}
+
+.quadro-aviso-status {
+  margin-top: var(--espaco-1);
+}
+
+.quadro-acao-texto {
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: var(--texto-sm);
+  color: var(--cor-acao);
+  text-decoration: underline;
+  cursor: pointer;
+}

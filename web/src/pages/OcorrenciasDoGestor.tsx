@@ -1,4 +1,4 @@
-import { Clock, Send, User } from 'lucide-react'
+import { Clock, MessageSquareText, Repeat, Send, User, UserCheck } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { dataCompleta, tempoRelativo } from '../lib/tempo'
@@ -21,6 +21,75 @@ type Ocorrencia = {
   condominio_nome: string | null
   registrado_por_nome: string | null
   concluido_em: string | null
+}
+
+// Delegação de cada ocorrência (SQUAD1-78): quem é o responsável agora e, depois da
+// conclusão pelo link, o comentário do funcionário. Só o gestor lê delegacoes (RLS).
+type Delegacao = {
+  ocorrencia_id: string
+  funcionario_id: string
+  situacao: 'ativa' | 'concluida'
+  comentario: string | null
+  concluida_em: string | null
+  funcionarios: { nome: string } | null
+}
+
+type InfoDelegacao = {
+  ativa?: { funcionarioId: string; nome: string }
+  concluida?: { nome: string; comentario: string | null; concluidaEm: string }
+}
+
+type Conclusao = { ocorrencia_id: string; created_at: string }
+
+function buscarDelegacoes() {
+  return supabase
+    .from('delegacoes')
+    .select('ocorrencia_id, funcionario_id, situacao, comentario, concluida_em, funcionarios(nome)')
+    .in('situacao', ['ativa', 'concluida'])
+    .returns<Delegacao[]>()
+}
+
+// Quando cada ocorrência foi concluída, pelo histórico de status. Serve para não mostrar o
+// comentário de uma conclusão antiga, se a ocorrência foi reaberta e o gestor concluiu de novo.
+function buscarConclusoes() {
+  return supabase
+    .from('historico_status')
+    .select('ocorrencia_id, created_at')
+    .eq('status_novo', 'concluido')
+    .returns<Conclusao[]>()
+}
+
+// Uma ocorrência tem no máximo uma delegação ativa. O comentário só vale se a conclusão mais
+// recente da ocorrência foi a do funcionário pelo link: concluir_tarefa grava a delegação e o
+// histórico na mesma transação, com o mesmo horário.
+function porOcorrencia(lista: Delegacao[], conclusoes: Conclusao[]): Record<string, InfoDelegacao> {
+  const ultimaConclusao: Record<string, number> = {}
+  for (const c of conclusoes) {
+    const t = Date.parse(c.created_at)
+    if (!(t <= ultimaConclusao[c.ocorrencia_id])) ultimaConclusao[c.ocorrencia_id] = t
+  }
+  const mapa: Record<string, InfoDelegacao> = {}
+  for (const d of lista) {
+    const info = (mapa[d.ocorrencia_id] ??= {})
+    const nome = d.funcionarios?.nome ?? 'Funcionário'
+    if (d.situacao === 'ativa') {
+      info.ativa = { funcionarioId: d.funcionario_id, nome }
+    } else if (
+      d.concluida_em &&
+      Date.parse(d.concluida_em) >= (ultimaConclusao[d.ocorrencia_id] ?? 0) &&
+      (!info.concluida || d.concluida_em > info.concluida.concluidaEm)
+    ) {
+      info.concluida = { nome, comentario: d.comentario, concluidaEm: d.concluida_em }
+    }
+  }
+  return mapa
+}
+
+// O comentário aparece em até 3 linhas; o "Ver tudo" só aparece quando ele pode passar disso.
+// A conta é aproximada (cerca de 40 caracteres por linha num card de celular).
+function comentarioLongo(comentario: string | null): boolean {
+  if (!comentario) return false
+  return comentario.length > 120 || comentario.split('\n').length > 3
 }
 
 // Nomes das colunas da US 1 (SQUAD1-61), também no seletor do card. O morador continua vendo
@@ -85,8 +154,23 @@ export function OcorrenciasDoGestor() {
   const [erroStatus, setErroStatus] = useState<{ id: string; mensagem: string } | null>(null)
   const [filtroCondominio, setFiltroCondominio] = useState(TODOS)
   const [delegando, setDelegando] = useState<Ocorrencia | null>(null)
+  const [delegacoes, setDelegacoes] = useState<Record<string, InfoDelegacao>>({})
+  const [erroDelegacoes, setErroDelegacoes] = useState(false)
+  // Sobe a cada delegação ou troca de status, para recarregar responsáveis e comentários.
+  const [versaoDelegacoes, setVersaoDelegacoes] = useState(0)
   // No celular o quadro mostra uma coluna por vez (DESIGN.md), escolhida nas abas.
   const [colunaAberta, setColunaAberta] = useState<Status>('novo')
+  // Comentários do funcionário abertos por inteiro ("Ver tudo"), por ocorrência.
+  const [comentariosAbertos, setComentariosAbertos] = useState<Set<string>>(new Set())
+
+  function alternarComentario(id: string) {
+    setComentariosAbertos((atuais) => {
+      const novos = new Set(atuais)
+      if (novos.has(id)) novos.delete(id)
+      else novos.add(id)
+      return novos
+    })
+  }
 
   useEffect(() => {
     buscarOcorrencias().then(({ data, error }) => {
@@ -100,6 +184,25 @@ export function OcorrenciasDoGestor() {
       setCarregando(false)
     })
   }, [])
+
+  useEffect(() => {
+    // Ignora a resposta de uma busca antiga, se outra troca já pediu uma nova.
+    let ativo = true
+    Promise.all([buscarDelegacoes(), buscarConclusoes()]).then(([delegacoesLidas, conclusoes]) => {
+      if (!ativo) return
+      const error = delegacoesLidas.error ?? conclusoes.error
+      if (error) {
+        console.error('Erro ao carregar as delegações', error)
+        setErroDelegacoes(true)
+      } else {
+        setErroDelegacoes(false)
+        setDelegacoes(porOcorrencia(delegacoesLidas.data ?? [], conclusoes.data ?? []))
+      }
+    })
+    return () => {
+      ativo = false
+    }
+  }, [versaoDelegacoes])
 
   async function alterarStatus(id: string, status: Status) {
     setErroStatus(null)
@@ -118,6 +221,8 @@ export function OcorrenciasDoGestor() {
       setItens((atuais) =>
         atuais.map((o) => (o.id === id ? { ...o, status, concluido_em: concluidoEm } : o)),
       )
+      // Trocar o status revoga o link ativo ("assumir de volta").
+      setVersaoDelegacoes((v) => v + 1)
     }
     setSalvandoId(null)
   }
@@ -138,6 +243,7 @@ export function OcorrenciasDoGestor() {
   ) as Record<Status, Ocorrencia[]>
 
   function cartao(o: Ocorrencia) {
+    const concluida = delegacoes[o.id]?.concluida
     return (
       <li key={o.id} className={o.status === 'concluido' ? 'cartao cartao-apagado' : 'cartao'}>
         <EtiquetaPrioridade urgencia={o.urgencia_atual} />
@@ -165,7 +271,11 @@ export function OcorrenciasDoGestor() {
           <span className="cartao-meta">Status</span>
           <select
             value={o.status}
-            aria-describedby={`descricao-${o.id}`}
+            aria-describedby={
+              o.status === 'delegado'
+                ? `descricao-${o.id} aviso-status-${o.id}`
+                : `descricao-${o.id}`
+            }
             disabled={salvandoId === o.id}
             onChange={(e) => alterarStatus(o.id, e.target.value as Status)}
           >
@@ -182,6 +292,56 @@ export function OcorrenciasDoGestor() {
             ))}
           </select>
         </label>
+        {o.status === 'delegado' && (
+          <>
+            <p className="cartao-meta quadro-info quadro-responsavel">
+              <UserCheck size={14} aria-hidden />
+              Responsável:{' '}
+              {delegacoes[o.id]?.ativa?.nome ?? (erroDelegacoes ? 'não carregado' : '…')}
+            </p>
+            {/* Trocar o status revoga o link na hora ("assumir de volta"): avisa antes */}
+            <p id={`aviso-status-${o.id}`} className="campo-ajuda quadro-aviso-status">
+              Mudar o status tira a tarefa do funcionário, e o link dele deixa de funcionar.
+            </p>
+            <button
+              type="button"
+              className="botao quadro-delegar"
+              aria-describedby={`descricao-${o.id}`}
+              onClick={() => setDelegando(o)}
+            >
+              <Repeat size={16} aria-hidden /> Trocar responsável
+            </button>
+          </>
+        )}
+        {o.status === 'concluido' && concluida && (
+          <div className="quadro-comentario">
+            <p className="cartao-meta quadro-info">
+              <MessageSquareText size={14} aria-hidden />
+              Concluída por {concluida.nome}
+            </p>
+            <p
+              id={`comentario-${o.id}`}
+              className={
+                comentariosAbertos.has(o.id)
+                  ? 'quadro-comentario-texto quadro-comentario-aberto'
+                  : 'quadro-comentario-texto'
+              }
+            >
+              {concluida.comentario ?? 'Sem comentário.'}
+            </p>
+            {comentarioLongo(concluida.comentario) && (
+              <button
+                type="button"
+                className="quadro-acao-texto"
+                aria-expanded={comentariosAbertos.has(o.id)}
+                aria-controls={`comentario-${o.id}`}
+                onClick={() => alternarComentario(o.id)}
+              >
+                {comentariosAbertos.has(o.id) ? 'Ver menos' : 'Ver tudo'}
+              </button>
+            )}
+          </div>
+        )}
         {(o.status === 'novo' || o.status === 'em_andamento') && (
           <button
             type="button"
@@ -241,6 +401,11 @@ export function OcorrenciasDoGestor() {
               </select>
             </label>
           )}
+          {erroDelegacoes && (
+            <p role="alert" className="aviso aviso-erro quadro-resumo">
+              Não foi possível carregar os responsáveis das tarefas delegadas.
+            </p>
+          )}
           {/* Abas de contagem: só aparecem no celular, onde cabe uma coluna por vez */}
           <div className="opcoes quadro-abas" role="group" aria-label="Coluna do quadro">
             {COLUNAS.map((s) => (
@@ -282,11 +447,14 @@ export function OcorrenciasDoGestor() {
       {delegando && (
         <DelegarOcorrencia
           ocorrencia={delegando}
-          aoDelegar={(id) =>
+          trocando={delegando.status === 'delegado'}
+          responsavelAtualId={delegacoes[delegando.id]?.ativa?.funcionarioId}
+          aoDelegar={(id) => {
             setItens((atuais) =>
               atuais.map((o) => (o.id === id ? { ...o, status: 'delegado' } : o)),
             )
-          }
+            setVersaoDelegacoes((v) => v + 1)
+          }}
           aoFechar={() => setDelegando(null)}
         />
       )}
