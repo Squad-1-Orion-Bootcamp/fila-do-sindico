@@ -110,6 +110,7 @@ Em ordem alfabética: a função nova entra no lugar dela, não no fim.
 | `aprovar_solicitacao_vinculo(p_solicitacao_id)` | gestor ativo do condomínio |
 | `cadastrar_condominio(p_nome, p_cnpj)` | gestor. **Sprint 1:** cria o condomínio e o vínculo de gestor já ativo; CNPJ com 14 dígitos, único |
 | `cadastrar_funcionario(p_condominio_id, p_nome, p_celular, p_funcao)` | gestor ativo do condomínio. Devolve o `id`. `p_celular` só com dígitos (`5511999998888`; o front converte a máscara); nome até 120 e função até 60 caracteres (a função tira os espaços das pontas). Recusa celular já usado por um funcionário ativo do mesmo condomínio |
+| `classificar_pendentes()` | gestor com vínculo ativo em algum condomínio. Chamada pelo painel ao abrir, sem esperar a resposta. Se houver ocorrência sem prioridade criada há mais de 2 minutos, pede ao ai-service (`POST /classificar-pendentes`, pelo `pg_net`) que classifique até 20 delas; sem pendente, não chama nada. No máximo um pedido por minuto, somando todos os gestores (`private.classificar_pendentes_controle`). Não devolve dado nenhum |
 | `concluir_tarefa(p_token, p_comentario)` | quem tem o link (`anon` ou `authenticated`). Exige delegação ativa e ocorrência `delegado`, trava a ocorrência antes de revalidar o token, limita comentário a 800 caracteres (só espaços vira nulo), conclui ocorrência e delegação e grava histórico com `autor_id` nulo. Link que não vale mais: "Esta tarefa já foi encerrada." ou "Esta tarefa não está mais atribuída a você." |
 | `definir_prioridade_ocorrencia(p_ocorrencia_id, p_urgencia, p_justificativa)` | gestor ativo do condomínio. Confirma ou muda a prioridade (`urgente`, `alta`, `normal` ou `baixa`); `p_justificativa` é opcional. Grava em `decisoes` (`acao = 'definir_prioridade'`) e atualiza `urgencia_atual`. Depois disso, a IA não muda mais a urgência. Não vale para ocorrência concluída |
 | `delegar_ocorrencia(p_ocorrencia_id, p_funcionario_id)` | gestor ativo do condomínio. O funcionário precisa estar ativo e ser do mesmo condomínio; a ocorrência não pode estar concluída. Revoga a delegação anterior (trocar o responsável é delegar de novo), cria a nova, muda o status para `delegado` (com histórico) e **devolve o token do link uma vez** (43 caracteres, base64url); o banco guarda só o hash |
@@ -132,7 +133,9 @@ no encerramento.
   pelo `pg_net`, com o cabeçalho `X-Webhook-Secret`. Nada de quem registrou sai do banco.
 - `ai_service_url` e `ai_webhook_secret` ficam no Vault de cada banco (passo a passo no
   `README.md` da raiz). Sem eles, ou se o `pg_net` falhar, a ocorrência é registrada normalmente
-  e fica sem prioridade ("Aguardando triagem").
+  e fica sem prioridade ("Aguardando triagem"). A rede de segurança é `classificar_pendentes()`,
+  que o painel do gestor chama ao abrir (mesmo Vault e mesmo segredo, rota
+  `<ai_service_url>/classificar-pendentes`).
 - O schema `private` guarda funções internas: sem acesso para `anon` e `authenticated` e fora da API.
 - O Supabase dá a `anon` e `authenticated` acesso ao schema `net` do `pg_net`, onde o segredo fica
   até o envio, e uma migração não consegue tirar. Ele só fica protegido porque a API não expõe `net`:

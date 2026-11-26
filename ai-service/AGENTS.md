@@ -17,6 +17,8 @@ uv add <pacote>          # nunca pip install
 - `app/main.py` — rotas (`GET /health`, `POST /classificar`)
 - `app/webhook.py` — `POST /webhook`: aviso do gatilho do banco (segredo, 202, classificação em
   segundo plano)
+- `app/pendentes.py` — `POST /classificar-pendentes`: rede de segurança do webhook (até 20
+  ocorrências sem prioridade por chamada, em segundo plano)
 - `app/banco.py` — API REST do Supabase com a chave secreta (ler a ocorrência, chamar
   `gravar_classificacao`)
 - `app/schemas.py` — contratos Pydantic de entrada e saída
