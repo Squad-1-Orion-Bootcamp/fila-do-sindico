@@ -369,6 +369,7 @@ export function OcorrenciasDoGestor() {
           </span>
         </p>
         <MotivoPrioridade
+          ocorrenciaId={o.id}
           urgencia={o.urgencia_atual}
           motivoIA={motivosIA[o.id] ?? null}
           decisao={decisoes[o.id]}

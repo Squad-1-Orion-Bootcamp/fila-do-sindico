@@ -201,6 +201,18 @@
   overflow-wrap: anywhere;
 }
 
+/* Motivo aberto por inteiro ("Ver tudo"); o botão fica alinhado com o texto, depois do ícone. */
+.quadro-motivo-aberto > span {
+  display: block;
+  -webkit-line-clamp: none;
+  line-clamp: none;
+}
+
+.quadro-motivo-ver {
+  margin-top: var(--espaco-1);
+  margin-left: calc(14px + var(--espaco-1));
+}
+
 .quadro-acoes-texto {
   display: flex;
   flex-wrap: wrap;

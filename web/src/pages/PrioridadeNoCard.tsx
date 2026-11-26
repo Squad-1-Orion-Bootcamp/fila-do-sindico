@@ -1,5 +1,5 @@
 import { Sparkles, UserCheck } from 'lucide-react'
-import { useState, type FormEvent } from 'react'
+import { useLayoutEffect, useRef, useState, type FormEvent } from 'react'
 
 // Prioridade no card do painel do gestor (SQUAD1-64): etiqueta, motivo e seletor.
 // Decisões da Riane (docs/decisoes.md): o painel atualiza ao recarregar; depois que o gestor
@@ -39,34 +39,71 @@ export function EtiquetaPrioridade({ urgencia }: { urgencia: Urgencia | null }) 
   return <span className={`etiqueta etiqueta-${urgencia}`}>{ROTULO_URGENCIA[urgencia]}</span>
 }
 
-// Frase do motivo, logo abaixo do rodapé do card.
+// Frase do motivo, logo abaixo do rodapé do card. Aparece em até 2 linhas; o "Ver tudo" só
+// aparece quando a frase foi cortada de fato (mede o texto, porque a largura da coluna muda
+// entre celular, tablet e computador).
 export function MotivoPrioridade({
+  ocorrenciaId,
   urgencia,
   motivoIA,
   decisao,
   meuId,
-}: Pick<Props, 'urgencia' | 'motivoIA' | 'decisao' | 'meuId'>) {
+}: Pick<Props, 'ocorrenciaId' | 'urgencia' | 'motivoIA' | 'decisao' | 'meuId'>) {
+  const [aberto, setAberto] = useState(false)
+  const [cortado, setCortado] = useState(false)
+  const textoRef = useRef<HTMLSpanElement>(null)
+
+  let icone = null
+  let texto: string | null = null
   if (decisao) {
     const quem = decisao.autorId === meuId ? 'Definida por você' : 'Definida pelo gestor'
-    return (
-      <p className="cartao-meta quadro-motivo" title={decisao.justificativa ?? undefined}>
-        <UserCheck size={14} aria-hidden />
-        <span>
-          {quem}
-          {decisao.justificativa && `: ${decisao.justificativa}`}
+    icone = <UserCheck size={14} aria-hidden />
+    texto = decisao.justificativa ? `${quem}: ${decisao.justificativa}` : quem
+  } else if (urgencia && motivoIA) {
+    icone = <Sparkles size={14} aria-hidden />
+    texto = motivoIA
+  }
+
+  // Mede de novo quando o texto muda, ao fechar e quando o card muda de largura. Aberto, não
+  // mede: o botão "Ver menos" continua na tela (e com o foco) até ser clicado.
+  useLayoutEffect(() => {
+    const el = textoRef.current
+    if (!el || aberto) return
+    const medir = () => setCortado(el.scrollHeight > el.clientHeight + 1)
+    medir()
+    const observador = new ResizeObserver(medir)
+    observador.observe(el)
+    return () => observador.disconnect()
+  }, [texto, aberto])
+
+  if (!texto) return null
+
+  const id = `motivo-${ocorrenciaId}`
+  return (
+    <>
+      <p
+        className={
+          aberto ? 'cartao-meta quadro-motivo quadro-motivo-aberto' : 'cartao-meta quadro-motivo'
+        }
+      >
+        {icone}
+        <span id={id} ref={textoRef}>
+          {texto}
         </span>
       </p>
-    )
-  }
-  if (urgencia && motivoIA) {
-    return (
-      <p className="cartao-meta quadro-motivo" title={motivoIA}>
-        <Sparkles size={14} aria-hidden />
-        <span>{motivoIA}</span>
-      </p>
-    )
-  }
-  return null
+      {(aberto || cortado) && (
+        <button
+          type="button"
+          className="quadro-acao-texto quadro-motivo-ver"
+          aria-expanded={aberto}
+          aria-controls={id}
+          onClick={() => setAberto((a) => !a)}
+        >
+          {aberto ? 'Ver menos' : 'Ver tudo'}
+        </button>
+      )}
+    </>
+  )
 }
 
 // Seletor, "Confirmar" (só quando a prioridade veio da IA) e "Adicionar motivo".
