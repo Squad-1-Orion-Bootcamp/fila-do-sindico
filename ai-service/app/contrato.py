@@ -30,9 +30,7 @@ URGENCIAS: dict[Urgencia, str] = {
     ),
     "alta": (
         "Problema que afeta um serviço essencial ou piora rápido se esperar, sem risco imediato: "
-        "vazamento, infiltração, falta de água ou de luz, elevador parado sem ninguém preso. "
-        "Problema em equipamento de incêndio (extintor vencido, porta corta-fogo travada, escada "
-        "de incêndio bloqueada) é no mínimo alta."
+        "vazamento, infiltração, falta de água ou de luz, elevador parado sem ninguém preso."
     ),
     "normal": (
         "Defeito ou manutenção que pode esperar alguns dias sem risco: lâmpada queimada, "

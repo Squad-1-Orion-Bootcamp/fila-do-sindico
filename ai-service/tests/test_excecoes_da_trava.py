@@ -4,7 +4,6 @@ import pytest
 
 from app.classifier import classificar, classificar_por_regras
 from app.config import settings
-from app.contrato import URGENCIAS
 from app.decisao import Decisao
 from app.schemas import OcorrenciaEntrada
 from app.trava import EXCECOES, aplicar_trava, normalizar_texto, remover_excecoes
@@ -139,5 +138,70 @@ def test_equipamento_de_incendio_com_risco_real_continua_urgente(
     assert classificar(OcorrenciaEntrada(descricao=descricao)).classificacao.urgencia == "urgente"
 
 
-def test_prompt_pede_no_minimo_alta_para_equipamento_de_incendio() -> None:
-    assert "equipamento de incêndio" in URGENCIAS["alta"]
+def _decisor_fixo(urgencia: str, categoria: str = "seguranca"):
+    def decisor(descricao: str, local: str | None) -> Decisao:
+        return Decisao(urgencia=urgencia, categoria=categoria, confianca=0.7)
+
+    return decisor
+
+
+def _classificar_com_ia(monkeypatch, descricao: str, urgencia_da_ia: str, categoria="seguranca"):
+    monkeypatch.setattr(settings, "llm_api_key", "chave-falsa-de-teste")
+    urgencias_justificadas: list[str] = []
+
+    def justificar(descricao: str, local: str | None, urgencia: str) -> str:
+        urgencias_justificadas.append(urgencia)
+        return "Frase de teste."
+
+    resultado = classificar(
+        OcorrenciaEntrada(descricao=descricao),
+        decisor=_decisor_fixo(urgencia_da_ia, categoria),
+        justificar=justificar,
+    )
+    return resultado, urgencias_justificadas
+
+
+@pytest.mark.parametrize("urgencia_da_ia", ["normal", "baixa"])
+def test_piso_sobe_equipamento_de_incendio_para_alta(monkeypatch, urgencia_da_ia: str) -> None:
+    resultado, justificadas = _classificar_com_ia(
+        monkeypatch, "Extintor de incêndio do 4º andar vencido", urgencia_da_ia
+    )
+    assert resultado.classificacao.urgencia == "alta"
+    assert resultado.origem == "ia"
+    # O System 2 explica a urgência final, já com o piso.
+    assert justificadas == ["alta"]
+
+
+@pytest.mark.parametrize("urgencia_da_ia", ["alta", "urgente"])
+def test_piso_nao_mexe_em_alta_nem_urgente(monkeypatch, urgencia_da_ia: str) -> None:
+    resultado, _ = _classificar_com_ia(
+        monkeypatch, "Extintor de incêndio do 4º andar vencido", urgencia_da_ia
+    )
+    assert resultado.classificacao.urgencia == urgencia_da_ia
+    assert resultado.origem == "ia"
+
+
+def test_equipamento_com_fogo_fica_urgente_pela_trava(monkeypatch) -> None:
+    resultado, _ = _classificar_com_ia(
+        monkeypatch, "porta corta-fogo emperrada e fogo no lixo da escada", "normal"
+    )
+    assert resultado.classificacao.urgencia == "urgente"
+    assert resultado.origem == "ia+trava"
+
+
+@pytest.mark.parametrize("urgencia_da_ia", ["normal", "baixa"])
+def test_piso_nao_mexe_em_frase_sem_equipamento(monkeypatch, urgencia_da_ia: str) -> None:
+    resultado, _ = _classificar_com_ia(
+        monkeypatch, "Portão da garagem quebrado e aberto", urgencia_da_ia
+    )
+    assert resultado.classificacao.urgencia == urgencia_da_ia
+
+
+def test_piso_olha_so_a_descricao(monkeypatch) -> None:
+    monkeypatch.setattr(settings, "llm_api_key", "chave-falsa-de-teste")
+    resultado = classificar(
+        OcorrenciaEntrada(descricao="Lâmpada queimada", local="Escada de incêndio"),
+        decisor=_decisor_fixo("normal", "eletrica"),
+        justificar=lambda descricao, local, urgencia: "Frase de teste.",
+    )
+    assert resultado.classificacao.urgencia == "normal"

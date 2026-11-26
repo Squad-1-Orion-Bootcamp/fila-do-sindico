@@ -3,7 +3,8 @@
 1. Trava de palavras de risco (app/trava.py).
 2. System 1: o Gemini Decision 1 decide a urgência e a categoria (app/decisao.py).
    Sem LLM_API_KEY, com erro ou demora, as regras provisórias abaixo decidem.
-3. Com a trava ativa, a urgência vira "urgente" e a origem ganha "+trava".
+3. Equipamento de incêndio na descrição: urgência normal ou baixa sobe para "alta" (SQUAD1-88).
+   Com a trava ativa, a urgência vira "urgente" e a origem ganha "+trava".
 4. System 2: a Gemini explica a urgência final em uma frase (app/justificativa.py), só quando
    o Decision 1 respondeu. Sem ele, com erro ou demora, fica o motivo padrão.
 """
@@ -123,6 +124,14 @@ def classificar(
         urgencia, categoria = pelas_regras.urgencia, pelas_regras.categoria
         origem, modelo_versao = "regra", MODELO_REGRAS
         justificativa_regra = pelas_regras.justificativa
+
+    # Piso da Júlia (SQUAD1-88): problema em equipamento de incêndio é no mínimo "alta". Fica no
+    # código, não no prompt: a frase no prompt mudou casos que não são de incêndio (SQUAD1-66).
+    # A origem não muda.
+    if urgencia in ("normal", "baixa") and equipamento_de_incendio(
+        normalizar_texto(ocorrencia.descricao)
+    ):
+        urgencia = "alta"
 
     if termo_risco is not None:
         urgencia = "urgente"

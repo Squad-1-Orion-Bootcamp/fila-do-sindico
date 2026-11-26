@@ -23,8 +23,8 @@ PALAVRAS_DE_RISCO: tuple[str, ...] = (
 TERMO_ELEVADOR = "pessoa presa no elevador"
 
 # Equipamentos de incêndio: problema neles é sério, mas não é de agir em minutos. A trava não
-# força urgente (a IA decide), e o mínimo é "alta": no prompt (app/contrato.py) e nas regras de
-# reserva (app/classifier.py).
+# força urgente (a IA decide), e o mínimo é "alta": um piso no classificar(), depois do
+# Decision 1, e nas regras de reserva (app/classifier.py).
 EQUIPAMENTOS_DE_INCENDIO: tuple[str, ...] = (
     "extintor de incêndio",
     # O plural "extintores" não vem do "s" opcional.
