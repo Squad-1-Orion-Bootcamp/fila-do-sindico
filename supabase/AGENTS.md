@@ -39,8 +39,9 @@ avisa o ai-service e gravação da classificação), `20261124041425_morador_sem
 (o morador não lê a prioridade nem a classificação), `20261124045005_gestor_altera_prioridade.sql`
 (o gestor confirma ou muda a prioridade),
 `20261124174433_criar_funcionarios.sql` (funcionários do condomínio),
-`20261124192621_status_delegado.sql` (status `delegado`) e
-`20261124200657_criar_delegacoes.sql` (delegação ao funcionário pelo link).
+`20261124192621_status_delegado.sql` (status `delegado`),
+`20261124200657_criar_delegacoes.sql` (delegação ao funcionário pelo link) e
+`20261124201343_delegar_ocorrencia.sql` (o gestor delega e a troca de status revoga o link).
 
 | Tabela | Para quê |
 | --- | --- |
@@ -117,7 +118,8 @@ solicitação de vínculo pendente. Campo faltando = o cadastro falha com a mens
 | `registrar_ocorrencia(p_descricao, p_local, p_condominio_id)` | morador (ou funcionário) com vínculo ativo. Grava em nome de quem chama, com status `novo`. `p_local` é opcional; `p_condominio_id` só é exigido de quem tem vínculo ativo em mais de um condomínio |
 | `registrar_ocorrencia_gestor(p_condominio_id, p_descricao, p_origem, p_local, p_relatado_por)` | gestor ativo do condomínio. Grava em nome de quem chama, com status `novo`. `p_origem`: `whatsapp`, `telefone`, `presencial` ou `vistoria`. `p_relatado_por` é opcional e precisa ser morador ou funcionário ativo do mesmo condomínio (vínculo do tipo `funcionario`, não a tabela `funcionarios`) |
 | `encerrar_vinculo(p_vinculo_id, p_motivo)` | vínculo de gestor: admin; de morador ou funcionário: gestor do condomínio ou admin |
-| `alterar_status_ocorrencia(p_ocorrencia_id, p_status)` | gestor ativo do condomínio. Muda só o status (`novo`, `em_andamento`, `concluido`; não aceita `delegado`, mas tira a ocorrência de `delegado`), preenche ou limpa `concluido_em` e grava em `historico_status` |
+| `alterar_status_ocorrencia(p_ocorrencia_id, p_status)` | gestor ativo do condomínio. Muda só o status (`novo`, `em_andamento`, `concluido`; não aceita `delegado`, mas tira a ocorrência de `delegado`), preenche ou limpa `concluido_em`, grava em `historico_status` e **revoga a delegação ativa** ("assumir de volta") |
+| `delegar_ocorrencia(p_ocorrencia_id, p_funcionario_id)` | gestor ativo do condomínio. O funcionário precisa estar ativo e ser do mesmo condomínio; a ocorrência não pode estar concluída. Revoga a delegação anterior (trocar o responsável é delegar de novo), cria a nova, muda o status para `delegado` (com histórico) e **devolve o token do link uma vez** (43 caracteres, base64url); o banco guarda só o hash |
 | `definir_prioridade_ocorrencia(p_ocorrencia_id, p_urgencia, p_justificativa)` | gestor ativo do condomínio. Confirma ou muda a prioridade (`urgente`, `alta`, `normal` ou `baixa`); `p_justificativa` é opcional. Grava em `decisoes` (`acao = 'definir_prioridade'`) e atualiza `urgencia_atual`. Depois disso, a IA não muda mais a urgência. Não vale para ocorrência concluída |
 | `listar_ocorrencias_gestor()` | qualquer usuário logado; devolve só as ocorrências dos condomínios em que quem chama é gestor ativo (para os outros, lista vazia), das mais novas para as mais antigas: `id`, `condominio_id`, `condominio_nome`, `local`, `descricao`, `status`, `urgencia_atual`, `categoria_atual`, `created_at`, `registrado_por_nome` |
 | `cadastrar_funcionario(p_condominio_id, p_nome, p_celular, p_funcao)` | gestor ativo do condomínio. Devolve o `id`. `p_celular` só com dígitos (`5511999998888`; o front converte a máscara); nome até 120 e função até 60 caracteres (a função tira os espaços das pontas). Recusa celular já usado por um funcionário ativo do mesmo condomínio |

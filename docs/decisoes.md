@@ -45,6 +45,22 @@ Decidido pelo time, sem product builder no momento.
 | --- | --- |
 | A trava e as regras provisórias usam a mesma comparação por palavra inteira (`padrao_de_termo` em `app/trava.py`) | "gas" não casa com "gasto", "vagas" nem "desgaste", nem na trava nem nas regras |
 
+## 24/11/2026 — Funções da delegação (SQUAD1-74)
+
+### Produto e acesso
+
+| Decisão | Motivo |
+| --- | --- |
+| Ocorrência concluída não pode ser delegada | A reabertura de ocorrências concluídas está fora da US 3 |
+| Trocar o responsável é delegar de novo: o link anterior é revogado, e o status continua `delegado` (sem nova linha no histórico) | Decisão da US 3 (SQUAD1-74); o status não mudou, só quem cuida |
+
+### Técnica
+
+| Decisão | Motivo |
+| --- | --- |
+| O token do link tem 32 bytes aleatórios em base64url (43 caracteres) | Impossível de adivinhar e curto o bastante para a mensagem do WhatsApp |
+| A `alterar_status_ocorrencia` ganhou uma nova versão que revoga a delegação ativa | Decisão do Lucas: qualquer troca de status pelo gestor revoga o link (SQUAD1-72) |
+
 ## 24/11/2026 — Tabela de delegações (SQUAD1-73)
 
 ### Técnica
