@@ -3,7 +3,8 @@
 1. Trava de palavras de risco (app/trava.py).
 2. System 1: o Gemini Decision 1 decide a urgência e a categoria (app/decisao.py).
    Sem LLM_API_KEY, com erro ou demora, as regras provisórias abaixo decidem.
-3. Com a trava ativa, a urgência vira "urgente" e a origem ganha "+trava".
+3. Equipamento de incêndio na descrição: urgência normal ou baixa sobe para "alta" (SQUAD1-88).
+   Com a trava ativa, a urgência vira "urgente" e a origem ganha "+trava".
 4. System 2: a Gemini explica a urgência final em uma frase (app/justificativa.py), só quando
    o Decision 1 respondeu. Sem ele, com erro ou demora, fica o motivo padrão.
 """
@@ -23,7 +24,13 @@ from app.schemas import (
     ResultadoClassificacao,
     Urgencia,
 )
-from app.trava import aplicar_trava, normalizar_texto, padrao_de_termo
+from app.trava import (
+    aplicar_trava,
+    equipamento_de_incendio,
+    normalizar_texto,
+    padrao_de_termo,
+    remover_excecoes,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +60,18 @@ _REGRAS_COMPILADAS = [
 
 def classificar_por_regras(ocorrencia: OcorrenciaEntrada) -> Classificacao:
     """Classifica a ocorrência usando apenas as regras provisórias por palavra-chave."""
-    texto = normalizar_texto(f"{ocorrencia.descricao} {ocorrencia.local or ''}")
+    texto_normalizado = normalizar_texto(f"{ocorrencia.descricao} {ocorrencia.local or ''}")
+    # Problema em equipamento de incêndio é no mínimo "alta" (decisão da Júlia, SQUAD1-88).
+    # Vem antes das exceções, que tiram essas expressões do texto.
+    equipamento = equipamento_de_incendio(texto_normalizado)
+    if equipamento:
+        return Classificacao(
+            urgencia="alta",
+            categoria="seguranca",
+            justificativa=f"Regra provisória: a descrição menciona '{equipamento}'.",
+        )
+    # As mesmas exceções da trava: "fumaça de cigarro" não vira segurança.
+    texto = remover_excecoes(texto_normalizado)
     for termos, categoria, urgencia in _REGRAS_COMPILADAS:
         encontrada = next((termo for termo, padrao in termos if padrao.search(texto)), None)
         if encontrada:
@@ -106,6 +124,14 @@ def classificar(
         urgencia, categoria = pelas_regras.urgencia, pelas_regras.categoria
         origem, modelo_versao = "regra", MODELO_REGRAS
         justificativa_regra = pelas_regras.justificativa
+
+    # Piso da Júlia (SQUAD1-88): problema em equipamento de incêndio é no mínimo "alta". Fica no
+    # código, não no prompt: a frase no prompt mudou casos que não são de incêndio (SQUAD1-66).
+    # A origem não muda.
+    if urgencia in ("normal", "baixa") and equipamento_de_incendio(
+        normalizar_texto(ocorrencia.descricao)
+    ):
+        urgencia = "alta"
 
     if termo_risco is not None:
         urgencia = "urgente"
