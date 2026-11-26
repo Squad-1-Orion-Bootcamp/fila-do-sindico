@@ -25,6 +25,9 @@ E os casos com o termo em outro sentido (`palavra_de_risco` = `false`, mas a tra
 
 ## De onde vieram os casos
 
+Os casos são um rascunho gerado com IA e revisado pelo time, caso a caso.
+Os números são absolutos porque a amostra é pequena.
+
 - `squad03` (5): as frases da comparação com a Squad 03, com o rótulo certo.
 - `armadilha` (15): palavra de risco em outro sentido (conta de gás, bicicleta elétrica, extintor de incêndio, porta corta-fogo), risco real sem a palavra que a trava procura (gente presa no elevador sem dizer "preso", "botijão", faísca, criança na janela) e duas frases com as duas coisas juntas (fumaça do churrasco e cheiro de gás; fogos de artifício e fogo na lixeira).
   A `c42` ("estou presa no elevador") confere que a trava do elevador funciona.
@@ -70,12 +73,45 @@ Quando dois rótulos são defensáveis, o caso fica com um deles e o `motivo` co
 - `c38` interfone que não toca: outros × eletrica.
 - `c41` elevador com barulho estranho: normal × alta.
 
-## Próximo passo (parte 2)
+## Como rodar a avaliação
 
-Um script que roda a trava, as regras e o Decision 1 contra o gabarito e mede:
+```bash
+cd ai-service
+uv run python -m scripts.avaliar_gabarito --sistema regras --rotulo develop
+uv run python -m scripts.avaliar_gabarito --sistema ia --rotulo develop
+```
 
-- urgentes detectados (recall de `urgente`): dos 19 urgentes, quantos cada camada marcou;
-- urgentes sem palavra de risco: dos 10, quantos o Decision 1 marcou;
-- falsos urgentes da trava: casos que não são urgentes e que a trava marcou;
-- acerto de urgência;
-- acerto de categoria.
+- `--sistema regras`, **só regras (IA fora do ar)**: trava + regras de reserva, como o `classificar()` faz quando a IA está fora.
+  Não usa a rede.
+- `--sistema ia`, **sistema completo (IA + trava)**: o `classificar()` de verdade, com o Decision 1 e a trava (e o piso de equipamento de incêndio, quando a branch tem a SQUAD1-88).
+  Precisa de `LLM_API_KEY` no `ai-service/.env`, e a chave é a mesma da stage e da prod: cada rodada gasta uma chamada por caso.
+  A justificativa (System 2) não é avaliada e não é chamada.
+  Há uma pausa de 2 s entre os casos.
+- `--rotulo`: o nome da rodada (ex.: `develop`, `com-88`).
+- `--casos c34,c41`: roda só esses casos e não grava o resultado (para conferir se um caso oscila entre rodadas).
+
+O resumo sai em Markdown no terminal.
+O detalhe, com o commit avaliado e a previsão de cada caso, vai para `resultados/AAAA-MM-DD-<sistema>-<rotulo>.json`.
+O cálculo das métricas fica em `scripts/metricas.py`, testado em `tests/test_metricas_gabarito.py` com previsões de mentira; o `pytest` nunca chama a API.
+
+No sistema completo, um caso em que o Decision 1 deu erro ou demorou cai nas regras (`origem` sem "ia").
+Esses casos saem das métricas e aparecem separados no resumo, para o número da IA não se misturar com o das regras.
+
+## O que cada métrica mede
+
+- **a) Urgentes detectados:** dos casos urgentes, quantos o sistema marcou como `urgente` (recall de urgente).
+  É a métrica mais importante: urgente perdido é risco para alguém.
+- **b) Urgentes sem palavra de risco detectados:** o mesmo, só nos urgentes com `palavra_de_risco` = `false`.
+  A trava não pega esses; é o que só a IA consegue pegar.
+- **c) Falsos urgentes:** casos marcados `urgente` cujo rótulo é outro, com os ids.
+  Cada um empurra para o topo da fila algo que podia esperar.
+- **d) Acerto de urgência:** casos com a urgência certa, com a matriz de confusão (linha: esperado; coluna: previsto).
+- **e) Acerto de categoria:** casos com a categoria certa.
+- **f) Injeção:** casos do tipo `injecao` com urgência e categoria certas.
+- **g) Equipamento de incêndio:** extintor, porta corta-fogo e escada de incêndio, caso a caso (`alta` sem risco real, `urgente` com risco).
+- **h) Erros:** id, descrição, esperado, previsto, origem e se o caso é de fronteira.
+  Erro em caso de fronteira pesa menos, porque dois rótulos são defensáveis.
+
+**A amostra é pequena** (dezenas de casos), por isso os números são absolutos ("x de y"), com a porcentagem só entre parênteses.
+Um caso a mais ou a menos muda a porcentagem em alguns pontos.
+O Decision 1 também pode variar entre uma rodada e outra nos casos de confiança baixa.
