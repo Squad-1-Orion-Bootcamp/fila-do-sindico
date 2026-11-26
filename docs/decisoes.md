@@ -56,6 +56,41 @@ Decidido pelo time, sem product builder no momento.
 | --- | --- |
 | A trava e as regras provisórias usam a mesma comparação por palavra inteira (`padrao_de_termo` em `app/trava.py`) | "gas" não casa com "gasto", "vagas" nem "desgaste", nem na trava nem nas regras |
 
+## 24/11/2026 — Funções da delegação (SQUAD1-74)
+
+### Produto e acesso
+
+| Decisão | Motivo |
+| --- | --- |
+| Ocorrência concluída não pode ser delegada | A reabertura de ocorrências concluídas está fora da US 3 |
+| Trocar o responsável é delegar de novo: o link anterior é revogado, e o status continua `delegado` (sem nova linha no histórico) | Decisão da US 3 (SQUAD1-74); o status não mudou, só quem cuida |
+
+### Técnica
+
+| Decisão | Motivo |
+| --- | --- |
+| O token do link tem 32 bytes aleatórios em base64url (43 caracteres) | Impossível de adivinhar e curto o bastante para a mensagem do WhatsApp |
+| A `alterar_status_ocorrencia` ganhou uma nova versão que revoga a delegação ativa | Decisão do Lucas: qualquer troca de status pelo gestor revoga o link (SQUAD1-72) |
+
+## 24/11/2026 — Tabela de delegações (SQUAD1-73)
+
+### Técnica
+
+| Decisão | Motivo |
+| --- | --- |
+| O banco guarda só o hash (SHA-256) do token do link; a função de delegar devolve o token uma vez, para montar o link do WhatsApp. Para mandar de novo, o gestor delega de novo | Se a tabela vazar, nenhum link funciona. O front só precisa do token na hora de delegar (SQUAD1-76) |
+| `delegacoes` tem `condominio_id` e chave composta com `ocorrencias` e com `funcionarios` | O banco garante que o funcionário é do mesmo condomínio da ocorrência, além da conferência na função (SQUAD1-74) |
+| O comentário do funcionário tem até 800 caracteres e só existe na delegação concluída | Mesmo limite da descrição da ocorrência |
+
+## 24/11/2026 — Status Delegado (SQUAD1-57)
+
+### Produto e acesso
+
+| Decisão | Motivo |
+| --- | --- |
+| A ocorrência tem quatro status: `novo`, `em_andamento`, `delegado` e `concluido`. `delegado` só vem da delegação para um funcionário (US 3); a troca manual do gestor continua entre os outros três | A US 1 pede as quatro colunas, e a US 3 diz que o status muda para Delegado ao delegar |
+| O gestor pode tirar uma ocorrência de `delegado` trocando o status manualmente | A US 3 prevê que o síndico "assuma de volta" ou conclua; o link antigo deixa de valer (SQUAD1-74) |
+
 ## 24/11/2026 — Classificação pelo Gemini Decision 1 (SQUAD1-84)
 
 ### Produto e acesso
