@@ -105,19 +105,22 @@ Em ordem alfabética: a função nova entra no lugar dela, não no fim.
 
 | Função | Quem pode |
 | --- | --- |
-| `alterar_status_ocorrencia(p_ocorrencia_id, p_status)` | gestor ativo do condomínio. Muda só o status (`novo`, `em_andamento`, `concluido`; não aceita `delegado`, mas tira a ocorrência de `delegado`), preenche ou limpa `concluido_em` e grava em `historico_status` |
+| `alterar_status_ocorrencia(p_ocorrencia_id, p_status)` | gestor ativo do condomínio. Muda só o status (`novo`, `em_andamento`, `concluido`; não aceita `delegado`, mas tira a ocorrência de `delegado`), preenche ou limpa `concluido_em`, grava em `historico_status` e **revoga a delegação ativa** ("assumir de volta") |
 | `aprovar_solicitacao_condominio(p_solicitacao_id)` | admin. Para depois da Sprint 1, quando o cadastro passar pela análise do admin |
 | `aprovar_solicitacao_vinculo(p_solicitacao_id)` | gestor ativo do condomínio |
 | `cadastrar_condominio(p_nome, p_cnpj)` | gestor. **Sprint 1:** cria o condomínio e o vínculo de gestor já ativo; CNPJ com 14 dígitos, único |
 | `cadastrar_funcionario(p_condominio_id, p_nome, p_celular, p_funcao)` | gestor ativo do condomínio. Devolve o `id`. `p_celular` só com dígitos (`5511999998888`; o front converte a máscara); nome até 120 e função até 60 caracteres (a função tira os espaços das pontas). Recusa celular já usado por um funcionário ativo do mesmo condomínio |
+| `concluir_tarefa(p_token, p_comentario)` | quem tem o link (`anon` ou `authenticated`). Exige delegação ativa e ocorrência `delegado`, trava a ocorrência antes de revalidar o token, limita comentário a 800 caracteres (só espaços vira nulo), conclui ocorrência e delegação e grava histórico com `autor_id` nulo. Link que não vale mais: "Esta tarefa já foi encerrada." ou "Esta tarefa não está mais atribuída a você." |
 | `definir_prioridade_ocorrencia(p_ocorrencia_id, p_urgencia, p_justificativa)` | gestor ativo do condomínio. Confirma ou muda a prioridade (`urgente`, `alta`, `normal` ou `baixa`); `p_justificativa` é opcional. Grava em `decisoes` (`acao = 'definir_prioridade'`) e atualiza `urgencia_atual`. Depois disso, a IA não muda mais a urgência. Não vale para ocorrência concluída |
+| `delegar_ocorrencia(p_ocorrencia_id, p_funcionario_id)` | gestor ativo do condomínio. O funcionário precisa estar ativo e ser do mesmo condomínio; a ocorrência não pode estar concluída. Revoga a delegação anterior (trocar o responsável é delegar de novo), cria a nova, muda o status para `delegado` (com histórico) e **devolve o token do link uma vez** (43 caracteres, base64url); o banco guarda só o hash |
 | `desativar_funcionario(p_funcionario_id)` | gestor ativo do condomínio do funcionário. Marca `ativo = false`; repetir não muda nada |
 | `encerrar_vinculo(p_vinculo_id, p_motivo)` | vínculo de gestor: admin; de morador ou funcionário: gestor do condomínio ou admin |
-| `listar_ocorrencias_gestor()` | qualquer usuário logado; devolve só as ocorrências dos condomínios em que quem chama é gestor ativo (para os outros, lista vazia), das mais novas para as mais antigas: `id`, `condominio_id`, `condominio_nome`, `local`, `descricao`, `status`, `urgencia_atual`, `categoria_atual`, `created_at`, `registrado_por_nome` |
+| `listar_ocorrencias_gestor()` | qualquer usuário logado; devolve só as ocorrências dos condomínios em que quem chama é gestor ativo (para os outros, lista vazia), das mais novas para as mais antigas: `id`, `condominio_id`, `condominio_nome`, `local`, `descricao`, `status`, `urgencia_atual`, `categoria_atual`, `created_at`, `registrado_por_nome`, `concluido_em` |
 | `recusar_solicitacao_condominio(p_solicitacao_id, p_motivo)` | admin. Para depois da Sprint 1 |
 | `recusar_solicitacao_vinculo(p_solicitacao_id, p_motivo)` | gestor ativo do condomínio |
 | `registrar_ocorrencia(p_descricao, p_local, p_condominio_id)` | morador (ou funcionário) com vínculo ativo. Grava em nome de quem chama, com status `novo`. `p_local` é opcional; `p_condominio_id` só é exigido de quem tem vínculo ativo em mais de um condomínio |
 | `registrar_ocorrencia_gestor(p_condominio_id, p_descricao, p_origem, p_local, p_relatado_por)` | gestor ativo do condomínio. Grava em nome de quem chama, com status `novo`. `p_origem`: `whatsapp`, `telefone`, `presencial` ou `vistoria`. `p_relatado_por` é opcional e precisa ser morador ou funcionário ativo do mesmo condomínio (vínculo do tipo `funcionario`, não a tabela `funcionarios`) |
+| `ver_tarefa(p_token)` | quem tem o link (`anon` ou `authenticated`). Devolve a situação: `ativa` com nome do condomínio, local e descrição; `concluida` ou `revogada` sem dados da tarefa. Token inválido ou inexistente resulta em lista vazia |
 
 Ninguém aprova, recusa ou encerra o próprio pedido ou vínculo. Motivo é obrigatório na recusa e
 no encerramento.

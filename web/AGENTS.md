@@ -26,6 +26,7 @@ npm run build     # checagem de tipos + build
 - `src/lib/celular.ts` — máscara do celular e conversão para o formato do WhatsApp
   (`5511999998888`, como o banco guarda).
 - `src/lib/tempo.ts` — tempo relativo e data completa para listas.
+- `src/lib/whatsapp.ts` — mensagem e links do WhatsApp e da tarefa, na delegação.
 
 ## Rotas
 
@@ -37,6 +38,7 @@ npm run build     # checagem de tipos + build
 | `/funcionarios` | `gestor` | Cadastro (`rpc('cadastrar_funcionario')`), lista e desativação (`rpc('desativar_funcionario')`) dos funcionários dos condomínios do gestor |
 | `/minhas-ocorrencias` | `morador` | Ocorrências do morador |
 | `/sem-acesso` | Logado sem perfil | Acesso ainda não liberado |
+| `/tarefa/:token` | Público (quem tem o link) | Tarefa delegada ao funcionário: ver e concluir (`rpc('ver_tarefa')`, `rpc('concluir_tarefa')`). O `vercel.json` manda `Referrer-Policy: no-referrer` nessa rota, para o token não vazar |
 
 ## Design
 
