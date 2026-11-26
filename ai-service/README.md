@@ -131,6 +131,8 @@ os da justificativa usam `TestModel` e `FunctionModel`.
 - `app/justificativa.py`: System 2, a frase da justificativa (Pydantic AI + Gemini 2.5 Flash)
 - `app/trava.py`: trava de palavras de risco (força urgência `urgente`)
 - `app/config.py`: variáveis de ambiente
+- `scripts/`: avaliação da classificação contra o gabarito (`avaliar_gabarito.py` e `metricas.py`)
+- `tests/gabarito/`: o gabarito de relatos rotulados e os resultados das rodadas (veja o README de lá)
 
 ## Trava de palavras de risco
 
