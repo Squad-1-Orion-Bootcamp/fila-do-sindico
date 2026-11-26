@@ -1,0 +1,43 @@
+/* Página pública da tarefa (link do WhatsApp). Só tokens de src/styles/tokens.css. */
+
+.tarefa-dados {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-1);
+  margin: var(--espaco-6) 0;
+}
+
+.tarefa-dados dt {
+  font-size: var(--texto-xs);
+  color: var(--cor-texto-secundario);
+}
+
+.tarefa-dados dt:not(:first-child) {
+  margin-top: var(--espaco-3);
+}
+
+.tarefa-dados dd {
+  margin: 0;
+  font-weight: var(--peso-forte);
+  overflow-wrap: anywhere;
+}
+
+.tarefa-dados .tarefa-descricao {
+  font-weight: var(--peso-normal);
+  white-space: pre-line;
+}
+
+.tarefa-contador {
+  font-size: var(--texto-xs);
+  color: var(--cor-texto-sutil);
+}
+
+.tarefa-aviso {
+  text-align: center;
+}
+
+.tarefa-aviso-icone {
+  display: inline-flex;
+  margin-bottom: var(--espaco-3);
+  color: var(--cor-texto-secundario);
+}
