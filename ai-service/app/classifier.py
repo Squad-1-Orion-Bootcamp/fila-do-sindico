@@ -23,7 +23,7 @@ from app.schemas import (
     ResultadoClassificacao,
     Urgencia,
 )
-from app.trava import aplicar_trava, normalizar_texto, padrao_de_termo
+from app.trava import aplicar_trava, normalizar_texto, padrao_de_termo, remover_excecoes
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +53,8 @@ _REGRAS_COMPILADAS = [
 
 def classificar_por_regras(ocorrencia: OcorrenciaEntrada) -> Classificacao:
     """Classifica a ocorrência usando apenas as regras provisórias por palavra-chave."""
-    texto = normalizar_texto(f"{ocorrencia.descricao} {ocorrencia.local or ''}")
+    # As mesmas exceções da trava: "fumaça de cigarro" não vira segurança.
+    texto = remover_excecoes(normalizar_texto(f"{ocorrencia.descricao} {ocorrencia.local or ''}"))
     for termos, categoria, urgencia in _REGRAS_COMPILADAS:
         encontrada = next((termo for termo, padrao in termos if padrao.search(texto)), None)
         if encontrada:
