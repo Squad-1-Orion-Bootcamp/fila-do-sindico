@@ -1,12 +1,13 @@
-import { Clock, User } from 'lucide-react'
+import { Clock, Send, User } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { dataCompleta, tempoRelativo } from '../lib/tempo'
+import { DelegarOcorrencia } from './DelegarOcorrencia'
 import './OcorrenciasDoGestor.css'
 
 // Bloco do painel do gestor: ocorrências de todos os seus condomínios (SQUAD1-29).
 
-type Status = 'novo' | 'em_andamento' | 'concluido'
+type Status = 'novo' | 'em_andamento' | 'delegado' | 'concluido'
 type Urgencia = 'urgente' | 'alta' | 'normal' | 'baixa'
 
 type Ocorrencia = {
@@ -25,8 +26,12 @@ type Ocorrencia = {
 const ROTULO_STATUS: Record<Status, string> = {
   novo: 'Pendente',
   em_andamento: 'Em análise',
+  delegado: 'Delegado',
   concluido: 'Resolvido',
 }
+
+// "Delegado" só vem pela delegação (botão Delegar), nunca pela troca de status.
+const STATUS_ESCOLHIVEIS: Status[] = ['novo', 'em_andamento', 'concluido']
 
 const ROTULO_URGENCIA: Record<Urgencia, string> = {
   urgente: 'Urgente',
@@ -58,6 +63,7 @@ export function OcorrenciasDoGestor() {
   const [salvandoId, setSalvandoId] = useState<string | null>(null)
   const [erroStatus, setErroStatus] = useState<{ id: string; mensagem: string } | null>(null)
   const [filtroCondominio, setFiltroCondominio] = useState(TODOS)
+  const [delegando, setDelegando] = useState<Ocorrencia | null>(null)
 
   useEffect(() => {
     buscarOcorrencias().then(({ data, error }) => {
@@ -174,13 +180,29 @@ export function OcorrenciasDoGestor() {
                     disabled={salvandoId === o.id}
                     onChange={(e) => alterarStatus(o.id, e.target.value as Status)}
                   >
-                    {(Object.keys(ROTULO_STATUS) as Status[]).map((s) => (
+                    {/* Delegado aparece só na ocorrência já delegada, e não dá para escolher */}
+                    {o.status === 'delegado' && (
+                      <option value="delegado" disabled>
+                        {ROTULO_STATUS.delegado}
+                      </option>
+                    )}
+                    {STATUS_ESCOLHIVEIS.map((s) => (
                       <option key={s} value={s}>
                         {ROTULO_STATUS[s]}
                       </option>
                     ))}
                   </select>
                 </label>
+                {(o.status === 'novo' || o.status === 'em_andamento') && (
+                  <button
+                    type="button"
+                    className="botao quadro-delegar"
+                    aria-describedby={`descricao-${o.id}`}
+                    onClick={() => setDelegando(o)}
+                  >
+                    <Send size={16} aria-hidden /> Delegar
+                  </button>
+                )}
                 {erroStatus?.id === o.id && (
                   <p role="alert" className="campo-erro">
                     {erroStatus.mensagem}
@@ -190,6 +212,18 @@ export function OcorrenciasDoGestor() {
             ))}
           </ul>
         </>
+      )}
+
+      {delegando && (
+        <DelegarOcorrencia
+          ocorrencia={delegando}
+          aoDelegar={(id) =>
+            setItens((atuais) =>
+              atuais.map((o) => (o.id === id ? { ...o, status: 'delegado' } : o)),
+            )
+          }
+          aoFechar={() => setDelegando(null)}
+        />
       )}
     </section>
   )

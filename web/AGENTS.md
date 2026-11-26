@@ -26,6 +26,7 @@ npm run build     # checagem de tipos + build
 - `src/lib/celular.ts` — máscara do celular e conversão para o formato do WhatsApp
   (`5511999998888`, como o banco guarda).
 - `src/lib/tempo.ts` — tempo relativo e data completa para listas.
+- `src/lib/whatsapp.ts` — mensagem e links do WhatsApp e da tarefa, na delegação.
 
 ## Rotas
 
