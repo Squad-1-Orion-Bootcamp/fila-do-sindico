@@ -13,7 +13,7 @@ condomínios. Projeto do Squad 1 no Orion Bootcamp (New Rizon), com entrega em 1
 | `docs/` | Decisões do time | Markdown |
 
 ```
-morador registra ocorrência (web) → Supabase grava → Database Webhook → ai-service classifica
+morador registra ocorrência (web) → Supabase grava → gatilho (pg_net) → ai-service classifica
 → grava urgência, categoria e justificativa → quadro do síndico atualiza (Realtime)
 ```
 
@@ -46,6 +46,7 @@ Comandos úteis:
 docker compose exec ai-service pytest          # testes do serviço de IA
 docker compose exec ai-service ruff check .    # lint do serviço de IA
 docker compose exec web npm run lint           # lint do front
+docker compose exec web npm test               # testes do front
 docker compose logs -f ai-service              # logs
 docker compose down                            # derruba front e IA
 npx supabase stop                              # derruba o Supabase
@@ -57,8 +58,25 @@ duplicaria a configuração sem ganho.
 
 **Endereços entre containers:** o navegador acessa o Supabase por `127.0.0.1:54321`, mas de
 dentro de um container o endereço é `host.docker.internal:54321` (o compose já define
-`SUPABASE_URL` assim no ai-service). Pelo mesmo motivo, o Database Webhook do Supabase deve
-chamar o serviço de IA em `http://host.docker.internal:8000`.
+`SUPABASE_URL` assim no ai-service). Pelo mesmo motivo, o banco chama o serviço de IA em
+`http://host.docker.internal:8000`.
+
+**Classificação automática no local.** A cada ocorrência nova, o gatilho `classificar_ocorrencia`
+chama o `POST /webhook` do ai-service. O endereço e o segredo ficam no Vault do banco, nunca no
+código. O `db reset` apaga o Vault, então rode isto depois de cada reset (no SQL Editor do Studio
+ou com `psql`), usando o mesmo valor de `WEBHOOK_SECRET` do `ai-service/.env`:
+
+```sql
+select vault.create_secret('http://host.docker.internal:8000', 'ai_service_url');
+select vault.create_secret('<o WEBHOOK_SECRET do ai-service/.env>', 'ai_webhook_secret');
+```
+
+Sem esses dois valores, a ocorrência é registrada normalmente e fica em "Aguardando triagem".
+Para conferir as chamadas: `select * from net._http_response order by id desc;` (202 é sucesso,
+401 é segredo diferente do `ai-service/.env`).
+
+Para o ai-service gravar a classificação, o `ai-service/.env` também precisa da
+`SUPABASE_SECRET_KEY` local (a "Secret key", `sb_secret_...`, que o `npx supabase status` mostra).
 
 ## Deploy
 
@@ -87,6 +105,12 @@ set encrypted_password = extensions.crypt('<senha-nova>', extensions.gen_salt('b
 where email = 'admin@teste.local';
 ```
 
+**Classificação na nuvem.** Em cada projeto do Supabase (stage e prod), cadastre uma vez no SQL
+Editor o endereço do ai-service daquele ambiente e o segredo do webhook (o mesmo `WEBHOOK_SECRET`
+configurado no ai-service publicado), com os comandos `vault.create_secret` acima. Os valores
+ficam só no Vault do projeto. Fora do local, o endereço precisa ser `https://`: o segredo e a
+descrição da ocorrência vão nessa chamada.
+
 No painel (*Authentication*), a confirmação de e-mail fica desligada e *URL Configuration*
 aponta *Site URL* e *Redirect URLs* para o endereço da Vercel.
 
@@ -100,10 +124,12 @@ container em produção. Na Vercel:
    a service_role).
 4. Em *Settings → Git → Production Branch*, use `develop`.
 
-O `web/vercel.json` faz rotas como `/quadro` funcionarem ao abrir direto no navegador.
+O `web/vercel.json` faz rotas como `/quadro` funcionarem ao abrir direto no navegador e
+manda `Referrer-Policy: no-referrer` em `/tarefa/*`, para o token do link não vazar para outros
+sites. Não tire esse bloco `headers`.
 Cada PR ganha um link de preview automático.
 
-**Serviço de IA → container.** Ele é um servidor de verdade, então usa a imagem de produção:
+**Serviço de IA → Render.** Ele é um servidor de verdade, então usa a imagem de produção:
 
 ```bash
 docker build --target prod -t fila-ai-service ai-service
@@ -111,6 +137,43 @@ docker build --target prod -t fila-ai-service ai-service
 
 Ela roda sem reload, sem dependências de desenvolvimento e com usuário sem privilégios.
 O CI constrói a imagem a cada PR.
+
+O serviço fica no Render, com um serviço para cada ambiente. No Render, cada serviço acompanha
+uma branch só, então a `stage` e a `prod` são dois serviços:
+
+| Ambiente | Branch | Endereço | Supabase |
+| --- | --- | --- | --- |
+| stage | `stage` | <https://fila-do-sindico-r38q.onrender.com> ([`/health`](https://fila-do-sindico-r38q.onrender.com/health)) | projeto de stage |
+| prod | `prod` | <https://fila-do-sindico-31lo.onrender.com> ([`/health`](https://fila-do-sindico-31lo.onrender.com/health)) | projeto de produção (a demo) |
+
+Na `develop` não há serviço no Render: o ai-service roda local, com o Supabase local.
+
+- **Configuração** (feita pelo painel do Render, igual nos dois): Web Service com runtime
+  Docker, plano Free, este repositório com *Root Directory* `ai-service` e health check em
+  `/health`. O Render constrói o último estágio do `ai-service/Dockerfile`, que é o `prod`.
+  Só muda a branch e as variáveis.
+- **Por que dois:** cada serviço acompanha a mesma branch que o banco do seu ambiente, então o
+  código do ai-service sempre combina com o esquema do banco. As 750 horas grátis por mês são
+  do workspace inteiro, e serviço dormindo não gasta hora, então os dois cabem no plano Free.
+- **Variáveis** (no painel, *Environment*), com valores próprios em cada serviço:
+
+  | Variável | Para quê |
+  | --- | --- |
+  | `PORT` | `8000`, a porta em que o uvicorn escuta. Diz ao Render para onde mandar as requisições |
+  | `WEBHOOK_SECRET` | Segredo compartilhado com o gatilho do Supabase: o mesmo valor fica no Vault do projeto do Supabase do mesmo ambiente. Um segredo diferente em cada ambiente. Nunca no repositório. Vazio, o `/webhook` recusa tudo |
+  | `SUPABASE_URL` | URL do projeto do Supabase do mesmo ambiente (stage no serviço de stage, produção no de prod) |
+  | `SUPABASE_SECRET_KEY` | Chave secreta (`sb_secret_...`) desse mesmo projeto, em *Project Settings → API Keys*: o webhook lê a ocorrência e grava a classificação com ela. Só no Render, nunca no front nem no repositório |
+  | `LLM_API_KEY` | Chave da Gemini. Vazia até o serviço passar a usar o LLM |
+
+- **No Vault de cada projeto do Supabase**, `ai_service_url` aponta para o serviço do mesmo
+  ambiente (stage → endereço de stage; prod → endereço de prod).
+- **Ele dorme.** No plano grátis, o serviço desliga depois de 15 minutos sem uso e leva cerca de
+  1 minuto para voltar. **Antes de uma demo**, abra
+  <https://fila-do-sindico-31lo.onrender.com/health> e espere a resposta. Quando ele responder,
+  já está acordado.
+
+Não há `render.yaml`: a documentação do Render não garante que um Blueprint assuma os serviços
+criados pelo painel sem criar outros. Mudou algo no painel? Atualize esta seção.
 
 ## Rodar sem Docker
 
@@ -140,9 +203,10 @@ Studio local do Supabase: http://127.0.0.1:54323
 
 O `supabase/seed.sql` cria gestores, condomínios, moradores e ocorrências de teste, todos com a
 senha `senha123`. A lista de contas está no topo do arquivo. Para a demo, entre como
-`gestora.helena@teste.local`: ela tem 3 condomínios, ocorrências urgentes e simples e um
-cadastro pendente em cada condomínio. Também dá para criar contas pelo próprio app: cadastro
-de gestor e pré-cadastro de morador.
+`gestora.helena@teste.local`: ela tem 3 condomínios, ocorrências urgentes e simples, um
+cadastro pendente e dois ou três funcionários em cada condomínio, para a delegação. Os
+celulares dos funcionários são fictícios: abra o link do WhatsApp, mas não envie a mensagem.
+Também dá para criar contas pelo próprio app: cadastro de gestor e pré-cadastro de morador.
 
 ## Banco de dados
 
@@ -165,15 +229,16 @@ Nunca altere o banco da nuvem direto pelo painel sem criar a migração correspo
 
 ### Branches e ambientes
 
-| Branch | Função | Recebe PR de | Front | Banco |
-| --- | --- | --- | --- | --- |
-| `develop` | Integração do dia a dia; **branch base** | `feature/*` e `hotfix/*` | `localhost:5173` e um preview por PR | Supabase local de cada um |
-| `stage` | Homologação e ensaio | só `develop` | a definir (domínio fixo na Vercel) | Supabase de stage (a definir) |
-| `prod` | Produção: a demo para a banca | `stage` e `hotfix/*` | <https://fila-do-sindico.vercel.app> | Supabase de produção |
+| Branch | Função | Recebe PR de | Front | Serviço de IA | Banco |
+| --- | --- | --- | --- | --- | --- |
+| `develop` | Integração do dia a dia; **branch base** | `feature/*` e `hotfix/*` | `localhost:5173` e um preview por PR | `localhost:8000` | Supabase local de cada um |
+| `stage` | Homologação e ensaio | só `develop` | a definir (domínio fixo na Vercel) | <https://fila-do-sindico-r38q.onrender.com> | Supabase de stage |
+| `prod` | Produção: a demo para a banca | `stage` e `hotfix/*` | <https://fila-do-sindico.vercel.app> | <https://fila-do-sindico-31lo.onrender.com> | Supabase de produção |
 
 Não existem `main` nem `release/`. O CI (`origem-pr`) recusa PR para a `stage` ou a `prod` vinda
-de outra origem. Cada ambiente tem o próprio banco, e a integração do Supabase com o GitHub
-aplica as migrações quando a branch do ambiente recebe um merge.
+de outra origem. Cada ambiente tem o próprio banco e o próprio serviço de IA: a integração do
+Supabase com o GitHub aplica as migrações, e o Render publica o ai-service, quando a branch do
+ambiente recebe um merge. Para testar a IA num endereço público, promova `develop → stage`.
 
 Dia a dia:
 
@@ -205,6 +270,11 @@ o começo à mão.
   `feat: cadastro do gestor (SQUAD1-12)`. O CI confere. As promoções (`develop → stage` e
   `stage → prod`) dispensam a issue, ex.: `chore: entrega da Sprint 1 (v0.1.0)`.
 - **Uma issue por PR**, de preferência com menos de 400 linhas alteradas.
+- **Para evitar conflito:** decisão nova é um arquivo novo em `docs/decisoes/`;
+  linha nova em tabela de funções entra em ordem alfabética;
+  a PR que é base de outra tem prioridade na revisão e no merge;
+  e PR aberta por mais de um dia traz a `develop` todo dia.
+  Detalhes em `docs/decisoes/2026-11-25-squad1-87-menos-conflitos-na-documentacao.md`.
 - Ainda não está pronta? Abra como **rascunho (draft)**.
 - **PR que depende de outra ainda aberta:** a PR aponta sempre para a `develop`, nunca para a
   branch da outra PR. Veja [PR que depende de outra](#pr-que-depende-de-outra).

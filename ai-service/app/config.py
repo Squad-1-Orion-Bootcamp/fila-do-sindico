@@ -9,10 +9,25 @@ class Settings(BaseSettings):
     # URL do Supabase. Fora do Docker: http://127.0.0.1:54321.
     # Dentro do docker compose: http://host.docker.internal:54321 (o compose já define).
     supabase_url: str = "http://127.0.0.1:54321"
-    # Segredo compartilhado com o Database Webhook do Supabase (Sprint 2).
+    # Chave secreta do Supabase (sb_secret_..., em Project Settings → API Keys). Ela entra no
+    # banco com o papel service_role, o único que pode chamar gravar_classificacao. A chave
+    # antiga em formato JWT (service_role) também funciona. Fica só aqui no servidor, nunca no
+    # front (regra 1 do AGENTS.md).
+    supabase_secret_key: str = ""
+    # Segredo do gatilho do banco que chama o POST /webhook (o mesmo valor do Vault do
+    # Supabase). Vazio, o webhook recusa toda chamada.
     webhook_secret: str = ""
-    # Chave do provedor de LLM, quando o time escolher qual usar.
+    # Chave da API da Gemini (aistudio.google.com). Vazia, o classificar() nem chama o
+    # Decision 1 e usa só as regras provisórias (origem "regra").
     llm_api_key: str = ""
+    # Modelo do System 1 (Decisions API, v1beta) e o tempo limite da chamada.
+    llm_modelo_decisao: str = "gemini-decision-1"
+    llm_timeout_segundos: float = 3.0
+    # Modelo do System 2 (a frase da justificativa) e o tempo limite da execução inteira,
+    # contando a nova tentativa quando a resposta vem inválida. O 2.5 Flash não aceita mais contas
+    # novas (404), e os Flash 3.x sem "lite" passaram de 8 s nos testes de 26/11 (SQUAD1-93).
+    llm_modelo_justificativa: str = "gemini-3.5-flash-lite"
+    llm_timeout_justificativa_segundos: float = 8.0
 
 
 settings = Settings()

@@ -1,0 +1,552 @@
+{
+  "data": "2026-11-26",
+  "sistema": "ia",
+  "nome_do_sistema": "sistema completo (IA + trava)",
+  "rotulo": "com-88",
+  "commit": "280fa6e",
+  "modelo": "gemini-decision-1",
+  "metricas": {
+    "casos": 54,
+    "avaliados": 54,
+    "quedas_nas_regras": [],
+    "urgentes_detectados": {
+      "acertos": 19,
+      "total": 19
+    },
+    "urgentes_sem_palavra_detectados": {
+      "acertos": 10,
+      "total": 10
+    },
+    "falsos_urgentes": [
+      "c51"
+    ],
+    "acerto_urgencia": {
+      "acertos": 52,
+      "total": 54
+    },
+    "matriz_urgencia": {
+      "urgente": {
+        "urgente": 19,
+        "alta": 0,
+        "normal": 0,
+        "baixa": 0
+      },
+      "alta": {
+        "urgente": 1,
+        "alta": 13,
+        "normal": 0,
+        "baixa": 0
+      },
+      "normal": {
+        "urgente": 0,
+        "alta": 1,
+        "normal": 10,
+        "baixa": 0
+      },
+      "baixa": {
+        "urgente": 0,
+        "alta": 0,
+        "normal": 0,
+        "baixa": 10
+      }
+    },
+    "acerto_categoria": {
+      "acertos": 54,
+      "total": 54
+    },
+    "injecao": {
+      "acertos": 3,
+      "total": 3
+    },
+    "equipamento_de_incendio": [
+      {
+        "id": "c08",
+        "esperado": "alta",
+        "previsto": "alta",
+        "certo": true
+      },
+      {
+        "id": "c09",
+        "esperado": "alta",
+        "previsto": "alta",
+        "certo": true
+      },
+      {
+        "id": "c51",
+        "esperado": "alta",
+        "previsto": "urgente",
+        "certo": false
+      },
+      {
+        "id": "c52",
+        "esperado": "urgente",
+        "previsto": "urgente",
+        "certo": true
+      },
+      {
+        "id": "c53",
+        "esperado": "urgente",
+        "previsto": "urgente",
+        "certo": true
+      },
+      {
+        "id": "c54",
+        "esperado": "urgente",
+        "previsto": "urgente",
+        "certo": true
+      }
+    ],
+    "erros": [
+      {
+        "id": "c40",
+        "descricao": "Várias cerâmicas soltas no piso em volta da piscina",
+        "esperado": "normal / estrutura",
+        "previsto": "alta / estrutura",
+        "origem": "ia",
+        "fronteira": false
+      },
+      {
+        "id": "c51",
+        "descricao": "Escada de incêndio do bloco C cheia de entulho da obra do 502, não dá pra passar",
+        "esperado": "alta / seguranca",
+        "previsto": "urgente / seguranca",
+        "origem": "ia",
+        "fronteira": false
+      }
+    ]
+  },
+  "previstos": [
+    {
+      "id": "c01",
+      "urgencia": "alta",
+      "categoria": "hidraulica",
+      "origem": "ia",
+      "confianca": 0.9335883588313566,
+      "termo_trava": null
+    },
+    {
+      "id": "c02",
+      "urgencia": "urgente",
+      "categoria": "elevador",
+      "origem": "ia",
+      "confianca": 0.9988273572924045,
+      "termo_trava": null
+    },
+    {
+      "id": "c03",
+      "urgencia": "urgente",
+      "categoria": "estrutura",
+      "origem": "ia+trava",
+      "confianca": 0.8486978531058734,
+      "termo_trava": "rachadura"
+    },
+    {
+      "id": "c04",
+      "urgencia": "baixa",
+      "categoria": "outros",
+      "origem": "ia",
+      "confianca": 0.9071938630347738,
+      "termo_trava": null
+    },
+    {
+      "id": "c05",
+      "urgencia": "baixa",
+      "categoria": "convivencia",
+      "origem": "ia",
+      "confianca": 0.7218728878291774,
+      "termo_trava": null
+    },
+    {
+      "id": "c06",
+      "urgencia": "baixa",
+      "categoria": "outros",
+      "origem": "ia",
+      "confianca": 0.6299305271468371,
+      "termo_trava": null
+    },
+    {
+      "id": "c07",
+      "urgencia": "baixa",
+      "categoria": "convivencia",
+      "origem": "ia",
+      "confianca": 0.6382866072068224,
+      "termo_trava": null
+    },
+    {
+      "id": "c08",
+      "urgencia": "alta",
+      "categoria": "seguranca",
+      "origem": "ia",
+      "confianca": 0.6252203564309577,
+      "termo_trava": null
+    },
+    {
+      "id": "c09",
+      "urgencia": "alta",
+      "categoria": "seguranca",
+      "origem": "ia",
+      "confianca": 0.5968819385949767,
+      "termo_trava": null
+    },
+    {
+      "id": "c10",
+      "urgencia": "urgente",
+      "categoria": "elevador",
+      "origem": "ia",
+      "confianca": 0.9984308489403655,
+      "termo_trava": null
+    },
+    {
+      "id": "c11",
+      "urgencia": "urgente",
+      "categoria": "seguranca",
+      "origem": "ia",
+      "confianca": 0.9976873700881873,
+      "termo_trava": null
+    },
+    {
+      "id": "c12",
+      "urgencia": "urgente",
+      "categoria": "eletrica",
+      "origem": "ia",
+      "confianca": 0.9379626368872145,
+      "termo_trava": null
+    },
+    {
+      "id": "c13",
+      "urgencia": "urgente",
+      "categoria": "seguranca",
+      "origem": "ia",
+      "confianca": 0.9190261444003742,
+      "termo_trava": null
+    },
+    {
+      "id": "c14",
+      "urgencia": "urgente",
+      "categoria": "seguranca",
+      "origem": "ia+trava",
+      "confianca": 0.9661545328534785,
+      "termo_trava": "gás"
+    },
+    {
+      "id": "c15",
+      "urgencia": "urgente",
+      "categoria": "seguranca",
+      "origem": "ia+trava",
+      "confianca": 0.9825152403568577,
+      "termo_trava": "fogo"
+    },
+    {
+      "id": "c16",
+      "urgencia": "urgente",
+      "categoria": "seguranca",
+      "origem": "ia+trava",
+      "confianca": 0.9890069183100226,
+      "termo_trava": "gás"
+    },
+    {
+      "id": "c17",
+      "urgencia": "baixa",
+      "categoria": "convivencia",
+      "origem": "ia",
+      "confianca": 0.9533345577851015,
+      "termo_trava": null
+    },
+    {
+      "id": "c18",
+      "urgencia": "normal",
+      "categoria": "hidraulica",
+      "origem": "ia",
+      "confianca": 0.5265644274021958,
+      "termo_trava": null
+    },
+    {
+      "id": "c19",
+      "urgencia": "normal",
+      "categoria": "eletrica",
+      "origem": "ia",
+      "confianca": 0.9681758172198984,
+      "termo_trava": null
+    },
+    {
+      "id": "c20",
+      "urgencia": "normal",
+      "categoria": "estrutura",
+      "origem": "ia",
+      "confianca": 0.6010768584181345,
+      "termo_trava": null
+    },
+    {
+      "id": "c21",
+      "urgencia": "urgente",
+      "categoria": "seguranca",
+      "origem": "ia+trava",
+      "confianca": 0.9993865386715275,
+      "termo_trava": "fumaça"
+    },
+    {
+      "id": "c22",
+      "urgencia": "urgente",
+      "categoria": "hidraulica",
+      "origem": "ia",
+      "confianca": 0.6205642718317255,
+      "termo_trava": null
+    },
+    {
+      "id": "c23",
+      "urgencia": "urgente",
+      "categoria": "eletrica",
+      "origem": "ia",
+      "confianca": 0.5882902712273301,
+      "termo_trava": null
+    },
+    {
+      "id": "c24",
+      "urgencia": "urgente",
+      "categoria": "estrutura",
+      "origem": "ia",
+      "confianca": 0.9272361159633664,
+      "termo_trava": null
+    },
+    {
+      "id": "c25",
+      "urgencia": "urgente",
+      "categoria": "seguranca",
+      "origem": "ia",
+      "confianca": 0.5416677872641205,
+      "termo_trava": null
+    },
+    {
+      "id": "c26",
+      "urgencia": "urgente",
+      "categoria": "seguranca",
+      "origem": "ia",
+      "confianca": 0.9795070791659913,
+      "termo_trava": null
+    },
+    {
+      "id": "c27",
+      "urgencia": "alta",
+      "categoria": "hidraulica",
+      "origem": "ia",
+      "confianca": 0.9600121115684714,
+      "termo_trava": null
+    },
+    {
+      "id": "c28",
+      "urgencia": "alta",
+      "categoria": "hidraulica",
+      "origem": "ia",
+      "confianca": 0.9805256471326839,
+      "termo_trava": null
+    },
+    {
+      "id": "c29",
+      "urgencia": "alta",
+      "categoria": "eletrica",
+      "origem": "ia",
+      "confianca": 0.6221999855302012,
+      "termo_trava": null
+    },
+    {
+      "id": "c30",
+      "urgencia": "alta",
+      "categoria": "elevador",
+      "origem": "ia",
+      "confianca": 0.9813424453250259,
+      "termo_trava": null
+    },
+    {
+      "id": "c31",
+      "urgencia": "alta",
+      "categoria": "elevador",
+      "origem": "ia",
+      "confianca": 0.9449185719530602,
+      "termo_trava": null
+    },
+    {
+      "id": "c32",
+      "urgencia": "alta",
+      "categoria": "hidraulica",
+      "origem": "ia",
+      "confianca": 0.8808426202821841,
+      "termo_trava": null
+    },
+    {
+      "id": "c33",
+      "urgencia": "alta",
+      "categoria": "hidraulica",
+      "origem": "ia",
+      "confianca": 0.6071528272371074,
+      "termo_trava": null
+    },
+    {
+      "id": "c34",
+      "urgencia": "alta",
+      "categoria": "seguranca",
+      "origem": "ia",
+      "confianca": 0.5489589563610348,
+      "termo_trava": null
+    },
+    {
+      "id": "c35",
+      "urgencia": "alta",
+      "categoria": "limpeza",
+      "origem": "ia",
+      "confianca": 0.6416718123696615,
+      "termo_trava": null
+    },
+    {
+      "id": "c36",
+      "urgencia": "alta",
+      "categoria": "estrutura",
+      "origem": "ia",
+      "confianca": 0.8721607405250877,
+      "termo_trava": null
+    },
+    {
+      "id": "c37",
+      "urgencia": "normal",
+      "categoria": "eletrica",
+      "origem": "ia",
+      "confianca": 0.9797880017816184,
+      "termo_trava": null
+    },
+    {
+      "id": "c38",
+      "urgencia": "normal",
+      "categoria": "outros",
+      "origem": "ia",
+      "confianca": 0.7448174603313708,
+      "termo_trava": null
+    },
+    {
+      "id": "c39",
+      "urgencia": "normal",
+      "categoria": "estrutura",
+      "origem": "ia",
+      "confianca": 0.8646845415527359,
+      "termo_trava": null
+    },
+    {
+      "id": "c40",
+      "urgencia": "alta",
+      "categoria": "estrutura",
+      "origem": "ia",
+      "confianca": 0.4921910493391512,
+      "termo_trava": null
+    },
+    {
+      "id": "c41",
+      "urgencia": "normal",
+      "categoria": "elevador",
+      "origem": "ia",
+      "confianca": 0.45381401738772575,
+      "termo_trava": null
+    },
+    {
+      "id": "c42",
+      "urgencia": "urgente",
+      "categoria": "elevador",
+      "origem": "ia+trava",
+      "confianca": 0.9967639202194098,
+      "termo_trava": "pessoa presa no elevador"
+    },
+    {
+      "id": "c43",
+      "urgencia": "normal",
+      "categoria": "limpeza",
+      "origem": "ia",
+      "confianca": 0.6114054271188432,
+      "termo_trava": null
+    },
+    {
+      "id": "c44",
+      "urgencia": "normal",
+      "categoria": "limpeza",
+      "origem": "ia",
+      "confianca": 0.6464260560887043,
+      "termo_trava": null
+    },
+    {
+      "id": "c45",
+      "urgencia": "normal",
+      "categoria": "eletrica",
+      "origem": "ia",
+      "confianca": 0.7919570719230085,
+      "termo_trava": null
+    },
+    {
+      "id": "c46",
+      "urgencia": "baixa",
+      "categoria": "convivencia",
+      "origem": "ia",
+      "confianca": 0.9705868829054405,
+      "termo_trava": null
+    },
+    {
+      "id": "c47",
+      "urgencia": "baixa",
+      "categoria": "convivencia",
+      "origem": "ia",
+      "confianca": 0.7721410808114157,
+      "termo_trava": null
+    },
+    {
+      "id": "c48",
+      "urgencia": "baixa",
+      "categoria": "convivencia",
+      "origem": "ia",
+      "confianca": 0.9232939352957693,
+      "termo_trava": null
+    },
+    {
+      "id": "c49",
+      "urgencia": "baixa",
+      "categoria": "convivencia",
+      "origem": "ia",
+      "confianca": 0.9807010026835852,
+      "termo_trava": null
+    },
+    {
+      "id": "c50",
+      "urgencia": "baixa",
+      "categoria": "limpeza",
+      "origem": "ia",
+      "confianca": 0.7563569716301741,
+      "termo_trava": null
+    },
+    {
+      "id": "c51",
+      "urgencia": "urgente",
+      "categoria": "seguranca",
+      "origem": "ia",
+      "confianca": 0.45121192149830536,
+      "termo_trava": null
+    },
+    {
+      "id": "c52",
+      "urgencia": "urgente",
+      "categoria": "seguranca",
+      "origem": "ia+trava",
+      "confianca": 0.8443661888600903,
+      "termo_trava": "fumaça"
+    },
+    {
+      "id": "c53",
+      "urgencia": "urgente",
+      "categoria": "seguranca",
+      "origem": "ia+trava",
+      "confianca": 0.9261964574454897,
+      "termo_trava": "fogo"
+    },
+    {
+      "id": "c54",
+      "urgencia": "urgente",
+      "categoria": "seguranca",
+      "origem": "ia+trava",
+      "confianca": 0.9977556937507104,
+      "termo_trava": "gás"
+    }
+  ]
+}
