@@ -18,8 +18,8 @@ Studio local: http://127.0.0.1:54323
 - Criar ou alterar tabela: siga `.claude/skills/nova-tabela/SKILL.md`.
 - `decisoes`, `historico_status` e `classificacoes_ia` são só de inserção (gatilho da SQUAD1-91).
   Uma migração que precise mesmo corrigir dados nelas desativa o gatilho só dentro dela (`alter table ... disable trigger ...` e depois `enable always trigger ...`, nunca só `enable`, que tira a proteção contra o modo `replica`) e explica o motivo.
-- Tabela que o ai-service lê pela API REST precisa de `grant select ... to service_role` na
-  migração. Projetos novos do Supabase não dão esse acesso por padrão (SQUAD1-94).
+- Tabela que o ai-service lê pela API REST precisa de `grant select ... to service_role` na migração.
+  Projetos novos do Supabase não dão esse acesso por padrão (SQUAD1-94).
 - Toda tabela em `public` tem `enable row level security` e políticas explícitas para cada
   operação que o front usa.
 - Use `(select auth.uid())` nas políticas (avaliado uma vez por consulta, não por linha).
