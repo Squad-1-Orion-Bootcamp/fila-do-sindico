@@ -114,6 +114,16 @@ descrição da ocorrência vão nessa chamada.
 No painel (*Authentication*), a confirmação de e-mail fica desligada e *URL Configuration*
 aponta *Site URL* e *Redirect URLs* para o endereço da Vercel.
 
+**Ambiente novo, nesta ordem** (SQUAD1-94).
+O seed cria ocorrências, e cada uma avisa o ai-service na hora.
+Se o serviço não estiver pronto, elas ficam pelas regras ou sem classificação, e reclassificar exige mexer no histórico imutável (SQUAD1-91):
+
+1. Migrações aplicadas no projeto (*Database → Migrations*).
+2. Serviço do Render no último commit da branch, com todas as variáveis da tabela do *Serviço de IA* abaixo, incluindo a `LLM_API_KEY`.
+3. `ai_service_url` e `ai_webhook_secret` no Vault do projeto.
+4. Teste com uma ocorrência nova: no log do Render deve aparecer `origem ia`.
+5. Só então o seed (`db push --linked --include-seed`).
+
 **Front → Vercel.** O front é estático (o build gera HTML, JS e CSS), então não precisa de
 container em produção. Na Vercel:
 
@@ -163,7 +173,12 @@ Na `develop` não há serviço no Render: o ai-service roda local, com o Supabas
   | `WEBHOOK_SECRET` | Segredo compartilhado com o gatilho do Supabase: o mesmo valor fica no Vault do projeto do Supabase do mesmo ambiente. Um segredo diferente em cada ambiente. Nunca no repositório. Vazio, o `/webhook` recusa tudo |
   | `SUPABASE_URL` | URL do projeto do Supabase do mesmo ambiente (stage no serviço de stage, produção no de prod) |
   | `SUPABASE_SECRET_KEY` | Chave secreta (`sb_secret_...`) desse mesmo projeto, em *Project Settings → API Keys*: o webhook lê a ocorrência e grava a classificação com ela. Só no Render, nunca no front nem no repositório |
-  | `LLM_API_KEY` | Chave da Gemini. Vazia até o serviço passar a usar o LLM |
+  | `LLM_API_KEY` | Chave da Gemini (Google AI Studio). **Obrigatória:** vazia, o serviço nem chama a Gemini e classifica tudo pelas regras provisórias, sem aviso no log (origem `regra`) |
+
+  Os opcionais (`LLM_MODELO_DECISAO`, `LLM_TIMEOUT_SEGUNDOS`, `LLM_MODELO_JUSTIFICATIVA`, `LLM_TIMEOUT_JUSTIFICATIVA_SEGUNDOS`) só entram se o valor for diferente do padrão do `ai-service/.env.example`.
+
+- **Depois de cada promoção**, confira no log do deploy (*Checking out commit ...*) se o Render pegou o último commit da branch.
+  Se não pegou, use *Manual Deploy → Deploy latest commit* e veja se o *Auto-Deploy* está ligado.
 
 - **No Vault de cada projeto do Supabase**, `ai_service_url` aponta para o serviço do mesmo
   ambiente (stage → endereço de stage; prod → endereço de prod).

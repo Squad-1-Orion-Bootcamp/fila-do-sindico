@@ -43,5 +43,8 @@ uv add <pacote>          # nunca pip install
 - Chaves (`LLM_API_KEY`, `WEBHOOK_SECRET`, `SUPABASE_SECRET_KEY`) só em `.env`; atualize o
   `.env.example`. A chave secreta do Supabase (papel `service_role`) existe só aqui no servidor,
   nunca no front. A chave nova (`sb_secret_...`) vai só no cabeçalho `apikey`.
+- Passou a ler uma tabela nova pela REST (inclusive num embed como `classificacoes_ia(id)`)?
+  A migração precisa de `grant select on public.<tabela> to service_role`.
+  Sem ele, projetos novos do Supabase respondem 403 (SQUAD1-94).
 - Urgência só com os valores do banco: `urgente`, `alta`, `normal`, `baixa` (SQUAD1-56).
 - Type hints em tudo; formatação pelo ruff.
